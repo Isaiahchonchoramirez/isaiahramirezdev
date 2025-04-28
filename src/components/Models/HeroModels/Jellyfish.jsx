@@ -1,3 +1,9 @@
+// 3D Jellyfish Model Credit:
+// Model by n- from Sketchfab
+// https://sketchfab.com/n-
+// Attribution required per artist request
+
+
 import { useGLTF } from '@react-three/drei';
 import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
