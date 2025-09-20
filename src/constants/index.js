@@ -1,3 +1,8 @@
+const getAssetPath = (path) => {
+  const base = import.meta.env.BASE_URL || '/';
+  return base + path.replace(/^\//, '');
+};
+
 const navLinks = [
     {
       name: "Projects",
@@ -37,37 +42,37 @@ const navLinks = [
   
   const logoIconsList = [
     {
-      imgPath: "/images/logos/company-logo-1.png",
+      imgPath: getAssetPath ("/images/logos/company-logo-1.png"),
     },
     {
-      imgPath: "/images/logos/company-logo-2.png",
+      imgPath: getAssetPath ("/images/logos/company-logo-2.png"),
     },
     {
-      imgPath: "/images/logos/company-logo-3.png",
+      imgPath: getAssetPath ("/images/logos/company-logo-3.png"),
     },
     {
-      imgPath: "/images/logos/company-logo-4.png",
+      imgPath: getAssetPath ("/images/logos/company-logo-4.png"),
     },
     {
-      imgPath: "/images/logos/company-logo-5.png",
+      imgPath: getAssetPath ("/images/logos/company-logo-5.png"),
     },
     {
-      imgPath: "/images/logos/company-logo-6.png",
+      imgPath: getAssetPath ("/images/logos/company-logo-6.png"),
     },
     {
-      imgPath: "/images/logos/company-logo-7.png",
+      imgPath: getAssetPath ("/images/logos/company-logo-7.png"),
     },
     {
-      imgPath: "/images/logos/company-logo-8.png",
+      imgPath: getAssetPath ("/images/logos/company-logo-8.png"),
     },
     {
-      imgPath: "/images/logos/company-logo-9.png",
+      imgPath: getAssetPath ("/images/logos/company-logo-9.png"),
     },
     {
-      imgPath: "/images/logos/company-logo-10.png",
+      imgPath: getAssetPath ("/images/logos/company-logo-10.png"),
     },
     {
-      imgPath: "/images/logos/company-logo-11.png",
+      imgPath: getAssetPath ("/images/logos/company-logo-11.png"),
     },
   ];
   
@@ -115,31 +120,31 @@ const navLinks = [
   const techStackIcons = [
     {
       name: "React Developer",
-      modelPath: "/models/react_logo-transformed.glb",
+      modelPath: getAssetPath ("/models/react_logo-transformed.glb"),
       scale: 1,
       rotation: [0, 0, 0],
     },
     {
       name: "Python Developer",
-      modelPath: "/models/python-transformed.glb",
+      modelPath: getAssetPath ("/models/python-transformed.glb"),
       scale: 0.8,
       rotation: [0, 0, 0],
     },
     {
       name: "Backend Developer",
-      modelPath: "/models/node-transformed.glb",
+      modelPath: getAssetPath ("/models/node-transformed.glb"),
       scale: 5,
       rotation: [0, -Math.PI / 2, 0],
     },
     {
       name: "Interactive Developer",
-      modelPath: "/models/three.js-transformed.glb",
+      modelPath: getAssetPath ("/models/three.js-transformed.glb"),
       scale: 0.05,
       rotation: [0, 0, 0],
     },
     {
       name: "Project Manager",
-      modelPath: "/models/git-svg-transformed.glb",
+      modelPath: getAssetPath ("/models/git-svg-transformed.glb"),
       scale: 0.05,
       rotation: [0, -Math.PI / 4, 0],
     },
