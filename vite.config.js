@@ -12,13 +12,18 @@ export default defineConfig(({ command, mode }) => {
       outDir: 'dist',
       assetsDir: 'assets',
       sourcemap: false,
+      minify: 'terser',
       rollupOptions: {
         output: {
           manualChunks: undefined,
         },
       },
     },
-    // Ensure proper asset handling
     publicDir: 'public',
+    esbuild: {
+      loader: 'jsx',
+      include: /src\/.*\.[jt]sx?$/,
+      exclude: [],
+    },
   };
 });
