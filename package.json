@@ -10,6 +10,7 @@
     "build:github": "GITHUB_PAGES=true vite build",
     "lint": "eslint .",
     "preview": "vite preview",
+    "preview:github": "GITHUB_PAGES=true vite build && vite preview",
     "predeploy": "npm run build:github",
     "deploy": "gh-pages -d dist"
   },
