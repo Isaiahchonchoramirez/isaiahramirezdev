@@ -3,7 +3,7 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig(({ command, mode }) => {
-  const isGitHubPages = process.env.GITHUB_PAGES === 'true' || mode === 'github';
+  const isGitHubPages = process.env.GITHUB_PAGES === 'true';
   
   return {
     base: isGitHubPages ? '/isaiahramirezdev/' : '/',
@@ -12,7 +12,6 @@ export default defineConfig(({ command, mode }) => {
       outDir: 'dist',
       assetsDir: 'assets',
       sourcemap: false,
-      minify: 'terser',
       rollupOptions: {
         output: {
           manualChunks: undefined,
@@ -20,10 +19,5 @@ export default defineConfig(({ command, mode }) => {
       },
     },
     publicDir: 'public',
-    esbuild: {
-      loader: 'jsx',
-      include: /src\/.*\.[jt]sx?$/,
-      exclude: [],
-    },
   };
 });
