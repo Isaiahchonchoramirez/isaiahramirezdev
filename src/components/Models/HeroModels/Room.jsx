@@ -9,10 +9,16 @@ import { EffectComposer, SelectiveBloom } from "@react-three/postprocessing";
 import { BlendFunction } from "postprocessing";
 import * as THREE from "three";
 
+// Add the asset path helper
+const getAssetPath = (path) => {
+  const base = import.meta.env.BASE_URL || '/';
+  return base + path.replace(/^\//, '');
+};
+
 export function Room(props) {
-  const { nodes, materials } = useGLTF("/models/optimized-room.glb");
+  const { nodes, materials } = useGLTF(getAssetPath("/models/optimized-room.glb"));
   const screensRef = useRef();
-  const matcapTexture = useTexture("/images/textures/mat1.png");
+  const matcapTexture = useTexture(getAssetPath("/images/textures/mat1.png"));
 
   const curtainMaterial = new THREE.MeshPhongMaterial({
     color: "#d90429",
@@ -174,4 +180,4 @@ export function Room(props) {
   );
 }
 
-useGLTF.preload("/models/optimized-room.glb");
+useGLTF.preload(getAssetPath("/models/optimized-room.glb"));

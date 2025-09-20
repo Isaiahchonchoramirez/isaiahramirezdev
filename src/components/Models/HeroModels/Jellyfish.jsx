@@ -3,12 +3,12 @@
 // https://sketchfab.com/n-
 // Attribution required per artist request
 
-
 import { useGLTF } from '@react-three/drei';
 import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useRef, useState, useEffect } from 'react';
 
+// Add the asset path helper
 const getAssetPath = (path) => {
   const base = import.meta.env.BASE_URL || '/';
   return base + path.replace(/^\//, '');

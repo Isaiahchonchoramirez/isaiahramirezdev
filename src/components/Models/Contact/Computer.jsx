@@ -1,14 +1,15 @@
 import { useGLTF } from "@react-three/drei";
 
+// Add the asset path helper
 const getAssetPath = (path) => {
   const base = import.meta.env.BASE_URL || '/';
   return base + path.replace(/^\//, '');
 };
 
 export function Computer(props) {
-  const { nodes, materials } = useGLTF(getAssetPath(
-    "/models/computer-optimized-transformed.glb"
-  ));
+  const { nodes, materials } = useGLTF(
+    getAssetPath("/models/computer-optimized-transformed.glb")
+  );
 
   return (
     <group {...props} dispose={null}>
@@ -30,6 +31,6 @@ export function Computer(props) {
   );
 }
 
-useGLTF.preload("/models/computer-optimized-transformed.glb");
+useGLTF.preload(getAssetPath("/models/computer-optimized-transformed.glb"));
 
 export default Computer;
