@@ -9,8 +9,13 @@ import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useRef, useState, useEffect } from 'react';
 
+const getAssetPath = (path) => {
+  const base = import.meta.env.BASE_URL || '/';
+  return base + path.replace(/^\//, '');
+};
+
 const Jellyfish = () => {
-  const { scene, animations } = useGLTF('/models/crystal_jellyfish_leptomedusae.glb');
+  const { scene, animations } = useGLTF(getAssetPath('/models/crystal_jellyfish_leptomedusae.glb'));
   const jellyRef = useRef();
   const modelRef = useRef();
 

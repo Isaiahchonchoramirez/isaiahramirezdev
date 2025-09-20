@@ -5,6 +5,12 @@ import { useGSAP } from "@gsap/react";
 
 gsap.registerPlugin(ScrollTrigger);
 
+// Add the asset path helper
+const getAssetPath = (path) => {
+  const base = import.meta.env.BASE_URL || '/';
+  return base + path.replace(/^\//, '');
+};
+
 const AppShowcase = () => {
   const sectionRef = useRef(null);
   const rydeRef = useRef(null);
@@ -49,8 +55,7 @@ const AppShowcase = () => {
         <div className="showcaselayout">
           <div ref={rydeRef} className="first-project-wrapper">
             <div className="image-wrapper scrollable-image">
-              
-               <img src="/images/Xbox_website.png" alt="Xbox Ad"  /> 
+              <img src={getAssetPath("/images/Xbox_website.png")} alt="Xbox Ad" /> 
             </div>
             <div className="text-content">
               <h2>
@@ -66,7 +71,7 @@ const AppShowcase = () => {
             <div className="project" ref={libraryRef}>
               <div className="image-wrapper bg-[#FFEFDB]">
                 <img
-                  src="/images/rockport_flyfishing.png"
+                  src={getAssetPath("/images/rockport_flyfishing.png")}
                   alt="Rockport Flyfishing App"
                 />
               </div>
@@ -75,7 +80,7 @@ const AppShowcase = () => {
 
             <div className="project" ref={ycDirectoryRef}>
               <div className="image-wrapper bg-[#FFE7EB]">
-                <img src="/images/teapigs.png" alt="YC Directory App" /> 
+                <img src={getAssetPath("/images/teapigs.png")} alt="YC Directory App" /> 
               </div>
               <h2>Tea Pigs Website</h2>
             </div>

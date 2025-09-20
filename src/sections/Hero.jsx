@@ -6,6 +6,12 @@ import Button from "../components/Button";
 import { words } from "../constants";
 import HeroExperience from "../components/Models/HeroModels/HeroExperience";
 
+// Add the asset path helper
+const getAssetPath = (path) => {
+  const base = import.meta.env.BASE_URL || '/';
+  return base + path.replace(/^\//, '');
+};
+
 // Hero Section Component
 const Hero = () => {
   useGSAP(() => {
@@ -20,7 +26,7 @@ const Hero = () => {
     <section id="hero" className="relative overflow-hidden">
       {/* Background Image */}
       <div className="absolute top-0 left-0 z-10">
-        <img src="/images/bg.png" alt="Background" />
+        <img src={getAssetPath("/images/bg.png")} alt="Background" />
       </div>
 
       <div className="hero-layout">
@@ -50,7 +56,7 @@ const Hero = () => {
             </div>
 
             <p className="text-white-50 md:text-xl relative z-10 pointer-events-none">
-              Hi, I’m Isaiah, coding the future, one line at a time.
+              Hi, I'm Isaiah, coding the future, one line at a time.
             </p>
 
             <Button

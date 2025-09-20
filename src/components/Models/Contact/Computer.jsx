@@ -1,9 +1,14 @@
 import { useGLTF } from "@react-three/drei";
 
+const getAssetPath = (path) => {
+  const base = import.meta.env.BASE_URL || '/';
+  return base + path.replace(/^\//, '');
+};
+
 export function Computer(props) {
-  const { nodes, materials } = useGLTF(
+  const { nodes, materials } = useGLTF(getAssetPath(
     "/models/computer-optimized-transformed.glb"
-  );
+  ));
 
   return (
     <group {...props} dispose={null}>

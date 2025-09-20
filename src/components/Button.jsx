@@ -4,6 +4,12 @@
  * with a small offset from the top for better visual placement.
  */
 
+// Add the asset path helper
+const getAssetPath = (path) => {
+  const base = import.meta.env.BASE_URL || '/';
+  return base + path.replace(/^\//, '');
+};
+
 const Button = ({ text, className, id }) => {
   return (
     <a
@@ -31,7 +37,7 @@ const Button = ({ text, className, id }) => {
         <div className="bg-circle" />
         <p className="text">{text}</p>
         <div className="arrow-wrapper">
-          <img src="/images/arrow-down.svg" alt="arrow" />
+          <img src={getAssetPath("/images/arrow-down.svg")} alt="arrow" />
         </div>
       </div>
     </a>
@@ -39,4 +45,3 @@ const Button = ({ text, className, id }) => {
 };
 
 export default Button;
-  
