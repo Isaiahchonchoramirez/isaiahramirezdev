@@ -29,8 +29,8 @@ const HeroExperience = () => {
       <HeroLights />
       <Particles count={100} />
 
-      {/* ✅ Add the Jellyfish inside the Canvas */}
-      <Jellyfish />
+      {/* ✅ Add the Jellyfish inside the Canvas
+      <Jellyfish /> */}
 
       <group
         scale={isMobile ? 0.7 : 1}

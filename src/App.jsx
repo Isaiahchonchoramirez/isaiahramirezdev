@@ -12,28 +12,24 @@ import FloatingJelly from "./components/FloatingJelly"; // ✅ Use wrapper, not 
 
 const App = () => {
   return (
-    <div className="relative overflow-hidden">
-    {/* Water shimmer behind everything */}
-    <div className="shimmer-overlay fixed top-0 left-0 w-full h-full z-0 pointer-events-none" />
-
-    {/* Actual content */}
-    <div className="relative z-10">
+    <>
+      {/* Jellyfish OUTSIDE the main div so it's not affected by overflow */}
       <FloatingJelly />
-      <Navbar />
-      <Hero />
-      <ShowcaseSection />
-      <LogoSection />
-      <FeatureCards />
-      <Experience />
-      <TechStack />
-      <Testimonials />
-      <Contact />
-      <Footer />
       
-    </div>
-  </div>
+      <div className="relative" style={{zIndex:10}}>
+        <Navbar />
+        <Hero />
+        <ShowcaseSection />
+        <LogoSection />
+        <FeatureCards />
+        <Experience />
+        <TechStack />
+        <Testimonials />
+        <Contact />
+        <Footer />
+      </div>
+    </>
   );
 };
-
 
 export default App;

@@ -5,8 +5,6 @@ Command: npx gltfjsx@6.5.3 optimized-room.glb
 
 import React, { useRef } from "react";
 import { useGLTF, useTexture } from "@react-three/drei";
-import { EffectComposer, SelectiveBloom } from "@react-three/postprocessing";
-import { BlendFunction } from "postprocessing";
 import * as THREE from "three";
 
 // Add the asset path helper
@@ -48,17 +46,15 @@ export function Room(props) {
     color: "#000",
   });
 
+  // Create an emissive material for the screens to make them glow
+  const screenMaterial = new THREE.MeshStandardMaterial({
+    ...materials.lambert1,
+    emissive: materials.lambert1.color || "#ffffff",
+    emissiveIntensity: 1.5,
+  });
+
   return (
     <group {...props} dispose={null}>
-      <EffectComposer>
-        <SelectiveBloom
-          selection={screensRef}
-          intensity={1.5} // Strength of the bloom
-          luminanceThreshold={0.2} // Minimum luminance needed
-          luminanceSmoothing={0.9} // Smooth transition
-          blendFunction={BlendFunction.ADD} // How it blends
-        />
-      </EffectComposer>
       <mesh
         geometry={nodes._________6_blinn1_0.geometry}
         material={curtainMaterial}
@@ -73,7 +69,7 @@ export function Room(props) {
       <mesh
         ref={screensRef}
         geometry={nodes.emis_lambert1_0.geometry}
-        material={materials.lambert1}
+        material={screenMaterial}
       />
       <mesh
         geometry={nodes.handls_blinn1_0.geometry}

@@ -27,6 +27,7 @@ const words = [
   { text: "Concepts", imgPath: getAssetPath("/images/concepts.svg") },
   { text: "Designs", imgPath: getAssetPath("/images/designs.svg") },
   { text: "Code", imgPath: getAssetPath("/images/code.svg") },
+ //These run smoothly together in a loop with dupes but throw errors. (FIX LATER)
   { text: "Ideas", imgPath: getAssetPath("/images/ideas.svg") },
   { text: "Concepts", imgPath: getAssetPath("/images/concepts.svg") },
   { text: "Designs", imgPath: getAssetPath("/images/designs.svg") },
