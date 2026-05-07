@@ -1,10 +1,6 @@
 import { useRef } from "react";
 
-// Add the asset path helper
-const getAssetPath = (path) => {
-  const base = import.meta.env.BASE_URL || '/';
-  return base + path.replace(/^\//, '');
-};
+import { getAssetPath } from "../utils/assetPath";
 
 const GlowCard = ({ card, index, children }) => {
   // refs for all the cards

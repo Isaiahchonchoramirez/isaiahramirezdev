@@ -1,10 +1,6 @@
 import { useGLTF } from "@react-three/drei";
 
-// Add the asset path helper
-const getAssetPath = (path) => {
-  const base = import.meta.env.BASE_URL || '/';
-  return base + path.replace(/^\//, '');
-};
+import { getAssetPath } from "../../../utils/assetPath";
 
 export function Computer(props) {
   const { nodes, materials } = useGLTF(

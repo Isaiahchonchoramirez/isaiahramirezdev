@@ -1,7 +1,4 @@
-const getAssetPath = (path) => {
-  const base = import.meta.env.BASE_URL || '/';
-  return base + path.replace(/^\//, '');
-};
+import { getAssetPath } from "../utils/assetPath";
 
 const navLinks = [
   {
@@ -27,16 +24,11 @@ const words = [
   { text: "Concepts", imgPath: getAssetPath("/images/concepts.svg") },
   { text: "Designs", imgPath: getAssetPath("/images/designs.svg") },
   { text: "Code", imgPath: getAssetPath("/images/code.svg") },
- //These run smoothly together in a loop with dupes but throw errors. (FIX LATER)
-  { text: "Ideas", imgPath: getAssetPath("/images/ideas.svg") },
-  { text: "Concepts", imgPath: getAssetPath("/images/concepts.svg") },
-  { text: "Designs", imgPath: getAssetPath("/images/designs.svg") },
-  { text: "Code", imgPath: getAssetPath("/images/code.svg") },
 ];
 
 const counterItems = [
   { value: 30, suffix: "+", label: "Projects Built" },
-  { value: 6, suffix: "+", label: "Technologies Larned" },
+  { value: 6, suffix: "+", label: "Technologies Learned" },
   { value: 70, suffix: "+", label: "Certifications Earned" },
   { value: 100, suffix: "%", label: "Commitment to Learning" },
 ];

@@ -7,11 +7,7 @@ import React, { useRef } from "react";
 import { useGLTF, useTexture } from "@react-three/drei";
 import * as THREE from "three";
 
-// Add the asset path helper
-const getAssetPath = (path) => {
-  const base = import.meta.env.BASE_URL || '/';
-  return base + path.replace(/^\//, '');
-};
+import { getAssetPath } from "../../../utils/assetPath";
 
 export function Room(props) {
   const { nodes, materials } = useGLTF(getAssetPath("/models/optimized-room.glb"));

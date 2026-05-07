@@ -3,12 +3,7 @@ import emailjs from "@emailjs/browser";
 
 import TitleHeader from "../components/TitleHeader";
 import ContactExperience from "../components/Models/Contact/ContactExperience";
-
-// Add the asset path helper
-const getAssetPath = (path) => {
-  const base = import.meta.env.BASE_URL || '/';
-  return base + path.replace(/^\//, '');
-};
+import { getAssetPath } from "../utils/assetPath";
 
 const Contact = () => {
   const formRef = useRef(null);

@@ -1,15 +1,12 @@
 import { useRef } from "react";
+import { Link } from "react-router-dom";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 
-gsap.registerPlugin(ScrollTrigger);
+import { getAssetPath } from "../utils/assetPath";
 
-// Add the asset path helper
-const getAssetPath = (path) => {
-  const base = import.meta.env.BASE_URL || '/';
-  return base + path.replace(/^\//, '');
-};
+gsap.registerPlugin(ScrollTrigger);
 
 const AppShowcase = () => {
   const sectionRef = useRef(null);
@@ -80,9 +77,18 @@ const AppShowcase = () => {
 
             <div className="project" ref={ycDirectoryRef}>
               <div className="image-wrapper bg-[#FFE7EB]">
-                <img src={getAssetPath("/images/teapigs.png")} alt="YC Directory App" /> 
+                <img src={getAssetPath("/images/teapigs.png")} alt="YC Directory App" />
               </div>
               <h2>Tea Pigs Website</h2>
+
+              <div className="mt-6 flex justify-center">
+                <Link to="/projects" className="cta-wrapper md:w-60 md:h-14 w-48 h-12">
+                  <div className="cta-button group">
+                    <div className="bg-circle" />
+                    <p className="text">See More</p>
+                  </div>
+                </Link>
+              </div>
             </div>
           </div>
         </div>

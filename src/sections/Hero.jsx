@@ -5,12 +5,7 @@ import AnimatedCounter from "../components/AnimatedCounter";
 import Button from "../components/Button";
 import { words } from "../constants";
 import HeroExperience from "../components/Models/HeroModels/HeroExperience";
-
-// Add the asset path helper
-const getAssetPath = (path) => {
-  const base = import.meta.env.BASE_URL || '/';
-  return base + path.replace(/^\//, '');
-};
+import { getAssetPath } from "../utils/assetPath";
 
 // Hero Section Component
 const Hero = () => {
@@ -38,8 +33,8 @@ const Hero = () => {
                 Bringing
                 <span className="slide">
                   <span className="wrapper">
-                    {words.map((word, index) => (
-                      <span key={`${word.text}-${index}`} className="flex items-center md:gap-3 gap-1 pb-2">
+                    {[...words, ...words].map((word, index) => (
+                      <span key={index} className="flex items-center md:gap-3 gap-1 pb-2">
                         <img
                           src={word.imgPath}
                           alt={word.text}
@@ -51,7 +46,7 @@ const Hero = () => {
                   </span>
                 </span>
               </h1>
-              <h1>to life throught pixels.</h1>
+              <h1>to life through pixels.</h1>
               <h1>Built for users, not ego.</h1>
             </div>
 
