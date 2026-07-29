@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="./support.js"></script>
+<script src="../shared/lyrx-vault.js"></script>
 </head>
 <body>
 <x-dc>
@@ -79,6 +80,20 @@
     .dc-bob{ animation: dcBob 6s ease-in-out infinite; }
     .dc-magnet{ transition: transform .25s cubic-bezier(.2,.7,.3,1), background .2s, color .2s; }
     .dc-magnet:hover{ transform:translateY(-4px); }
+    /* — cross-link to Lyrx (sibling app) — */
+    .dc-xlink{ --lyrx-acid:#C8FF2E; --lyrx-hot:#FF2E7A; display:inline-flex; align-items:center; gap:10px; text-decoration:none; color:var(--color-text); border:1px solid var(--color-divider); padding:7px 12px; transition:border-color .22s, background .22s, transform .22s, box-shadow .22s; }
+    .dc-xlink:hover, .nav a.dc-xlink:hover{ color:var(--color-text); border-color:var(--lyrx-acid); background:color-mix(in srgb, var(--lyrx-acid) 9%, transparent); transform:translateY(-2px); box-shadow:0 8px 24px color-mix(in srgb, var(--lyrx-acid) 16%, transparent); }
+    .nav a.dc-xlink{ color:var(--color-text); }
+    .dc-xlink .xl-name{ font-family:var(--font-heading); font-weight:800; font-size:13px; letter-spacing:0.04em; }
+    .dc-xlink .xl-arrow{ font-size:12px; opacity:0.55; transition:transform .22s, opacity .22s; }
+    .dc-xlink:hover .xl-arrow{ opacity:1; transform:translate(3px,-3px); }
+    .dc-xband{ display:flex; align-items:center; gap:20px; width:100%; padding:20px 22px; }
+    .lyrx-mark rect{ transform-origin:50% 50%; transition:transform .36s cubic-bezier(.2,.8,.3,1); }
+    .dc-xlink:hover .lyrx-mark .lb1{ transform:scaleY(2.0); }
+    .dc-xlink:hover .lyrx-mark .lb2{ transform:scaleY(.5); }
+    .dc-xlink:hover .lyrx-mark .lb3{ transform:scaleY(.4); }
+    .dc-xlink:hover .lyrx-mark .lb4{ transform:scaleY(1.75); }
+    .dc-xlink:hover .lyrx-mark .lb5{ transform:scaleY(2.6); }
     ::-webkit-scrollbar{ width:10px; height:10px; }
     ::-webkit-scrollbar-track{ background:#0a0a0a; }
     ::-webkit-scrollbar-thumb{ background:#2D2D2D; }
@@ -108,6 +123,18 @@
     <a href="#rights">Rights-first</a>
     <a href="#capsule">Capsules</a>
     <a href="#pricing">Pricing</a>
+    <a class="dc-xlink" href="../lyrx/index.html" title="Lyrx — the studio this data trains for" style="padding:6px 11px;">
+      <svg class="lyrx-mark" width="20" height="20" viewBox="0 0 32 32" aria-label="Lyrx logo">
+        <defs><linearGradient id="lyrxGradNav" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#C8FF2E"></stop><stop offset="1" stop-color="#FF2E7A"></stop></linearGradient></defs>
+        <g fill="url(#lyrxGradNav)">
+          <rect class="lb1" x="2" y="13" width="3.4" height="6"></rect>
+          <rect class="lb2" x="8" y="8" width="3.4" height="16"></rect>
+          <rect class="lb3" x="14" y="3" width="3.4" height="26"></rect>
+          <rect class="lb4" x="20" y="9" width="3.4" height="14"></rect>
+          <rect class="lb5" x="26" y="13" width="3.4" height="6"></rect>
+        </g>
+      </svg>
+      <span class="xl-name">Lyrx</span><span class="xl-arrow">&#8599;</span></a>
     <button class="btn btn-ghost" onClick="{{ toggleTheme }}" style="font-size:11px; letter-spacing:0.08em;">{{ themeLabel }}</button>
     <button class="btn btn-primary" onClick="{{ goApp }}">Launch app</button>
   </nav>
@@ -321,6 +348,24 @@
       <span>{{ waveStatus }}</span>
       <span>SWEEP TO SHAPE &middot; CLICK A CHORD TO PLAY</span>
     </div>
+
+    <a class="dc-xlink dc-xband" href="../lyrx/index.html#studio" style="margin-top:28px; background:var(--color-bg);">
+      <svg class="lyrx-mark" width="44" height="44" viewBox="0 0 32 32" aria-label="Lyrx logo" style="flex:none;">
+        <defs><linearGradient id="lyrxGradBand" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#C8FF2E"></stop><stop offset="1" stop-color="#FF2E7A"></stop></linearGradient></defs>
+        <g fill="url(#lyrxGradBand)">
+          <rect class="lb1" x="2" y="13" width="3.4" height="6"></rect>
+          <rect class="lb2" x="8" y="8" width="3.4" height="16"></rect>
+          <rect class="lb3" x="14" y="3" width="3.4" height="26"></rect>
+          <rect class="lb4" x="20" y="9" width="3.4" height="14"></rect>
+          <rect class="lb5" x="26" y="13" width="3.4" height="6"></rect>
+        </g>
+      </svg>
+      <span style="flex:1; min-width:0;">
+        <span style="display:block; font-size:10px; letter-spacing:0.14em; color:#C8FF2E; margin-bottom:5px;">THE OTHER HALF OF THE STACK</span>
+        <span class="xl-name" style="display:block; font-size:19px; margin-bottom:5px;">Lyrx — the studio this trains for</span>
+        <span style="display:block; font-size:13px; opacity:0.7;">Twenty-six dockable windows, 85 instruments, a step sequencer and a mixer that all run in one browser tab. DataCore governs the data; Lyrx is where it gets played.</span>
+      </span>
+      <span class="xl-arrow" style="font-size:15px; flex:none;">Open Lyrx &#8599;</span></a>
   </section>
 
   <section style="padding:88px 64px; background:var(--color-accent); color:#000;">
@@ -328,9 +373,21 @@
     <button class="btn" style="background:#000; color:var(--color-accent); padding:14px 28px; font-size:15px;" onClick="{{ goApp }}">Launch the app</button>
   </section>
 
-  <footer style="padding:32px 64px; border-top:2px solid var(--color-divider); display:flex; justify-content:space-between; opacity:0.6; font-size:13px;">
-    <span>DataCore</span>
-    <span>Permission before collection.</span>
+  <footer style="padding:32px 64px; border-top:2px solid var(--color-divider); display:flex; align-items:center; justify-content:space-between; gap:24px; font-size:13px;">
+    <span style="opacity:0.6;">DataCore</span>
+    <a class="dc-xlink" href="../lyrx/index.html" title="Lyrx — the studio side of the stack" style="padding:6px 12px;">
+      <svg class="lyrx-mark" width="18" height="18" viewBox="0 0 32 32" aria-label="Lyrx logo">
+        <defs><linearGradient id="lyrxGradFoot" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#C8FF2E"></stop><stop offset="1" stop-color="#FF2E7A"></stop></linearGradient></defs>
+        <g fill="url(#lyrxGradFoot)">
+          <rect class="lb1" x="2" y="13" width="3.4" height="6"></rect>
+          <rect class="lb2" x="8" y="8" width="3.4" height="16"></rect>
+          <rect class="lb3" x="14" y="3" width="3.4" height="26"></rect>
+          <rect class="lb4" x="20" y="9" width="3.4" height="14"></rect>
+          <rect class="lb5" x="26" y="13" width="3.4" height="6"></rect>
+        </g>
+      </svg>
+      <span class="xl-name" style="font-size:12px;">Sister project: Lyrx</span><span class="xl-arrow">&#8599;</span></a>
+    <span style="opacity:0.6;">Permission before collection.</span>
   </footer>
 </div>
 </sc-if>
@@ -357,6 +414,18 @@
       <button onClick="{{ item.onClick }}" style="all:unset; cursor:pointer; padding:11px 20px; font-size:13px; font-family:var(--font-heading); font-weight:600; border-left:2px solid {{ item.borderColor }}; background:{{ item.bg }}; color:{{ item.color }};">{{ item.label }}</button>
     </sc-for>
     <div style="margin-top:auto; padding:20px; display:flex; flex-direction:column; gap:12px;">
+      <a class="dc-xlink" href="../lyrx/index.html#studio" title="Open Lyrx Studio" style="padding:8px 10px;">
+        <svg class="lyrx-mark" width="18" height="18" viewBox="0 0 32 32" aria-label="Lyrx logo" style="flex:none;">
+          <defs><linearGradient id="lyrxGradSide" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#C8FF2E"></stop><stop offset="1" stop-color="#FF2E7A"></stop></linearGradient></defs>
+          <g fill="url(#lyrxGradSide)">
+            <rect class="lb1" x="2" y="13" width="3.4" height="6"></rect>
+            <rect class="lb2" x="8" y="8" width="3.4" height="16"></rect>
+            <rect class="lb3" x="14" y="3" width="3.4" height="26"></rect>
+            <rect class="lb4" x="20" y="9" width="3.4" height="14"></rect>
+            <rect class="lb5" x="26" y="13" width="3.4" height="6"></rect>
+          </g>
+        </svg>
+        <span class="xl-name" style="font-size:11px; flex:1;">Lyrx Studio</span><span class="xl-arrow">&#8599;</span></a>
       <button class="btn btn-ghost" onClick="{{ toggleTheme }}" style="font-size:11px; letter-spacing:0.08em; align-self:flex-start; padding:6px 0;">{{ themeLabel }}</button>
       <a href="#" onClick="{{ goLanding }}" style="font-size:12px; color:var(--color-neutral-700);">&larr; Back to site</a>
     </div>
@@ -431,12 +500,25 @@
         </div>
       </div>
 
+      <div style="display:flex; align-items:center; gap:12px; border:1px solid {{ modeBorder }}; background:{{ modeBg }}; padding:12px 16px; margin-bottom:24px; flex-wrap:wrap;">
+        <span style="width:8px; height:8px; flex:none; background:{{ modeDot }}; animation:dcPulse 1.6s ease-in-out infinite;"></span>
+        <span style="font-family:var(--font-heading); font-weight:800; font-size:12px; letter-spacing:0.08em; color:{{ modeDot }}; flex:none;">{{ modeLabel }}</span>
+        <span style="font-size:12px; opacity:0.75; flex:1; min-width:220px;">{{ modeHint }}</span>
+        <button class="btn btn-secondary" onClick="{{ recheckService }}" style="font-size:11px; flex:none;">Re-check</button>
+      </div>
+
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:40px; align-items:start;">
 
         <div style="display:flex; flex-direction:column; gap:20px;">
           <div class="field">
             <label>Seed targets</label>
             <textarea class="input" rows="4" value="{{ seedText }}" onChange="{{ setSeedText }}" style="font-family:var(--font-heading); font-size:12px; line-height:1.7; resize:vertical;"></textarea>
+          </div>
+
+          <div class="field">
+            <label>Also allow (media hosts)</label>
+            <input class="input" value="{{ extraHosts }}" onChange="{{ setExtraHosts }}" placeholder="upload.wikimedia.org, cdn.example.org" style="font-size:12px;"/>
+            <span style="font-size:11px; opacity:0.5; margin-top:6px; display:block;">Seed hosts are allowed automatically. Audio usually sits on a CDN — name it here or it will never be fetched.</span>
           </div>
 
           <div>
@@ -470,8 +552,9 @@
             </div>
           </div>
 
-          <label class="radio"><input type="checkbox" checked=""/><span class="dot" style="border-radius:0;"></span>Obey robots.txt &amp; crawl-delay</label>
-          <label class="radio"><input type="checkbox" checked=""/><span class="dot" style="border-radius:0;"></span>Quarantine pages with no reusable licence</label>
+          <label class="radio"><input type="checkbox" checked="{{ enforced }}" disabled="{{ enforced }}"/><span class="dot" style="border-radius:0;"></span>Obey robots.txt &amp; crawl-delay</label>
+          <label class="radio"><input type="checkbox" checked="{{ enforced }}" disabled="{{ enforced }}"/><span class="dot" style="border-radius:0;"></span>Quarantine pages with no reusable licence</label>
+          <span style="font-size:11px; opacity:0.45; margin-top:-6px;">{{ enforcedNote }}</span>
         </div>
 
         <div style="display:flex; flex-direction:column; gap:20px;">
@@ -504,6 +587,42 @@
           </div>
         </div>
       </div>
+
+      <sc-if value="{{ hasFindings }}" hint-placeholder-val="{{ false }}">
+        <div class="hr" style="margin:32px 0 20px;"></div>
+
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px; flex-wrap:wrap;">
+          <h4 style="margin:0;">Findings</h4>
+          <span style="font-size:12px; opacity:0.6;">{{ pickSummary }}</span>
+          <div style="margin-left:auto; display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="btn btn-secondary" onClick="{{ pickAllKept }}" style="font-size:11px;">Select keepable</button>
+            <button class="btn btn-secondary" onClick="{{ pickNone }}" style="font-size:11px;">Clear</button>
+            <button class="btn btn-secondary" onClick="{{ downloadBundle }}" style="font-size:11px;">Download</button>
+            <button class="btn btn-primary" onClick="{{ sendToLyrx }}" style="font-size:11px;">Send to Lyrx &#8599;</button>
+          </div>
+        </div>
+
+        <div style="border:1px solid var(--color-divider);">
+          <sc-for list="{{ findingRows }}" as="r" hint-placeholder-count="4">
+            <div onClick="{{ r.onToggle }}" style="display:grid; grid-template-columns:26px 56px 1fr 116px 74px 84px; align-items:center; gap:12px; padding:11px 14px; border-bottom:1px solid var(--color-divider); background:{{ r.bg }}; cursor:{{ r.cursor }}; opacity:{{ r.rowOpacity }};">
+              <span style="width:15px; height:15px; border:1px solid {{ r.boxBorder }}; background:{{ r.boxBg }}; color:#000; font-size:11px; font-family:var(--font-heading); font-weight:800; display:flex; align-items:center; justify-content:center;">{{ r.tick }}</span>
+              <span style="font-size:10px; letter-spacing:0.1em; font-family:var(--font-heading); font-weight:800; color:{{ r.typeColor }};">{{ r.typeLabel }}</span>
+              <span style="min-width:0; overflow:hidden;">
+                <span style="display:block; font-family:var(--font-heading); font-weight:700; font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ r.title }}</span>
+                <span style="display:block; font-size:11px; opacity:0.45; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ r.url }}</span>
+              </span>
+              <span style="font-size:11px; color:{{ r.licenseColor }}; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ r.license }}</span>
+              <span style="font-size:11px; opacity:0.55; text-align:right;">{{ r.size }}</span>
+              <span style="font-size:10px; letter-spacing:0.1em; font-family:var(--font-heading); font-weight:800; color:{{ r.statusColor }}; text-align:right;">{{ r.statusLabel }}</span>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="display:flex; gap:16px; margin-top:10px; flex-wrap:wrap; font-size:11px;">
+          <span style="color:var(--color-accent);">{{ busyMsg }}</span>
+          <span style="opacity:0.5; margin-left:auto;">{{ vaultSummary }}</span>
+        </div>
+      </sc-if>
     </sc-if>
 
     <sc-if value="{{ isStore }}" hint-placeholder-val="{{ false }}">
@@ -694,7 +813,25 @@
     <sc-if value="{{ isVoice }}" hint-placeholder-val="{{ false }}">
       <h6 style="color:var(--color-accent);">VOICE STUDIO</h6>
       <h2 style="margin-bottom:10px;">Isaiah Voice Model v3</h2>
-      <p style="font-size:12px; opacity:0.5; margin-bottom:24px;">Renders locally today. Lyrx hand-off (lyrics in, timed vocal out) lands once the connector is wired.</p>
+      <p style="font-size:12px; opacity:0.5; margin-bottom:20px;">Renders locally. The hand-off is lyrics in, timed vocal out — take the render into Lyrx to sit it on a track.</p>
+
+      <a class="dc-xlink dc-xband" href="../lyrx/index.html#studio" style="margin-bottom:28px; background:var(--color-surface); padding:16px 18px;">
+        <svg class="lyrx-mark" width="34" height="34" viewBox="0 0 32 32" aria-label="Lyrx logo" style="flex:none;">
+          <defs><linearGradient id="lyrxGradVoice" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#C8FF2E"></stop><stop offset="1" stop-color="#FF2E7A"></stop></linearGradient></defs>
+          <g fill="url(#lyrxGradVoice)">
+            <rect class="lb1" x="2" y="13" width="3.4" height="6"></rect>
+            <rect class="lb2" x="8" y="8" width="3.4" height="16"></rect>
+            <rect class="lb3" x="14" y="3" width="3.4" height="26"></rect>
+            <rect class="lb4" x="20" y="9" width="3.4" height="14"></rect>
+            <rect class="lb5" x="26" y="13" width="3.4" height="6"></rect>
+          </g>
+        </svg>
+        <span style="flex:1; min-width:0;">
+          <span style="display:block; font-size:10px; letter-spacing:0.14em; color:#C8FF2E; margin-bottom:4px;">VOCAL HAND-OFF</span>
+          <span class="xl-name" style="display:block; font-size:15px; margin-bottom:3px;">Lyrx Studio</span>
+          <span style="display:block; font-size:12px; opacity:0.65;">Drop the vocal into a session — comp it, tune it, mix it against the beat.</span>
+        </span>
+        <span class="xl-arrow" style="font-size:13px; flex:none;">Open &#8599;</span></a>
       <div style="display:grid; grid-template-columns:1.2fr 1fr; gap:40px;">
         <div style="display:flex; flex-direction:column; gap:20px;">
           <div class="field"><label>Accent strength: {{ accentStrength }}%</label><input type="range" value="{{ accentStrength }}" onChange="{{ setAccentStrength }}" style="width:100%; accent-color:var(--color-accent-2);"/></div>
@@ -717,7 +854,25 @@
     <sc-if value="{{ isMusic }}" hint-placeholder-val="{{ false }}">
       <h6 style="color:var(--color-accent);">MUSIC STUDIO</h6>
       <h2 style="margin-bottom:10px;">Staged generation</h2>
-      <p style="font-size:12px; opacity:0.5; margin-bottom:24px;">Lyrx will supply lyric + structure input to the composition stage — connector pending.</p>
+      <p style="font-size:12px; opacity:0.5; margin-bottom:20px;">Lyric and structure input for the composition stage comes from Lyrx — write the section map there, stage it here.</p>
+
+      <a class="dc-xlink dc-xband" href="../lyrx/index.html#studio" style="margin-bottom:28px; background:var(--color-surface); padding:16px 18px;">
+        <svg class="lyrx-mark" width="34" height="34" viewBox="0 0 32 32" aria-label="Lyrx logo" style="flex:none;">
+          <defs><linearGradient id="lyrxGradMusic" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#C8FF2E"></stop><stop offset="1" stop-color="#FF2E7A"></stop></linearGradient></defs>
+          <g fill="url(#lyrxGradMusic)">
+            <rect class="lb1" x="2" y="13" width="3.4" height="6"></rect>
+            <rect class="lb2" x="8" y="8" width="3.4" height="16"></rect>
+            <rect class="lb3" x="14" y="3" width="3.4" height="26"></rect>
+            <rect class="lb4" x="20" y="9" width="3.4" height="14"></rect>
+            <rect class="lb5" x="26" y="13" width="3.4" height="6"></rect>
+          </g>
+        </svg>
+        <span style="flex:1; min-width:0;">
+          <span style="display:block; font-size:10px; letter-spacing:0.14em; color:#C8FF2E; margin-bottom:4px;">ARRANGEMENT HAND-OFF</span>
+          <span class="xl-name" style="display:block; font-size:15px; margin-bottom:3px;">Lyrx Studio</span>
+          <span style="display:block; font-size:12px; opacity:0.65;">Sequencer, piano roll, plugin rack and mixer — where these stems become an arrangement.</span>
+        </span>
+        <span class="xl-arrow" style="font-size:13px; flex:none;">Open &#8599;</span></a>
       <div style="display:flex; gap:0; margin-bottom:32px; border:1px solid var(--color-divider);">
         <sc-for list="{{ musicStages }}" as="ms" hint-placeholder-count="5">
           <button onClick="{{ ms.onClick }}" style="all:unset; cursor:pointer; flex:1; text-align:left; padding:16px; border-right:1px solid var(--color-divider); background:{{ ms.bg }}; color:{{ ms.color }};">
@@ -796,7 +951,7 @@ class Component extends DCLogic {
     crawlTicks: 0,
     crawlCounters: { queued: 1284, fetched: 0, parsed: 0, stored: 0, quarantined: 0, bytes: 0 },
     crawlLog: [],
-    seedText: 'https://commoncrawl.org/collections/CC-MAIN-2026-26\nhttps://openlyrics.example/archive/public-domain\nhttps://docs.datacore.dev/robots-policy\nsitemap:https://folkarchive.example/sitemap.xml',
+    seedText: 'https://en.wikisource.org/wiki/Oh!_Susanna\nhttps://en.wikisource.org/wiki/Category:Folk_songs',
     extractFields: [
       { name: 'title', selector: 'h1, meta[property="og:title"]', type: 'text' },
       { name: 'body', selector: 'article, main p', type: 'text' },
@@ -805,6 +960,14 @@ class Component extends DCLogic {
     ],
     crawlDepth: 3,
     rateLimit: 4,
+    // live crawler service (npm run crawler); falls back to the simulation
+    svcState: 'checking',
+    svcUrl: 'http://localhost:8787',
+    extraHosts: 'upload.wikimedia.org',
+    liveResults: [],
+    picked: {},
+    busyMsg: '',
+    vaultInfo: null,
     schedule: 'daily',
     tier: 'raw',
     theme: 'dark',
@@ -822,6 +985,119 @@ class Component extends DCLogic {
     queryRunning: false,
     queryRan: true,
   };
+
+  // ── live crawler service ───────────────────────────────────────────────────
+  // The service does the fetching; this page only drives it and shows results.
+  // With nothing listening on svcUrl the screen falls back to the simulation,
+  // which is what the deployed (static) build always does.
+  svc(path, opts) {
+    return fetch(this.state.svcUrl + path, {
+      ...opts,
+      headers: opts && opts.body ? { 'content-type': 'application/json' } : undefined,
+    }).then(r => r.json().then(j => (r.ok ? j : Promise.reject(new Error(j.error || r.status)))));
+  }
+
+  async checkService() {
+    try {
+      await this.svc('/api/health');
+      if (this.state.svcState !== 'live') {
+        // The idle counters are the simulation's; a live service starts empty.
+        const fresh = !this.state.crawlTicks && !this.state.liveResults.length;
+        this.setState({
+          svcState: 'live',
+          ...(fresh ? { crawlCounters: { queued: 0, fetched: 0, parsed: 0, stored: 0, quarantined: 0, bytes: 0 } } : {}),
+        });
+      }
+      return true;
+    } catch (e) {
+      if (this.state.svcState !== 'offline') this.setState({ svcState: 'offline', crawlRunning: false });
+      return false;
+    }
+  }
+
+  async startLiveCrawl() {
+    this.setState({ busyMsg: 'starting…' });
+    try {
+      await this.svc('/api/reset', { method: 'POST' });
+      await this.svc('/api/crawl', {
+        method: 'POST',
+        body: JSON.stringify({
+          seeds: this.state.seedText,
+          extraHosts: this.state.extraHosts,
+          depth: this.state.crawlDepth,
+          rateLimit: this.state.rateLimit,
+          audio: true,
+          fields: this.state.extractFields.map(f => ({ name: f.name, selector: f.selector })),
+        }),
+      });
+      this.setState({ crawlRunning: true, liveResults: [], picked: {}, busyMsg: '', crawlLog: [] });
+    } catch (err) {
+      this.setState({ busyMsg: 'could not start: ' + err.message, crawlRunning: false });
+    }
+  }
+
+  async pollLive() {
+    if (Date.now() - (this._lastPoll || 0) < 1100) return;
+    this._lastPoll = Date.now();
+    try {
+      const st = await this.svc('/api/status');
+      const { results } = await this.svc('/api/results');
+      this.setState({
+        crawlRunning: st.running,
+        crawlTicks: st.counters.fetched,
+        crawlCounters: st.counters,
+        crawlLog: st.log,
+        liveResults: results,
+      });
+    } catch (err) {
+      this.setState({ svcState: 'offline', crawlRunning: false });
+    }
+  }
+
+  pickedIds() {
+    return Object.keys(this.state.picked).filter(id => this.state.picked[id]);
+  }
+
+  /** Collect → pull the bytes → write into the vault Lyrx reads. */
+  async sendToLyrx() {
+    const ids = this.pickedIds();
+    if (!ids.length) { this.setState({ busyMsg: 'nothing selected' }); return; }
+    if (!window.LyrxVault) { this.setState({ busyMsg: 'vault script missing' }); return; }
+    this.setState({ busyMsg: 'collecting ' + ids.length + ' item(s)…' });
+    try {
+      const { collected, failed } = await this.svc('/api/collect', { method: 'POST', body: JSON.stringify({ ids }) });
+      let sent = 0;
+      for (const item of collected) {
+        const res = await fetch(this.state.svcUrl + '/api/file/' + item.id);
+        if (!res.ok) continue;
+        if (item.type === 'audio') {
+          await window.LyrxVault.put({
+            kind: 'sample', title: item.title, url: item.url, license: item.license,
+            mime: item.mime, blob: await res.blob(),
+          });
+        } else {
+          const doc = await res.json();
+          await window.LyrxVault.put({
+            kind: 'text', title: doc.title || item.title, url: item.url, license: item.license,
+            text: doc.text || '', mime: 'text/plain',
+          });
+        }
+        sent++;
+      }
+      const info = await window.LyrxVault.count();
+      this.setState({
+        vaultInfo: info,
+        busyMsg: sent + ' sent to Lyrx' + (failed.length ? ' · ' + failed.length + ' failed (' + failed[0].error + ')' : ''),
+      });
+    } catch (err) {
+      this.setState({ busyMsg: 'send failed: ' + err.message });
+    }
+  }
+
+  async refreshVault() {
+    if (!window.LyrxVault) return;
+    try { this.setState({ vaultInfo: await window.LyrxVault.count() }); } catch (e) { /* ignore */ }
+  }
 
   crawlTick() {
     if (!this.state.crawlRunning) { this._lastCrawl = 0; return; }
@@ -865,7 +1141,11 @@ class Component extends DCLogic {
     this._pumpT = setTimeout(() => {
       this._pumpAlive = Date.now();
       this.setState(s => ({ phase: s.phase + 1 }));
-      if (this.state.crawlRunning) this.crawlTick();
+      if (this.state.svcState === 'live') {
+        if (this.state.crawlRunning || this.state.liveResults.length) this.pollLive();
+      } else if (this.state.crawlRunning) {
+        this.crawlTick();
+      }
       this.pump();
     }, 160);
   }
@@ -874,6 +1154,19 @@ class Component extends DCLogic {
     if (this._booted) return;
     this._booted = true;
     this._pumpAlive = Date.now();
+    this.checkService();
+    this.refreshVault();
+    // Deep links from Lyrx: #app, #voice, #music, #app/voice, …
+    try {
+      const parts = (location.hash || '').replace(/^#\/?/, '').toLowerCase().split('/').filter(Boolean);
+      const screens = ['home','discover','sources','crawl','store','query','knowledge','train','voice','music','compression'];
+      const screen = parts.find(p => screens.includes(p));
+      if (screen || parts[0] === 'app') {
+        // Runs before the first render reads state, so assign straight through.
+        this.state.view = 'app';
+        this.state.screen = screen || 'home';
+      }
+    } catch (e) {}
     window.__dcBooted = (window.__dcBooted || 0) + 1;
     this._io = new IntersectionObserver((entries) => {
       entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('dc-in'); });
@@ -1285,6 +1578,7 @@ class Component extends DCLogic {
     this.boot();
     if (Date.now() - (this._pumpAlive || 0) > 900) { this._pumpAlive = Date.now(); this.pump(); }
     const s = this.state;
+    const live = s.svcState === 'live';
     const setScreen = (name) => this.setState({ screen: name });
     const navDefs = [
       ['home', 'Home'], ['discover', 'Discover'], ['sources', 'Sources'],
@@ -1455,6 +1749,29 @@ class Component extends DCLogic {
     const liveBars = this.waveformBarsData.map((h, i) =>
       Math.round(28 + (h - 28) * (0.6 + 0.4 * Math.abs(Math.sin((s.phase + i * 1.7) / 4)))));
 
+    // NB: `resultRows` / `hasResults` are already taken by the Workbench screen
+    // further down this same vals object — findings keys must not collide.
+    const findingRows = s.liveResults.map(r => {
+      const keepable = r.status !== 'quarantined';
+      return {
+        id: r.id, url: r.url, title: r.title, license: r.license,
+        tick: s.picked[r.id] ? '✓' : '',
+        boxBorder: s.picked[r.id] ? 'var(--color-accent)' : 'var(--color-neutral-500)',
+        boxBg: s.picked[r.id] ? 'var(--color-accent)' : 'transparent',
+        onToggle: keepable
+          ? () => this.setState(st => ({ picked: { ...st.picked, [r.id]: !st.picked[r.id] } }))
+          : () => this.setState({ busyMsg: 'quarantined — no reusable licence, so it cannot be collected' }),
+        typeLabel: r.type === 'audio' ? 'AUDIO' : 'TEXT',
+        typeColor: r.type === 'audio' ? '#21E5E5' : 'var(--color-accent)',
+        licenseColor: keepable ? 'var(--color-accent-800)' : 'var(--color-accent-2)',
+        statusColor: r.status === 'kept' ? 'var(--color-accent)' : (r.status === 'listed' ? '#21E5E5' : 'var(--color-accent-2)'),
+        statusLabel: String(r.status || '').toUpperCase(),
+        size: r.bytes ? (r.bytes > 999999 ? (r.bytes / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(r.bytes / 1024)) + ' KB') : '—',
+        bg: s.picked[r.id] ? 'color-mix(in srgb, var(--color-accent) 7%, transparent)' : 'transparent',
+        cursor: keepable ? 'pointer' : 'not-allowed',
+        rowOpacity: keepable ? '1' : '0.45',
+      };
+    });
     const c = s.crawlCounters;
     const crawlStats = [
       { label: 'IN QUEUE', value: c.queued.toLocaleString(), color: 'var(--color-text)' },
@@ -1462,7 +1779,10 @@ class Component extends DCLogic {
       { label: 'PARSED', value: c.parsed.toLocaleString(), color: 'var(--color-accent)' },
       { label: 'STORED TO TIER 01', value: c.stored.toLocaleString(), color: 'var(--color-accent)' },
       { label: 'QUARANTINED', value: c.quarantined.toLocaleString(), color: 'var(--color-accent-2)' },
-      { label: 'CAPTURED', value: (c.bytes / 1024).toFixed(1) + ' MB', color: 'var(--color-text)' },
+      // the simulation counts in KB-ish units; the service reports real bytes
+      { label: 'CAPTURED', value: live
+          ? (c.bytes > 1048576 ? (c.bytes / 1048576).toFixed(1) + ' MB' : Math.round(c.bytes / 1024) + ' KB')
+          : (c.bytes / 1024).toFixed(1) + ' MB', color: 'var(--color-text)' },
     ];
     const extractFields = s.extractFields.map((f, i) => ({
       ...f,
@@ -1529,14 +1849,73 @@ class Component extends DCLogic {
       goHome: (e) => { if (e && e.preventDefault) e.preventDefault(); this.setState({ view: 'landing' }); window.scrollTo({ top: 0, behavior: 'smooth' }); },
       toTopApp: () => { const m = document.getElementById('dc-main'); if (m) m.scrollTo({ top: 0, behavior: 'smooth' }); window.scrollTo({ top: 0, behavior: 'smooth' }); },
       isCrawl: s.screen === 'crawl', isStore: s.screen === 'store', isQuery: s.screen === 'query',
-      crawlBtnLabel: s.crawlRunning ? 'Pause crawl' : 'Start crawl',
-      crawlStatusLabel: s.crawlRunning ? 'CRAWLING' : (s.crawlTicks ? 'PAUSED' : 'IDLE'),
+      crawlBtnLabel: s.crawlRunning ? (live ? 'Stop crawl' : 'Pause crawl') : 'Start crawl',
+      crawlStatusLabel: s.crawlRunning ? 'CRAWLING' : (s.crawlTicks ? (live ? 'FINISHED' : 'PAUSED') : 'IDLE'),
       crawlDotColor: s.crawlRunning ? 'var(--color-accent)' : 'var(--color-neutral-700)',
       crawlElapsed: (s.crawlRunning || s.crawlTicks)
-        ? Math.round(s.crawlTicks * 0.62) + 's elapsed · depth ' + s.crawlDepth + ' · ' + s.rateLimit + ' req/s'
+        ? (live
+            ? s.crawlCounters.fetched + ' fetched · depth ' + s.crawlDepth + ' · ' + s.rateLimit + ' req/s'
+            : Math.round(s.crawlTicks * 0.62) + 's elapsed · depth ' + s.crawlDepth + ' · ' + s.rateLimit + ' req/s')
         : 'not started',
-      toggleCrawl: () => this.setState(st => ({ crawlRunning: !st.crawlRunning })),
-      resetCrawl: () => this.setState({ crawlRunning: false, crawlTicks: 0, crawlLog: [], crawlCounters: { queued: 1284, fetched: 0, parsed: 0, stored: 0, quarantined: 0, bytes: 0 } }),
+      toggleCrawl: () => {
+        if (!live) return this.setState(st => ({ crawlRunning: !st.crawlRunning }));
+        if (s.crawlRunning) { this.svc('/api/stop', { method: 'POST' }).catch(() => {}); this.setState({ busyMsg: 'stopping…' }); }
+        else this.startLiveCrawl();
+      },
+      resetCrawl: () => {
+        if (live) this.svc('/api/reset', { method: 'POST' }).catch(() => {});
+        this.setState({
+          crawlRunning: false, crawlTicks: 0, crawlLog: [], liveResults: [], picked: {}, busyMsg: '',
+          crawlCounters: live
+            ? { queued: 0, fetched: 0, parsed: 0, stored: 0, quarantined: 0, bytes: 0 }
+            : { queued: 1284, fetched: 0, parsed: 0, stored: 0, quarantined: 0, bytes: 0 },
+        });
+      },
+
+      // service mode banner
+      modeLabel: s.svcState === 'live' ? 'LIVE CRAWLER' : (s.svcState === 'checking' ? 'CHECKING…' : 'DEMO MODE'),
+      modeDot: s.svcState === 'live' ? 'var(--color-accent)' : (s.svcState === 'checking' ? 'var(--color-neutral-600)' : 'var(--color-accent-2)'),
+      modeBg: s.svcState === 'live' ? 'color-mix(in srgb, var(--color-accent) 8%, transparent)' : 'var(--color-surface)',
+      modeBorder: s.svcState === 'live' ? 'var(--color-accent)' : 'var(--color-divider)',
+      modeHint: s.svcState === 'live'
+        ? 'Fetching for real against ' + s.svcUrl + ' — robots.txt honoured, seed hosts only, one request per second per host.'
+        : (s.svcState === 'checking'
+            ? 'Looking for the crawler service…'
+            : 'No crawler service on ' + s.svcUrl + ' — the log below is simulated. Run  npm run crawler  in the project, then re-check.'),
+      recheckService: () => { this.setState({ svcState: 'checking' }); this.checkService(); },
+      isLive: live,
+      enforced: true,
+      enforcedNote: live
+        ? 'Both are enforced by the service and cannot be switched off from here.'
+        : 'Enforced by the crawler service when one is running.',
+
+      // findings
+      hasFindings: live && findingRows.length > 0,
+      findingRows,
+      pickSummary: (() => {
+        const ids = Object.keys(s.picked).filter(k => s.picked[k]);
+        const rows = s.liveResults.filter(r => ids.includes(r.id));
+        const audio = rows.filter(r => r.type === 'audio').length;
+        return ids.length
+          ? ids.length + ' picked (' + (ids.length - audio) + ' text · ' + audio + ' audio)'
+          : s.liveResults.length + ' found — tick what you want';
+      })(),
+      pickAllKept: () => this.setState(st => {
+        const picked = { ...st.picked };
+        st.liveResults.forEach(r => { if (r.status !== 'quarantined') picked[r.id] = true; });
+        return { picked };
+      }),
+      pickNone: () => this.setState({ picked: {} }),
+      downloadBundle: () => {
+        const ids = Object.keys(s.picked).filter(k => s.picked[k]);
+        window.open(s.svcUrl + '/api/bundle' + (ids.length ? '?ids=' + ids.join(',') : ''), '_blank');
+      },
+      sendToLyrx: () => this.sendToLyrx(),
+      busyMsg: s.busyMsg,
+      vaultSummary: s.vaultInfo
+        ? 'Lyrx vault: ' + s.vaultInfo.text + ' text · ' + s.vaultInfo.sample + ' samples · ' + (s.vaultInfo.bytes / 1048576).toFixed(1) + ' MB — open Lyrx › Library to use them.'
+        : 'Nothing sent to Lyrx yet.',
+      extraHosts: s.extraHosts, setExtraHosts: (e) => this.setState({ extraHosts: e.target.value }),
       crawlLog: s.crawlLog,
       seedText: s.seedText, setSeedText: (e) => this.setState({ seedText: e.target.value }),
       crawlDepth: s.crawlDepth, setCrawlDepth: (e) => this.setState({ crawlDepth: +e.target.value }),
