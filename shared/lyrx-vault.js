@@ -16,6 +16,11 @@
 (function () {
   const DB = 'lyrx-vault';
   const STORE = 'items';
+  // Deliberately still 1. DataCore and Lyrx are separate pages holding this same
+  // database open, and an upgrade cannot commit until every one of them closes —
+  // including tabs in other windows nobody remembers opening. A bump therefore
+  // risks hanging both apps rather than improving either, so dedupe is done with
+  // a deterministic key instead of a new index.
   const VERSION = 1;
 
   let dbp = null;
@@ -23,6 +28,7 @@
     if (dbp) return dbp;
     dbp = new Promise((resolve, reject) => {
       const req = indexedDB.open(DB, VERSION);
+
       req.onupgradeneeded = () => {
         const db = req.result;
         if (!db.objectStoreNames.contains(STORE)) {
@@ -31,9 +37,24 @@
           os.createIndex('addedAt', 'addedAt');
         }
       };
-      req.onsuccess = () => resolve(req.result);
+
+      // DataCore and Lyrx share this database, so at an upgrade one of them is
+      // usually holding the old version open. Without this the request neither
+      // succeeds nor errors — it simply blocks, and every await behind it hangs
+      // forever, which looks exactly like the page having frozen.
+      req.onblocked = () => {
+        reject(new Error('The vault is open in another DataCore or Lyrx tab — close it and reload.'));
+      };
+
+      req.onsuccess = () => {
+        // Let a newer version elsewhere upgrade instead of blocking on us.
+        req.result.onversionchange = () => { try { req.result.close(); } catch (e) { /* gone */ } dbp = null; };
+        resolve(req.result);
+      };
       req.onerror = () => reject(req.error);
     });
+    // A failed open must not be cached, or one bad moment poisons the session.
+    dbp.catch(() => { dbp = null; });
     return dbp;
   }
 
@@ -50,12 +71,20 @@
   }
 
   const newId = () => 'v' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+  /**
+   * One id per source URL, so sending the same track twice overwrites the first
+   * copy instead of leaving two identical cards in the Library. The URL itself
+   * is the key — a hash would be shorter but could collide, and this stays
+   * readable when inspecting the database by hand.
+   */
+  const idFor = item => (item.url ? 'u:' + item.url : newId());
   const strip = ({ blob, text, ...meta }) => ({ ...meta, preview: (text || '').slice(0, 240) });
 
   window.LyrxVault = {
     async put(item) {
       const rec = {
-        id: item.id || newId(),
+        id: item.id || idFor(item),
         kind: item.kind === 'sample' ? 'sample' : 'text',
         title: item.title || 'untitled',
         url: item.url || '',

@@ -491,136 +491,222 @@
     </sc-if>
 
     <sc-if value="{{ isCrawl }}" hint-placeholder-val="{{ false }}">
-      <h6 style="color:var(--color-accent);">COLLECT</h6>
-      <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:24px; margin-bottom:24px;">
-        <h2 style="margin:0;">Crawler: nashville-lyric-corpus</h2>
-        <div style="display:flex; gap:8px; flex:none;">
-          <button class="btn btn-secondary" onClick="{{ resetCrawl }}" style="font-size:12px;">Reset</button>
-          <button class="btn btn-primary" onClick="{{ toggleCrawl }}" style="font-size:12px;">{{ crawlBtnLabel }}</button>
-        </div>
-      </div>
+      <h6 style="color:var(--color-accent);">FIND MUSIC</h6>
+      <h2 style="margin:0 0 8px;">Find music you're allowed to use</h2>
+      <p style="opacity:0.7; font-size:13px; margin:0 0 22px; max-width:640px; line-height:1.7;">
+        Say what you want to hear. Everything that comes back tells you, in plain words, what you're allowed to do with it.
+        Press <strong style="color:var(--color-accent);">&#9654; Play</strong> to hear it, tick the ones you like,
+        then press <strong style="color:var(--color-accent);">Send to Lyrx</strong> and they'll be waiting for you there.
+      </p>
 
       <div style="display:flex; align-items:center; gap:12px; border:1px solid {{ modeBorder }}; background:{{ modeBg }}; padding:12px 16px; margin-bottom:24px; flex-wrap:wrap;">
         <span style="width:8px; height:8px; flex:none; background:{{ modeDot }}; animation:dcPulse 1.6s ease-in-out infinite;"></span>
         <span style="font-family:var(--font-heading); font-weight:800; font-size:12px; letter-spacing:0.08em; color:{{ modeDot }}; flex:none;">{{ modeLabel }}</span>
         <span style="font-size:12px; opacity:0.75; flex:1; min-width:220px;">{{ modeHint }}</span>
-        <button class="btn btn-secondary" onClick="{{ recheckService }}" style="font-size:11px; flex:none;">Re-check</button>
+        <button class="btn btn-secondary" onClick="{{ recheckService }}" style="font-size:11px; flex:none;">Try again</button>
       </div>
 
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:40px; align-items:start;">
-
-        <div style="display:flex; flex-direction:column; gap:20px;">
-          <div class="field">
-            <label>Seed targets</label>
-            <textarea class="input" rows="4" value="{{ seedText }}" onChange="{{ setSeedText }}" style="font-family:var(--font-heading); font-size:12px; line-height:1.7; resize:vertical;"></textarea>
-          </div>
-
-          <div class="field">
-            <label>Also allow (media hosts)</label>
-            <input class="input" value="{{ extraHosts }}" onChange="{{ setExtraHosts }}" placeholder="upload.wikimedia.org, cdn.example.org" style="font-size:12px;"/>
-            <span style="font-size:11px; opacity:0.5; margin-top:6px; display:block;">Seed hosts are allowed automatically. Audio usually sits on a CDN — name it here or it will never be fetched.</span>
-          </div>
-
-          <div>
-            <label style="font-size:11px; letter-spacing:0.08em; text-transform:uppercase; opacity:0.7; display:block; margin-bottom:10px;">Extraction map</label>
-            <div style="display:flex; flex-direction:column; gap:1px; background:var(--color-divider); border:1px solid var(--color-divider);">
-              <div style="display:grid; grid-template-columns:1fr 1.4fr 92px; gap:1px; background:var(--color-divider);">
-                <div style="background:var(--color-surface); padding:8px 10px; font-size:10px; letter-spacing:0.1em; opacity:0.6;">FIELD</div>
-                <div style="background:var(--color-surface); padding:8px 10px; font-size:10px; letter-spacing:0.1em; opacity:0.6;">SELECTOR</div>
-                <div style="background:var(--color-surface); padding:8px 10px; font-size:10px; letter-spacing:0.1em; opacity:0.6;">TYPE</div>
-              </div>
-              <sc-for list="{{ extractFields }}" as="f" hint-placeholder-count="4">
-                <div style="display:grid; grid-template-columns:1fr 1.4fr 92px; gap:1px; background:var(--color-divider);">
-                  <input value="{{ f.name }}" onChange="{{ f.onName }}" style="all:unset; background:var(--color-bg); padding:9px 10px; font-size:12px; color:var(--color-text);"/>
-                  <input value="{{ f.selector }}" onChange="{{ f.onSelector }}" style="all:unset; background:var(--color-bg); padding:9px 10px; font-size:12px; color:var(--color-accent); font-family:var(--font-heading);"/>
-                  <div style="background:var(--color-bg); padding:9px 10px; font-size:11px; opacity:0.6;">{{ f.type }}</div>
-                </div>
-              </sc-for>
-            </div>
-            <button class="btn btn-ghost" onClick="{{ addField }}" style="font-size:11px; margin-top:8px;">+ Add field</button>
-          </div>
-
-          <div class="field"><label>Crawl depth: {{ crawlDepth }}</label><input type="range" min="1" max="8" value="{{ crawlDepth }}" onChange="{{ setCrawlDepth }}" style="width:100%; accent-color:var(--color-accent);"/></div>
-          <div class="field"><label>Rate limit: {{ rateLimit }} req/s per host</label><input type="range" min="1" max="20" value="{{ rateLimit }}" onChange="{{ setRateLimit }}" style="width:100%; accent-color:var(--color-accent);"/></div>
-
-          <div class="field">
-            <label>Schedule</label>
-            <div class="seg">
-              <sc-for list="{{ schedules }}" as="sc" hint-placeholder-count="4">
-                <button onClick="{{ sc.onClick }}" style="all:unset; cursor:pointer; flex:1; text-align:center; padding:9px 12px; font-size:12px; font-family:var(--font-heading); font-weight:600; background:{{ sc.bg }}; color:{{ sc.color }};">{{ sc.label }}</button>
-              </sc-for>
-            </div>
-          </div>
-
-          <label class="radio"><input type="checkbox" checked="{{ enforced }}" disabled="{{ enforced }}"/><span class="dot" style="border-radius:0;"></span>Obey robots.txt &amp; crawl-delay</label>
-          <label class="radio"><input type="checkbox" checked="{{ enforced }}" disabled="{{ enforced }}"/><span class="dot" style="border-radius:0;"></span>Quarantine pages with no reusable licence</label>
-          <span style="font-size:11px; opacity:0.45; margin-top:-6px;">{{ enforcedNote }}</span>
+      <!-- ── 1. ask ─────────────────────────────────────────────────────────── -->
+      <div style="border:1px solid var(--color-divider); background:var(--color-surface); padding:20px 22px; margin-bottom:24px;">
+        <div style="display:flex; align-items:baseline; gap:10px; margin-bottom:12px; flex-wrap:wrap;">
+          <span style="font-family:var(--font-heading); font-weight:800; font-size:11px; letter-spacing:0.12em; color:var(--color-accent);">STEP 1</span>
+          <h4 style="margin:0; font-size:15px;">What do you want to hear?</h4>
         </div>
 
-        <div style="display:flex; flex-direction:column; gap:20px;">
-          <div style="display:flex; align-items:center; gap:10px;">
-            <span style="width:8px; height:8px; background:{{ crawlDotColor }}; animation:dcPulse 1.6s ease-in-out infinite;"></span>
-            <span style="font-family:var(--font-heading); font-weight:800; font-size:13px; color:{{ crawlDotColor }};">{{ crawlStatusLabel }}</span>
-            <span style="font-size:11px; opacity:0.5;">{{ crawlElapsed }}</span>
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:12px;">
+          <input class="input" value="{{ discQuery }}" onChange="{{ setDiscQuery }}" onKeyDown="{{ discOnKey }}" placeholder="try: sad piano  ·  banjo folk ballad  ·  church choir  ·  rain on a window" style="flex:1; min-width:280px; font-size:14px; padding:13px 14px;"/>
+          <button class="btn btn-primary" onClick="{{ discSearch }}" style="font-size:13px; padding:13px 22px;">{{ discBtnLabel }}</button>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:16px;">
+          <span style="font-size:11px; opacity:0.5;">Not sure? Tap one:</span>
+          <sc-for list="{{ discExamples }}" as="ex" hint-placeholder-count="9">
+            <button onClick="{{ ex.onClick }}" style="all:unset; cursor:pointer; padding:6px 12px; font-size:11px; border-radius:999px; border:1px solid {{ ex.border }}; background:{{ ex.bg }}; color:{{ ex.color }};">{{ ex.label }}</button>
+          </sc-for>
+        </div>
+
+        <div style="display:flex; gap:20px; align-items:flex-start; flex-wrap:wrap; padding-top:14px; border-top:1px solid var(--color-divider);">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-size:10px; letter-spacing:0.1em; opacity:0.5; text-transform:uppercase;">I want</span>
+            <div style="display:flex; gap:4px;">
+              <sc-for list="{{ discKinds }}" as="dk" hint-placeholder-count="3">
+                <button onClick="{{ dk.onClick }}" style="all:unset; cursor:pointer; padding:7px 12px; font-size:11px; font-family:var(--font-heading); font-weight:700; border:1px solid {{ dk.border }}; background:{{ dk.bg }}; color:{{ dk.color }};">{{ dk.label }}</button>
+              </sc-for>
+            </div>
           </div>
 
-          <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:1px; background:var(--color-divider); border:1px solid var(--color-divider);">
-            <sc-for list="{{ crawlStats }}" as="st" hint-placeholder-count="6">
-              <div style="background:var(--color-surface); padding:14px 16px;">
-                <div style="font-size:10px; letter-spacing:0.1em; opacity:0.55; margin-bottom:4px;">{{ st.label }}</div>
-                <div style="font-family:var(--font-heading); font-weight:800; font-size:22px; color:{{ st.color }};">{{ st.value }}</div>
-              </div>
-            </sc-for>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-size:10px; letter-spacing:0.1em; opacity:0.5; text-transform:uppercase;">Rules</span>
+            <div style="display:flex; gap:4px; flex-wrap:wrap;">
+              <sc-for list="{{ discLicenses }}" as="dl" hint-placeholder-count="3">
+                <button onClick="{{ dl.onClick }}" style="all:unset; cursor:pointer; padding:7px 12px; font-size:11px; font-family:var(--font-heading); font-weight:700; border:1px solid {{ dl.border }}; background:{{ dl.bg }}; color:{{ dl.color }};">{{ dl.label }}</button>
+              </sc-for>
+            </div>
           </div>
 
-          <div>
-            <label style="font-size:11px; letter-spacing:0.08em; text-transform:uppercase; opacity:0.7; display:block; margin-bottom:8px;">Fetch log</label>
-            <div style="border:1px solid var(--color-divider); background:#080808; height:280px; overflow:hidden; display:flex; flex-direction:column-reverse; padding:10px 12px; gap:5px;">
-              <sc-for list="{{ crawlLog }}" as="line" hint-placeholder-count="6">
-                <div style="font-family:var(--font-heading); font-size:11px; display:flex; gap:8px; line-height:1.5;">
-                  <span style="opacity:0.35; flex:none;">{{ line.t }}</span>
-                  <span style="color:{{ line.color }}; flex:none; width:56px;">{{ line.code }}</span>
-                  <span style="opacity:0.8; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ line.msg }}</span>
-                </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-size:10px; letter-spacing:0.1em; opacity:0.5; text-transform:uppercase;">Look in</span>
+            <div style="display:flex; gap:4px; flex-wrap:wrap;">
+              <sc-for list="{{ discSources }}" as="ds" hint-placeholder-count="6">
+                <button onClick="{{ ds.onClick }}" style="all:unset; cursor:pointer; padding:7px 12px; font-size:11px; font-family:var(--font-heading); font-weight:700; border:1px solid {{ ds.border }}; background:{{ ds.bg }}; color:{{ ds.color }};">{{ ds.label }}</button>
               </sc-for>
             </div>
           </div>
         </div>
+        <p style="font-size:11px; opacity:0.45; margin:10px 0 0;">{{ discSourceHint }}</p>
       </div>
 
-      <sc-if value="{{ hasFindings }}" hint-placeholder-val="{{ false }}">
-        <div class="hr" style="margin:32px 0 20px;"></div>
+      <!-- ── 2. the one list ────────────────────────────────────────────────── -->
+      <div style="display:flex; align-items:baseline; gap:10px; margin-bottom:10px; flex-wrap:wrap;">
+        <span style="font-family:var(--font-heading); font-weight:800; font-size:11px; letter-spacing:0.12em; color:var(--color-accent);">STEP 2</span>
+        <h4 style="margin:0; font-size:15px;">Listen, then keep what you like</h4>
+        <span style="font-size:12px; opacity:0.6;">{{ pickSummary }}</span>
+      </div>
+      <p style="font-size:11px; color:var(--color-accent); margin:0 0 10px;">{{ discNote }}</p>
+      <p style="font-size:11px; color:#ffb020; margin:0 0 10px;">{{ previewErr }}</p>
 
-        <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px; flex-wrap:wrap;">
-          <h4 style="margin:0;">Findings</h4>
-          <span style="font-size:12px; opacity:0.6;">{{ pickSummary }}</span>
-          <div style="margin-left:auto; display:flex; gap:8px; flex-wrap:wrap;">
-            <button class="btn btn-secondary" onClick="{{ pickAllKept }}" style="font-size:11px;">Select keepable</button>
-            <button class="btn btn-secondary" onClick="{{ pickNone }}" style="font-size:11px;">Clear</button>
-            <button class="btn btn-secondary" onClick="{{ downloadBundle }}" style="font-size:11px;">Download</button>
-            <button class="btn btn-primary" onClick="{{ sendToLyrx }}" style="font-size:11px;">Send to Lyrx &#8599;</button>
-          </div>
-        </div>
-
-        <div style="border:1px solid var(--color-divider);">
-          <sc-for list="{{ findingRows }}" as="r" hint-placeholder-count="4">
-            <div onClick="{{ r.onToggle }}" style="display:grid; grid-template-columns:26px 56px 1fr 116px 74px 84px; align-items:center; gap:12px; padding:11px 14px; border-bottom:1px solid var(--color-divider); background:{{ r.bg }}; cursor:{{ r.cursor }}; opacity:{{ r.rowOpacity }};">
-              <span style="width:15px; height:15px; border:1px solid {{ r.boxBorder }}; background:{{ r.boxBg }}; color:#000; font-size:11px; font-family:var(--font-heading); font-weight:800; display:flex; align-items:center; justify-content:center;">{{ r.tick }}</span>
-              <span style="font-size:10px; letter-spacing:0.1em; font-family:var(--font-heading); font-weight:800; color:{{ r.typeColor }};">{{ r.typeLabel }}</span>
+      <sc-if value="{{ hasFindings }}" hint-placeholder-val="{{ true }}">
+        <div onScroll="{{ findingsOnScroll }}" style="border:1px solid var(--color-divider); max-height:520px; overflow-y:auto;">
+          <sc-for list="{{ findingRows }}" as="r" hint-placeholder-count="6">
+            <div onClick="{{ r.onToggle }}" title="Click anywhere on the row to tick it" style="display:grid; grid-template-columns:30px 84px 1fr 190px 120px; align-items:center; gap:14px; padding:12px 14px; border-bottom:1px solid var(--color-divider); background:{{ r.bg }}; cursor:{{ r.cursor }}; opacity:{{ r.rowOpacity }};">
+              <span style="width:18px; height:18px; border:1px solid {{ r.boxBorder }}; background:{{ r.boxBg }}; color:#000; font-size:12px; font-family:var(--font-heading); font-weight:800; display:flex; align-items:center; justify-content:center;">{{ r.tick }}</span>
+              <button onClick="{{ r.onPlay }}" title="{{ r.playTitle }}" style="all:unset; cursor:pointer; padding:6px 0; text-align:center; font-size:11px; font-family:var(--font-heading); font-weight:800; letter-spacing:0.04em; color:{{ r.playColor }}; border:1px solid {{ r.playBorder }}; border-radius:999px;">{{ r.playLabel }}</button>
               <span style="min-width:0; overflow:hidden;">
                 <span style="display:block; font-family:var(--font-heading); font-weight:700; font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ r.title }}</span>
-                <span style="display:block; font-size:11px; opacity:0.45; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ r.url }}</span>
+                <span style="display:block; font-size:11px; opacity:0.45; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ r.from }}</span>
               </span>
-              <span style="font-size:11px; color:{{ r.licenseColor }}; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ r.license }}</span>
-              <span style="font-size:11px; opacity:0.55; text-align:right;">{{ r.size }}</span>
-              <span style="font-size:10px; letter-spacing:0.1em; font-family:var(--font-heading); font-weight:800; color:{{ r.statusColor }}; text-align:right;">{{ r.statusLabel }}</span>
+              <span style="min-width:0; overflow:hidden;">
+                <span title="{{ r.licenseTitle }}" style="display:block; font-size:11px; font-family:var(--font-heading); font-weight:700; color:{{ r.licenseColor }}; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ r.licenseLabel }}</span>
+                <span style="display:block; font-size:10px; letter-spacing:0.1em; font-family:var(--font-heading); font-weight:800; color:{{ r.typeColor }}; opacity:0.7;">{{ r.typeLabel }}</span>
+              </span>
+              <span style="font-size:11px; opacity:0.5; text-align:right;">{{ r.meta }}</span>
             </div>
           </sc-for>
+
+          <sc-if value="{{ showFindingsMore }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ findingsLoadMore }}" style="all:unset; cursor:pointer; display:block; width:100%; box-sizing:border-box; padding:12px; text-align:center; font-size:11px; letter-spacing:0.1em; font-family:var(--font-heading); font-weight:700; color:var(--color-accent); background:color-mix(in srgb, var(--color-accent) 6%, transparent);">{{ findingsMoreLabel }}</button>
+          </sc-if>
+        </div>
+
+        <div style="display:flex; gap:8px; margin-top:14px; flex-wrap:wrap; align-items:center;">
+          <button class="btn btn-secondary" onClick="{{ pickAllKept }}" style="font-size:11px;">Tick everything</button>
+          <button class="btn btn-secondary" onClick="{{ pickNone }}" style="font-size:11px;">Untick all</button>
+          <button class="btn btn-secondary" onClick="{{ downloadBundle }}" style="font-size:11px; margin-left:auto;">{{ downloadLabel }}</button>
+          <button class="btn btn-primary" onClick="{{ sendToLyrx }}" style="font-size:12px; padding:11px 20px;">{{ sendLabel }}</button>
         </div>
 
         <div style="display:flex; gap:16px; margin-top:10px; flex-wrap:wrap; font-size:11px;">
           <span style="color:var(--color-accent);">{{ busyMsg }}</span>
           <span style="opacity:0.5; margin-left:auto;">{{ vaultSummary }}</span>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ noFindings }}" hint-placeholder-val="{{ false }}">
+        <div style="border:1px dashed var(--color-divider); padding:36px 24px; text-align:center;">
+          <p style="font-size:13px; opacity:0.6; margin:0 0 6px;">Nothing here yet.</p>
+          <p style="font-size:12px; opacity:0.4; margin:0;">Type something above and press <strong>Find music</strong>, or tap one of the examples.</p>
+        </div>
+      </sc-if>
+
+      <!-- ── advanced: the crawler, folded away ─────────────────────────────── -->
+      <div class="hr" style="margin:32px 0 16px;"></div>
+      <button class="btn btn-ghost" onClick="{{ toggleAdv }}" style="font-size:11px;">{{ advToggleLabel }}</button>
+
+      <sc-if value="{{ advOpen }}" hint-placeholder-val="{{ false }}">
+        <p style="font-size:12px; opacity:0.6; margin:16px 0 20px; max-width:640px; line-height:1.7;">
+          Searching above looks through music libraries that already label every file. This instead reads
+          the websites you list below, page by page, and keeps anything with a licence saying you may reuse it.
+          It is slower, and you only need it if you have a particular site in mind.
+        </p>
+
+        <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:24px; margin-bottom:20px; flex-wrap:wrap;">
+          <span style="font-size:12px; opacity:0.6;">Anything it finds joins the same list above.</span>
+          <div style="display:flex; gap:8px; flex:none;">
+            <button class="btn btn-secondary" onClick="{{ resetCrawl }}" style="font-size:12px; border-color:{{ resetStyle }};">{{ resetLabel }}</button>
+            <button class="btn btn-primary" onClick="{{ toggleCrawl }}" style="font-size:12px;">{{ crawlBtnLabel }}</button>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:40px; align-items:start;">
+
+          <div style="display:flex; flex-direction:column; gap:20px;">
+            <div class="field">
+              <label>Websites to read through</label>
+              <textarea class="input" rows="8" value="{{ seedText }}" onChange="{{ setSeedText }}" style="font-family:var(--font-heading); font-size:12px; line-height:1.7; resize:vertical;"></textarea>
+              <span style="font-size:11px; opacity:0.5; margin-top:6px; display:block;">One web address per line. These are the pages it starts from — it follows links out of them, staying on the same sites.</span>
+            </div>
+
+            <div class="field">
+              <label>Also allow (where the audio files live)</label>
+              <input class="input" value="{{ extraHosts }}" onChange="{{ setExtraHosts }}" placeholder="upload.wikimedia.org, cdn.example.org" style="font-size:12px;"/>
+              <span style="font-size:11px; opacity:0.5; margin-top:6px; display:block;">The sites above are allowed automatically. Audio often sits on a separate file server — name it here or it will be skipped.</span>
+            </div>
+
+            <div class="field"><label>How many links deep: {{ crawlDepth }}</label><input type="range" min="1" max="8" value="{{ crawlDepth }}" onChange="{{ setCrawlDepth }}" style="width:100%; accent-color:var(--color-accent);"/></div>
+            <div class="field"><label>How fast: {{ rateLimit }} pages a second</label><input type="range" min="1" max="20" value="{{ rateLimit }}" onChange="{{ setRateLimit }}" style="width:100%; accent-color:var(--color-accent);"/></div>
+
+            <div>
+              <label style="font-size:11px; letter-spacing:0.08em; text-transform:uppercase; opacity:0.7; display:block; margin-bottom:10px;">What to pull off each page</label>
+              <div style="display:flex; flex-direction:column; gap:1px; background:var(--color-divider); border:1px solid var(--color-divider);">
+                <div style="display:grid; grid-template-columns:1fr 1.4fr 92px; gap:1px; background:var(--color-divider);">
+                  <div style="background:var(--color-surface); padding:8px 10px; font-size:10px; letter-spacing:0.1em; opacity:0.6;">CALL IT</div>
+                  <div style="background:var(--color-surface); padding:8px 10px; font-size:10px; letter-spacing:0.1em; opacity:0.6;">FIND IT WITH</div>
+                  <div style="background:var(--color-surface); padding:8px 10px; font-size:10px; letter-spacing:0.1em; opacity:0.6;">TYPE</div>
+                </div>
+                <sc-for list="{{ extractFields }}" as="f" hint-placeholder-count="4">
+                  <div style="display:grid; grid-template-columns:1fr 1.4fr 92px; gap:1px; background:var(--color-divider);">
+                    <input value="{{ f.name }}" onChange="{{ f.onName }}" style="all:unset; background:var(--color-bg); padding:9px 10px; font-size:12px; color:var(--color-text);"/>
+                    <input value="{{ f.selector }}" onChange="{{ f.onSelector }}" style="all:unset; background:var(--color-bg); padding:9px 10px; font-size:12px; color:var(--color-accent); font-family:var(--font-heading);"/>
+                    <div style="background:var(--color-bg); padding:9px 10px; font-size:11px; opacity:0.6;">{{ f.type }}</div>
+                  </div>
+                </sc-for>
+              </div>
+              <button class="btn btn-ghost" onClick="{{ addField }}" style="font-size:11px; margin-top:8px;">+ Add one</button>
+            </div>
+
+            <div class="field">
+              <label>Repeat this</label>
+              <div class="seg">
+                <sc-for list="{{ schedules }}" as="sc" hint-placeholder-count="4">
+                  <button onClick="{{ sc.onClick }}" style="all:unset; cursor:pointer; flex:1; text-align:center; padding:9px 12px; font-size:12px; font-family:var(--font-heading); font-weight:600; background:{{ sc.bg }}; color:{{ sc.color }};">{{ sc.label }}</button>
+                </sc-for>
+              </div>
+            </div>
+
+            <label class="radio"><input type="checkbox" checked="{{ enforced }}" disabled="{{ enforced }}"/><span class="dot" style="border-radius:0;"></span>Follow each site's rules about what robots may read</label>
+            <label class="radio"><input type="checkbox" checked="{{ enforced }}" disabled="{{ enforced }}"/><span class="dot" style="border-radius:0;"></span>Set aside anything that doesn't say you may reuse it</label>
+            <span style="font-size:11px; opacity:0.45; margin-top:-6px;">{{ enforcedNote }}</span>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:20px;">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span style="width:8px; height:8px; background:{{ crawlDotColor }}; animation:dcPulse 1.6s ease-in-out infinite;"></span>
+              <span style="font-family:var(--font-heading); font-weight:800; font-size:13px; color:{{ crawlDotColor }};">{{ crawlStatusLabel }}</span>
+              <span style="font-size:11px; opacity:0.5;">{{ crawlElapsed }}</span>
+            </div>
+
+            <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:1px; background:var(--color-divider); border:1px solid var(--color-divider);">
+              <sc-for list="{{ crawlStats }}" as="st" hint-placeholder-count="6">
+                <div style="background:var(--color-surface); padding:14px 16px;">
+                  <div style="font-size:10px; letter-spacing:0.1em; opacity:0.55; margin-bottom:4px;">{{ st.label }}</div>
+                  <div style="font-family:var(--font-heading); font-weight:800; font-size:22px; color:{{ st.color }};">{{ st.value }}</div>
+                </div>
+              </sc-for>
+            </div>
+
+            <div>
+              <label style="font-size:11px; letter-spacing:0.08em; text-transform:uppercase; opacity:0.7; display:block; margin-bottom:8px;">What it's doing right now</label>
+              <div style="border:1px solid var(--color-divider); background:#080808; height:280px; overflow:hidden; display:flex; flex-direction:column-reverse; padding:10px 12px; gap:5px;">
+                <sc-for list="{{ crawlLog }}" as="line" hint-placeholder-count="6">
+                  <div style="font-family:var(--font-heading); font-size:11px; display:flex; gap:8px; line-height:1.5;">
+                    <span style="opacity:0.35; flex:none;">{{ line.t }}</span>
+                    <span style="color:{{ line.color }}; flex:none; width:56px;">{{ line.code }}</span>
+                    <span style="opacity:0.8; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ line.msg }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
         </div>
       </sc-if>
     </sc-if>
@@ -788,26 +874,88 @@
 
     <sc-if value="{{ isTrain }}" hint-placeholder-val="{{ false }}">
       <h6 style="color:var(--color-accent);">TRAIN</h6>
-      <h2 style="margin-bottom:24px;">New training job</h2>
-      <div style="max-width:520px; display:flex; flex-direction:column; gap:20px;">
-        <div class="field"><label>Training goal</label><input class="input" value="Country vocal delivery + song structure" onChange="{{ noop }}"/></div>
-        <div class="field"><label>Dataset version</label><input class="input" value="v4 — reviewed 2026-07-20" onChange="{{ noop }}"/></div>
-        <div class="field"><label>Base model</label><input class="input" value="datacore-base-7b" onChange="{{ noop }}"/></div>
-        <div class="field">
-          <label>Method</label>
-          <div class="seg">
-            <label class="seg-opt"><input type="radio" name="method" checked=""/>LoRA</label>
-            <label class="seg-opt"><input type="radio" name="method"/>Full fine-tune</label>
-            <label class="seg-opt"><input type="radio" name="method"/>Adapter</label>
-          </div>
-        </div>
-        <div class="field">
-          <label>Compute budget: {{ computeBudget }}%</label>
-          <input type="range" min="10" max="100" value="{{ computeBudget }}" onChange="{{ setComputeBudget }}" style="width:100%; accent-color:var(--color-accent);"/>
-        </div>
-        <label class="radio"><input type="checkbox" checked=""/><span class="dot" style="border-radius:0;"></span>Confirmed all sources passed rights review</label>
-        <button class="btn btn-primary" style="align-self:flex-start; padding:12px 24px;">Launch training job</button>
+      <h2 style="margin:0 0 8px;">Teach a model what you collected</h2>
+      <p style="opacity:0.7; font-size:13px; margin:0 0 24px; max-width:660px; line-height:1.7;">
+        Everything below is read off the disk — no examples, no placeholders. When it says a run is ready,
+        it is. Preparing one writes a folder you copy to the computer with the graphics card and run there;
+        a browser tab cannot do the training itself.
+      </p>
+
+      <div style="display:flex; align-items:center; gap:12px; border:1px solid {{ modeBorder }}; background:{{ modeBg }}; padding:12px 16px; margin-bottom:24px; flex-wrap:wrap;">
+        <span style="width:8px; height:8px; flex:none; background:{{ modeDot }}; animation:dcPulse 1.6s ease-in-out infinite;"></span>
+        <span style="font-family:var(--font-heading); font-weight:800; font-size:12px; letter-spacing:0.08em; color:{{ modeDot }}; flex:none;">{{ modeLabel }}</span>
+        <span style="font-size:12px; opacity:0.75; flex:1; min-width:220px;">{{ trainServiceHint }}</span>
+        <button class="btn btn-secondary" onClick="{{ refreshDataset }}" style="font-size:11px; flex:none;">Re-check</button>
       </div>
+
+      <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--color-divider); border:1px solid var(--color-divider); margin-bottom:28px;">
+        <sc-for list="{{ dsStats }}" as="ds" hint-placeholder-count="3">
+          <div style="background:var(--color-surface); padding:16px 18px;">
+            <div style="font-size:10px; letter-spacing:0.1em; opacity:0.55; margin-bottom:6px;">{{ ds.label }}</div>
+            <div style="font-family:var(--font-heading); font-weight:800; font-size:24px; color:{{ ds.color }};">{{ ds.value }}</div>
+            <div style="font-size:11px; opacity:0.45; margin-top:4px;">{{ ds.sub }}</div>
+          </div>
+        </sc-for>
+      </div>
+
+      <h4 style="margin:0 0 12px; font-size:15px;">Is it ready?</h4>
+      <div style="border:1px solid var(--color-divider); margin-bottom:28px;">
+        <sc-for list="{{ readyChecks }}" as="rc" hint-placeholder-count="4">
+          <div style="display:grid; grid-template-columns:26px 1fr 260px; align-items:center; gap:14px; padding:12px 16px; border-bottom:1px solid var(--color-divider);">
+            <span style="width:18px; height:18px; display:flex; align-items:center; justify-content:center; font-family:var(--font-heading); font-weight:800; font-size:12px; color:#000; background:{{ rc.dot }};">{{ rc.mark }}</span>
+            <span style="font-size:13px;">{{ rc.label }}</span>
+            <span style="font-size:11px; opacity:0.6; text-align:right;">{{ rc.detail }}</span>
+          </div>
+        </sc-for>
+      </div>
+
+      <h4 style="margin:0 0 12px; font-size:15px;">Set up a run</h4>
+      <div style="max-width:620px; display:flex; flex-direction:column; gap:18px;">
+        <div class="field">
+          <label>What should it learn to do?</label>
+          <input class="input" value="{{ trainGoal }}" onChange="{{ setTrainGoal }}" placeholder="e.g. write folk verses in my phrasing" style="font-size:13px;"/>
+        </div>
+
+        <div class="field">
+          <label>Train on</label>
+          <div style="display:flex; gap:4px;">
+            <sc-for list="{{ trainKinds }}" as="tk" hint-placeholder-count="2">
+              <button onClick="{{ tk.onClick }}" style="all:unset; cursor:pointer; padding:9px 14px; font-size:11px; font-family:var(--font-heading); font-weight:700; border:1px solid {{ tk.border }}; background:{{ tk.bg }}; color:{{ tk.color }};">{{ tk.label }}</button>
+            </sc-for>
+          </div>
+          <span style="font-size:11px; opacity:0.5; margin-top:6px; display:block;">{{ trainKindHint }}</span>
+        </div>
+
+        <div class="field">
+          <label>Starting model</label>
+          <input class="input" value="{{ trainBase }}" onChange="{{ setTrainBase }}" style="font-size:13px; font-family:var(--font-heading);"/>
+          <span style="font-size:11px; opacity:0.5; margin-top:6px; display:block;">Nobody trains from nothing — this is the model yours starts from.</span>
+        </div>
+
+        <div class="field">
+          <label>Passes over the data: {{ trainEpochs }}</label>
+          <input type="range" min="1" max="12" value="{{ trainEpochs }}" onChange="{{ setTrainEpochs }}" style="width:100%; accent-color:var(--color-accent);"/>
+          <span style="font-size:11px; opacity:0.5; margin-top:6px; display:block;">More passes learn the material harder — and, past a point, memorise it.</span>
+        </div>
+
+        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+          <button class="btn btn-primary" onClick="{{ prepareTrain }}" style="font-size:13px; padding:12px 22px;">{{ prepareLabel }}</button>
+          <span style="font-size:12px; color:{{ trainMsgColor }};">{{ trainMsg }}</span>
+        </div>
+      </div>
+
+      <sc-if value="{{ hasPrepared }}" hint-placeholder-val="{{ false }}">
+        <div style="border:1px solid var(--color-accent); background:color-mix(in srgb, var(--color-accent) 6%, transparent); padding:20px 22px; margin-top:28px; max-width:820px;">
+          <h4 style="margin:0 0 6px; font-size:15px; color:var(--color-accent);">Run ready — {{ preparedName }}</h4>
+          <p style="font-size:13px; opacity:0.8; margin:0 0 14px;">{{ preparedSummary }}</p>
+          <p style="font-size:12px; opacity:0.6; margin:0 0 8px;">On the computer with the graphics card, run:</p>
+          <div style="background:#080808; border:1px solid var(--color-divider); padding:12px 14px; font-family:var(--font-heading); font-size:12px; overflow-x:auto; white-space:pre; color:var(--color-accent);">{{ preparedCommand }}</div>
+          <div style="display:flex; gap:8px; margin-top:14px; flex-wrap:wrap;">
+            <button class="btn btn-secondary" onClick="{{ copyCommand }}" style="font-size:11px;">{{ copyLabel }}</button>
+          </div>
+          <p style="font-size:11px; opacity:0.5; margin:14px 0 0;">{{ preparedFiles }}</p>
+        </div>
+      </sc-if>
     </sc-if>
 
     <sc-if value="{{ isVoice }}" hint-placeholder-val="{{ false }}">
@@ -951,7 +1099,33 @@ class Component extends DCLogic {
     crawlTicks: 0,
     crawlCounters: { queued: 1284, fetched: 0, parsed: 0, stored: 0, quarantined: 0, bytes: 0 },
     crawlLog: [],
-    seedText: 'https://en.wikisource.org/wiki/Oh!_Susanna\nhttps://en.wikisource.org/wiki/Category:Folk_songs',
+    // Libraries that publish a licence next to every file. Beginners never have
+    // to touch this — it only matters if they open "Search specific websites".
+    seedText: [
+      'https://imslp.org/',
+      'https://musopen.org/',
+      'https://www.cpdl.org/',
+      'https://archive.org/details/midi',
+      'https://archive.org/details/audio',
+      'https://commons.wikimedia.org/wiki/Category:Audio_files',
+      'https://en.wikisource.org/wiki/Category:Folk_songs',
+      'https://en.wikipedia.org/wiki/List_of_music_genres_and_styles',
+      'https://en.wikipedia.org/wiki/List_of_musical_instruments',
+      'https://en.wikipedia.org/wiki/Category:Music_theory',
+    ].join('\n'),
+    // "Search specific websites" is folded away until someone asks for it.
+    advOpen: false,
+    confirmReset: false,
+    // Train screen — every number here arrives from /api/dataset, never a constant.
+    dataset: null,
+    trainGoal: 'write folk verses in my phrasing',
+    trainKind: 'lyrics',
+    trainBase: '',
+    trainEpochs: 3,
+    trainMsg: '',
+    trainBusy: false,
+    prepared: null,
+    copied: false,
     extractFields: [
       { name: 'title', selector: 'h1, meta[property="og:title"]', type: 'text' },
       { name: 'body', selector: 'article, main p', type: 'text' },
@@ -965,7 +1139,27 @@ class Component extends DCLogic {
     svcUrl: 'http://localhost:8787',
     extraHosts: 'upload.wikimedia.org',
     liveResults: [],
+    // How many finds the table actually puts in the DOM. A crawl can hold
+    // thousands; rendering them all is what locks the tab up.
+    findingsShown: 100,
     picked: {},
+    // seed discovery — "I don't know where to look"
+    discQuery: 'folk ballad banjo',
+    discKind: 'both',
+    discLicense: 'commercial',
+    discSource: 'all',
+    discPageSize: 20,
+    discPage: 1,
+    discHasMore: false,
+    discMore: false,
+    discEffective: '',
+    // audio audition — one player, shared by both tables
+    previewId: null,
+    previewLoading: false,
+    previewErr: '',
+    discBusy: false,
+    discNote: '',
+    discList: [],
     busyMsg: '',
     vaultInfo: null,
     schedule: 'daily',
@@ -1008,6 +1202,15 @@ class Component extends DCLogic {
           ...(fresh ? { crawlCounters: { queued: 0, fetched: 0, parsed: 0, stored: 0, quarantined: 0, bytes: 0 } } : {}),
         });
       }
+      // Pull once on connecting. The scheduled job collects overnight while
+      // nothing is open, so without this the screen says "Nothing here yet"
+      // to someone whose disk holds hundreds of tracks.
+      if (!this._loadedOnce) {
+        this._loadedOnce = true;
+        this._lastPoll = 0;
+        await this.pollLive();
+        this.refreshDataset();
+      }
       return true;
     } catch (e) {
       if (this.state.svcState !== 'offline') this.setState({ svcState: 'offline', crawlRunning: false });
@@ -1018,7 +1221,10 @@ class Component extends DCLogic {
   async startLiveCrawl() {
     this.setState({ busyMsg: 'starting…' });
     try {
-      await this.svc('/api/reset', { method: 'POST' });
+      // Deliberately no /api/reset here. It deletes the whole store, and a
+      // search used to begin by wiping every track ever collected — weeks of
+      // scheduled collecting gone on one button press. The service starts a
+      // fresh job by itself; the files on disk are meant to accumulate.
       await this.svc('/api/crawl', {
         method: 'POST',
         body: JSON.stringify({
@@ -1030,7 +1236,7 @@ class Component extends DCLogic {
           fields: this.state.extractFields.map(f => ({ name: f.name, selector: f.selector })),
         }),
       });
-      this.setState({ crawlRunning: true, liveResults: [], picked: {}, busyMsg: '', crawlLog: [] });
+      this.setState({ crawlRunning: true, liveResults: [], findingsShown: 100, picked: {}, busyMsg: '', crawlLog: [] });
     } catch (err) {
       this.setState({ busyMsg: 'could not start: ' + err.message, crawlRunning: false });
     }
@@ -1041,7 +1247,22 @@ class Component extends DCLogic {
     this._lastPoll = Date.now();
     try {
       const st = await this.svc('/api/status');
-      const { results } = await this.svc('/api/results');
+      const s = this.state;
+      // Ask only for finds we do not already hold. Re-pulling the whole list
+      // every second is what made a long crawl crawl.
+      const out = await this.svc('/api/results?since=' + s.liveResults.length);
+      // A service too old to echo `since` ignored the parameter and sent the
+      // whole list, so fall back to replacing rather than appending twice.
+      const since = Number(out.since) || 0;
+      const results = since === 0 ? out.results : s.liveResults.concat(out.results);
+      // A poll that brought nothing new must not re-render: the findings table
+      // rebuilds every row object on each render, so idle polls are not free.
+      const changed = results.length !== s.liveResults.length
+        || st.running !== s.crawlRunning
+        || st.counters.fetched !== s.crawlTicks
+        || st.log.length !== s.crawlLog.length
+        || (st.log[0] || {}).t !== (s.crawlLog[0] || {}).t;
+      if (!changed) return;
       this.setState({
         crawlRunning: st.running,
         crawlTicks: st.counters.fetched,
@@ -1054,16 +1275,276 @@ class Component extends DCLogic {
     }
   }
 
+  /** `q` lets an example chip search itself without waiting for a re-render. */
+  async runDiscover(q) {
+    const query = q || this.state.discQuery;
+    if (this.state.svcState !== 'live') {
+      this.setState({ discNote: 'Searching needs the finder running — start it with  npm run crawler.' });
+      return;
+    }
+    if (!String(query).trim()) { this.setState({ discNote: 'Type what you are after, or pick an example.' }); return; }
+    this.stopPreview();
+    this.setState(st => ({
+      discQuery: query,
+      discBusy: true, discNote: 'looking…',
+      discList: [], discPage: 1, discHasMore: false, findingsShown: 100,
+      // A new search drops the old search's ticks but keeps anything already
+      // collected — both share one pick list now.
+      picked: this.keepCollectedPicks(st.picked),
+    }));
+    try {
+      const out = await this.svc('/api/discover', {
+        method: 'POST',
+        body: JSON.stringify({
+          q: query,
+          kind: this.state.discKind,
+          license: this.state.discLicense,
+          source: this.state.discSource,
+          page: 1,
+          pageSize: this.state.discPageSize,
+        }),
+      });
+      const note = out.candidates.length
+        ? (out.note || `Found ${out.candidates.length} — every one says who may use it`)
+        : 'Nothing came back. Try fewer words, or "Show everything" above.'
+          + (out.problems.length ? ' · ' + out.problems.join(' · ') : '');
+      this.setState({
+        discBusy: false, discList: out.candidates, discNote: note,
+        discHasMore: !!out.hasMore, discEffective: out.effectiveQuery || query,
+      });
+    } catch (err) {
+      this.setState({ discBusy: false, discNote: 'Search failed: ' + err.message });
+    }
+  }
+
+  /** Next page, appended. Driven by scrolling near the end, or the button. */
+  async loadMoreDisc() {
+    const s = this.state;
+    if (s.discMore || s.discBusy || !s.discHasMore || s.svcState !== 'live') return;
+    const page = s.discPage + 1;
+    this.setState({ discMore: true });
+    try {
+      const out = await this.svc('/api/discover', {
+        method: 'POST',
+        body: JSON.stringify({
+          q: s.discEffective || s.discQuery,
+          kind: s.discKind, license: s.discLicense, source: s.discSource,
+          page, pageSize: s.discPageSize,
+        }),
+      });
+      this.setState(st => {
+        const seen = new Set(st.discList.map(c => c.url));
+        const fresh = out.candidates.filter(c => !seen.has(c.url));
+        return {
+          discMore: false,
+          discPage: page,
+          discList: st.discList.concat(fresh),
+          discHasMore: !!out.hasMore && fresh.length > 0,
+          discNote: (st.discList.length + fresh.length) + ' found'
+            + (out.hasMore && fresh.length ? ' — keep scrolling for more' : " — that's everything"),
+        };
+      });
+    } catch (err) {
+      this.setState({ discMore: false, discHasMore: false, discNote: 'could not load more: ' + err.message });
+    }
+  }
+
+  /** Pull the real dataset figures. Cheap, so it runs whenever the screen opens. */
+  async refreshDataset() {
+    if (this.state.svcState !== 'live') return;
+    try {
+      this.setState({ dataset: await this.svc('/api/dataset') });
+    } catch (err) {
+      this.setState({ dataset: null, trainMsg: 'Could not read the dataset: ' + err.message });
+    }
+  }
+
+  /**
+   * Ask the service to write a training run.
+   *
+   * The button does not train anything and does not pretend to — training needs
+   * a GPU. What comes back is a real folder with a real script in it, and the
+   * command to run there.
+   */
+  async prepareTrain() {
+    if (this.state.svcState !== 'live') {
+      this.setState({ trainMsg: 'The finder has to be running — start it with  npm run crawler.' });
+      return;
+    }
+    const s = this.state;
+    this.setState({ trainBusy: true, trainMsg: 'writing the run…', prepared: null, copied: false });
+    try {
+      const out = await this.svc('/api/train/prepare', {
+        method: 'POST',
+        body: JSON.stringify({
+          goal: s.trainGoal, kind: s.trainKind,
+          base: s.trainBase, epochs: s.trainEpochs,
+        }),
+      });
+      this.setState({ trainBusy: false, prepared: out, trainMsg: '' });
+      this.refreshDataset();
+    } catch (err) {
+      this.setState({ trainBusy: false, trainMsg: err.message });
+    }
+  }
+
+  /**
+   * Widen the one list by a page. Show what is already in hand before asking
+   * the service for more — that is what keeps the DOM bounded no matter how
+   * many results pile up.
+   */
+  growFindings() {
+    const s = this.state;
+    const held = s.discList.length + s.liveResults.length;
+    if (s.findingsShown < held) {
+      this.setState({ findingsShown: s.findingsShown + 100 });   // setState always re-renders, so guard here
+      return;
+    }
+    this.loadMoreDisc();
+  }
+
+  // ── audio audition ─────────────────────────────────────────────────────────
+  stopPreview() {
+    this._previewSeq = (this._previewSeq || 0) + 1;   // invalidates any in-flight load
+    if (this._previewSrc) {
+      try { this._previewSrc.onended = null; this._previewSrc.stop(); } catch (e) { /* already ended */ }
+      this._previewSrc = null;
+    }
+    if (this.state.previewId || this.state.previewLoading) {
+      this.setState({ previewId: null, previewLoading: false });
+    }
+  }
+
+  /**
+   * Audition a candidate through Web Audio — the same engine Lyrx runs on.
+   *
+   * An <audio> element pointed at these CDNs stalls at readyState 0 forever
+   * even though a plain fetch of the identical URL returns in milliseconds,
+   * so the bytes are fetched and decoded by hand instead. Every source we use
+   * answers ranged CORS requests, so only the head of the file is pulled:
+   * enough to hear, and it keeps a 28MB "preview" from tying up the device.
+   */
+  async togglePreview(id, url) {
+    if (this.state.previewId === id) { this.stopPreview(); return; }
+    this.stopPreview();
+
+    this._previewSeq = (this._previewSeq || 0) + 1;
+    const seq = this._previewSeq;
+    this.setState({ previewId: id, previewLoading: true, previewErr: '' });
+
+    try {
+      if (!this._ctx) this._ctx = new (window.AudioContext || window.webkitAudioContext)();
+      if (this._ctx.state === 'suspended') await this._ctx.resume();
+
+      const res = await fetch(url, { headers: { Range: 'bytes=0-8388607' } });   // first 8MB
+      if (!res.ok && res.status !== 206) throw new Error('HTTP ' + res.status);
+      const bytes = await res.arrayBuffer();
+      if (seq !== this._previewSeq) return;                 // superseded by a later click
+
+      const buffer = await this._ctx.decodeAudioData(bytes);
+      if (seq !== this._previewSeq) return;
+
+      const src = this._ctx.createBufferSource();
+      src.buffer = buffer;
+      src.connect(this._ctx.destination);
+      src.onended = () => {
+        if (seq === this._previewSeq) this.setState({ previewId: null, previewLoading: false });
+      };
+      src.start();
+      this._previewSrc = src;
+      this.setState({ previewLoading: false });
+    } catch (err) {
+      if (seq !== this._previewSeq) return;
+      const truncated = /decод|decode|EncodingError/i.test(err.name + err.message);
+      this.setState({
+        previewId: null, previewLoading: false,
+        previewErr: truncated
+          ? 'couldn’t decode that one (often a very long file cut short for preview) — it may still download fine'
+          : 'could not load that audio (' + err.message + ')',
+      });
+    }
+  }
+
+  discPickedItems() {
+    return this.state.discList.filter(c => this.state.picked[c.id]);
+  }
+
+  /**
+   * The one list mixes two kinds of row: search hits (`c…` ids, nothing fetched
+   * yet) and collected tracks (`r…` ids, the service holds the file). Anything
+   * that needs a real file has to turn the first kind into the second.
+   */
+  keepCollectedPicks(picked) {
+    const kept = {};
+    for (const id of Object.keys(picked)) if (picked[id] && id[0] === 'r') kept[id] = true;
+    return kept;
+  }
+
+  /** Put the chosen candidates in the seed box, and their media hosts alongside. */
+  useAsSeeds() {
+    const chosen = this.discPickedItems();
+    if (!chosen.length) { this.setState({ discNote: 'tick something first' }); return; }
+    const seeds = [...new Set(chosen.map(c => c.pageUrl || c.url))];
+    const seedHosts = new Set(seeds.map(u => { try { return new URL(u).hostname; } catch { return ''; } }));
+    // media lives off-site often enough that the host list has to come along
+    const media = [...new Set(chosen.map(c => c.host).filter(h => h && !seedHosts.has(h)))];
+    const existing = this.state.extraHosts.split(/[\s,]+/).filter(Boolean);
+    this.setState({
+      seedText: seeds.join('\n'),
+      extraHosts: [...new Set([...existing, ...media])].join(', '),
+      discNote: `${seeds.length} seed(s) loaded${media.length ? ` · added ${media.length} media host(s)` : ''} — press Start crawl`,
+    });
+  }
+
+  /**
+   * Catalogue hits already carry a licence, so they can skip the crawl and be
+   * downloaded straight away. Runs by itself before a send or a download — the
+   * person picking tracks never has to know this step exists.
+   *
+   * Returns { ok, note }; the ticks move from the `c…` ids onto the `r…` ids
+   * the service just created, so the row stays selected in the one list.
+   */
+  async collectPicked() {
+    const chosen = this.discPickedItems();
+    if (!chosen.length) return { ok: true, note: '' };
+    this.setState({ busyMsg: 'fetching ' + chosen.length + ' track(s)…' });
+    try {
+      const out = await this.svc('/api/adopt', {
+        method: 'POST',
+        body: JSON.stringify({ items: chosen.map(c => ({
+          url: c.url, pageUrl: c.pageUrl, title: c.title, license: c.license, kind: c.kind, source: c.source, creator: c.creator,
+        })) }),
+      });
+      this._lastPoll = 0; // bypass the poll throttle so the rows appear at once
+      await this.pollLive();
+      this.setState(st => {
+        const picked = this.keepCollectedPicks(st.picked);
+        (out.added || []).forEach(id => { picked[id] = true; });
+        // the "found N" line describes the search, and the list just grew past it
+        return { picked, discNote: '' };
+      });
+      const skipped = out.notes || [];
+      return {
+        ok: (out.added || []).length > 0,
+        note: skipped.length ? `couldn't fetch ${skipped.length}: ${skipped[0]}` : '',
+      };
+    } catch (err) {
+      return { ok: false, note: 'could not fetch: ' + err.message };
+    }
+  }
+
   pickedIds() {
     return Object.keys(this.state.picked).filter(id => this.state.picked[id]);
   }
 
-  /** Collect → pull the bytes → write into the vault Lyrx reads. */
+  /** Fetch anything not fetched yet → pull the bytes → write into Lyrx's vault. */
   async sendToLyrx() {
-    const ids = this.pickedIds();
-    if (!ids.length) { this.setState({ busyMsg: 'nothing selected' }); return; }
+    if (!this.pickedIds().length) { this.setState({ busyMsg: 'Tick a track first.' }); return; }
     if (!window.LyrxVault) { this.setState({ busyMsg: 'vault script missing' }); return; }
-    this.setState({ busyMsg: 'collecting ' + ids.length + ' item(s)…' });
+    const grab = await this.collectPicked();
+    const ids = this.pickedIds().filter(id => id[0] === 'r');
+    if (!ids.length) { this.setState({ busyMsg: grab.note || 'nothing could be fetched' }); return; }
+    this.setState({ busyMsg: 'sending ' + ids.length + ' to Lyrx…' });
     try {
       const { collected, failed } = await this.svc('/api/collect', { method: 'POST', body: JSON.stringify({ ids }) });
       let sent = 0;
@@ -1087,7 +1568,9 @@ class Component extends DCLogic {
       const info = await window.LyrxVault.count();
       this.setState({
         vaultInfo: info,
-        busyMsg: sent + ' sent to Lyrx' + (failed.length ? ' · ' + failed.length + ' failed (' + failed[0].error + ')' : ''),
+        busyMsg: sent + ' sent to Lyrx — open Lyrx and they are waiting for you'
+          + (failed.length ? ' · ' + failed.length + " couldn't be sent (" + failed[0].error + ')' : '')
+          + (grab.note ? ' · ' + grab.note : ''),
       });
     } catch (err) {
       this.setState({ busyMsg: 'send failed: ' + err.message });
@@ -1136,11 +1619,24 @@ class Component extends DCLogic {
     });
   }
 
+  /**
+   * `phase` only drives the hero particles, the crawl waveform and the music
+   * wave bars. Bumping it when none of those are on screen re-renders the whole
+   * findings table six times a second for nothing.
+   */
+  needsPhase() {
+    const s = this.state;
+    if (s.view === 'landing') return true;
+    if (s.screen === 'crawl' && s.crawlRunning) return true;
+    if (s.screen === 'music' && s.chordAt && Date.now() - s.chordAt < 1500) return true;
+    return false;
+  }
+
   pump() {
     clearTimeout(this._pumpT);
     this._pumpT = setTimeout(() => {
       this._pumpAlive = Date.now();
-      this.setState(s => ({ phase: s.phase + 1 }));
+      if (this.needsPhase()) this.setState(s => ({ phase: s.phase + 1 }));
       if (this.state.svcState === 'live') {
         if (this.state.crawlRunning || this.state.liveResults.length) this.pollLive();
       } else if (this.state.crawlRunning) {
@@ -1575,6 +2071,18 @@ class Component extends DCLogic {
   waveformBarsData = [30,55,40,70,90,60,45,80,35,65,50,95,40,60,75,30,55,85,45,65,40,70,50,60];
 
   renderVals() {
+    /** Licence codes mean nothing to someone new — say what they may do with it. */
+    const plainLicense = (raw) => {
+      const l = String(raw || '').toUpperCase();
+      if (!l || l === 'UNKNOWN') return 'Licence not stated';
+      if (/CC0|PUBLIC DOMAIN|PD/.test(l)) return 'Free — no strings';
+      if (/-NC/.test(l) && /-ND/.test(l)) return 'Personal use, no edits';
+      if (/-ND/.test(l)) return 'Free, but no edits';
+      if (/-NC/.test(l)) return 'Free for non-paid work';
+      if (/-SA/.test(l)) return 'Free — credit + share alike';
+      if (/CC BY|CC-BY/.test(l)) return 'Free — just credit them';
+      return raw;
+    };
     this.boot();
     if (Date.now() - (this._pumpAlive || 0) > 900) { this._pumpAlive = Date.now(); this.pump(); }
     const s = this.state;
@@ -1582,7 +2090,7 @@ class Component extends DCLogic {
     const setScreen = (name) => this.setState({ screen: name });
     const navDefs = [
       ['home', 'Home'], ['discover', 'Discover'], ['sources', 'Sources'],
-      ['crawl', 'Crawlers'], ['store', 'Data Store'], ['query', 'Workbench'],
+      ['crawl', 'Find Music'], ['store', 'Data Store'], ['query', 'Workbench'],
       ['knowledge', 'Knowledge'], ['train', 'Train'], ['voice', 'Voice Studio'],
       ['music', 'Music Studio'], ['compression', 'Compression'],
     ];
@@ -1749,38 +2257,83 @@ class Component extends DCLogic {
     const liveBars = this.waveformBarsData.map((h, i) =>
       Math.round(28 + (h - 28) * (0.6 + 0.4 * Math.abs(Math.sin((s.phase + i * 1.7) / 4)))));
 
-    // NB: `resultRows` / `hasResults` are already taken by the Workbench screen
-    // further down this same vals object — findings keys must not collide.
-    const findingRows = s.liveResults.map(r => {
-      const keepable = r.status !== 'quarantined';
+    // ── the one list ──────────────────────────────────────────────────────────
+    // Search hits and collected tracks used to live in two separate tables, which
+    // read like two different tools. They are one pool now: search hits first
+    // (they are what you just asked for), then anything already collected.
+    // `resultRows` / `hasResults` belong to the Workbench screen further down
+    // this same vals object, so these keys must not collide.
+    const collectedUrls = new Set(s.liveResults.map(r => r.url));
+    const pool = [
+      ...s.discList.filter(c => !collectedUrls.has(c.url)).map(c => ({
+        id: c.id, url: c.pageUrl || c.url, mediaUrl: c.url, title: c.title,
+        // `kind` is what it is; `playable` is whether we hold a URL that can be
+        // played right now — an Archive item page is audio but not yet playable.
+        audio: c.kind === 'audio', playable: !!c.playable,
+        license: c.license, usable: true, collected: false,
+        from: c.source + (c.creator ? ' · ' + c.creator : ''),
+        len: c.duration ? Math.floor(c.duration / 60000) + ':' + String(Math.round((c.duration % 60000) / 1000)).padStart(2, '0') : '',
+        bytes: c.bytes || 0,
+      })),
+      ...s.liveResults.map(r => ({
+        id: r.id, url: r.url, mediaUrl: r.url, title: r.title,
+        audio: r.type === 'audio', playable: r.type === 'audio', license: r.license,
+        usable: r.status !== 'quarantined', collected: true,
+        from: r.host || 'collected', len: '', bytes: r.bytes || 0,
+      })),
+    ];
+    const findingsTotal = pool.length;
+    const findingsCap = Math.min(s.findingsShown, findingsTotal);
+    const pickedCount = Object.keys(s.picked).filter(k => s.picked[k]).length;
+    const findingRows = pool.slice(0, findingsCap).map(t => {
+      const playing = s.previewId === t.id;
+      const size = t.bytes
+        ? (t.bytes > 999999 ? (t.bytes / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(t.bytes / 1024)) + ' KB')
+        : '';
       return {
-        id: r.id, url: r.url, title: r.title, license: r.license,
-        tick: s.picked[r.id] ? '✓' : '',
-        boxBorder: s.picked[r.id] ? 'var(--color-accent)' : 'var(--color-neutral-500)',
-        boxBg: s.picked[r.id] ? 'var(--color-accent)' : 'transparent',
-        onToggle: keepable
-          ? () => this.setState(st => ({ picked: { ...st.picked, [r.id]: !st.picked[r.id] } }))
-          : () => this.setState({ busyMsg: 'quarantined — no reusable licence, so it cannot be collected' }),
-        typeLabel: r.type === 'audio' ? 'AUDIO' : 'TEXT',
-        typeColor: r.type === 'audio' ? '#21E5E5' : 'var(--color-accent)',
-        licenseColor: keepable ? 'var(--color-accent-800)' : 'var(--color-accent-2)',
-        statusColor: r.status === 'kept' ? 'var(--color-accent)' : (r.status === 'listed' ? '#21E5E5' : 'var(--color-accent-2)'),
-        statusLabel: String(r.status || '').toUpperCase(),
-        size: r.bytes ? (r.bytes > 999999 ? (r.bytes / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(r.bytes / 1024)) + ' KB') : '—',
-        bg: s.picked[r.id] ? 'color-mix(in srgb, var(--color-accent) 7%, transparent)' : 'transparent',
-        cursor: keepable ? 'pointer' : 'not-allowed',
-        rowOpacity: keepable ? '1' : '0.45',
+        id: t.id, url: t.url, title: t.title,
+        tick: s.picked[t.id] ? '✓' : '',
+        boxBorder: s.picked[t.id] ? 'var(--color-accent)' : 'var(--color-neutral-500)',
+        boxBg: s.picked[t.id] ? 'var(--color-accent)' : 'transparent',
+        bg: s.picked[t.id] ? 'color-mix(in srgb, var(--color-accent) 7%, transparent)' : 'transparent',
+        // one control, one word: it says what pressing it does. Music we hold no
+        // direct file for yet says so, rather than showing a dead gap.
+        playLabel: t.playable
+          ? (playing ? (s.previewLoading ? '· · ·' : '■ Stop') : '▶ Play')
+          : (t.audio ? 'tick to get' : ''),
+        playColor: playing ? 'var(--color-accent)'
+          : (t.playable ? 'var(--color-neutral-600)' : 'var(--color-neutral-700)'),
+        // no pill at all when there is nothing to play — an empty outline reads
+        // like a button that is simply broken
+        playBorder: !t.playable ? 'transparent' : (playing ? 'var(--color-accent)' : 'var(--color-neutral-600)'),
+        playTitle: t.playable ? 'Hear it before you keep it' : '',
+        onPlay: (e) => {
+          if (e && e.stopPropagation) e.stopPropagation();
+          if (t.playable) this.togglePreview(t.id, t.mediaUrl);
+        },
+        onToggle: t.usable
+          ? () => this.setState(st => ({ picked: { ...st.picked, [t.id]: !st.picked[t.id] } }))
+          : () => this.setState({ busyMsg: "That one has no licence saying you can reuse it, so it can't be kept." }),
+        typeLabel: t.audio ? 'MUSIC' : 'WORDS',
+        typeColor: t.audio ? '#21E5E5' : 'var(--color-accent)',
+        licenseLabel: t.usable ? plainLicense(t.license) : "Can't use this one",
+        licenseColor: t.usable ? 'var(--color-accent-800)' : 'var(--color-accent-2)',
+        licenseTitle: t.license || '',
+        from: t.from,
+        meta: [t.len, size].filter(Boolean).join(' · ') || (t.collected ? 'ready to send' : ''),
+        cursor: t.usable ? 'pointer' : 'not-allowed',
+        rowOpacity: t.usable ? '1' : '0.45',
       };
     });
     const c = s.crawlCounters;
     const crawlStats = [
-      { label: 'IN QUEUE', value: c.queued.toLocaleString(), color: 'var(--color-text)' },
-      { label: 'FETCHED', value: c.fetched.toLocaleString(), color: 'var(--color-text)' },
-      { label: 'PARSED', value: c.parsed.toLocaleString(), color: 'var(--color-accent)' },
-      { label: 'STORED TO TIER 01', value: c.stored.toLocaleString(), color: 'var(--color-accent)' },
-      { label: 'QUARANTINED', value: c.quarantined.toLocaleString(), color: 'var(--color-accent-2)' },
+      { label: 'STILL TO CHECK', value: c.queued.toLocaleString(), color: 'var(--color-text)' },
+      { label: 'PAGES OPENED', value: c.fetched.toLocaleString(), color: 'var(--color-text)' },
+      { label: 'PAGES READ', value: c.parsed.toLocaleString(), color: 'var(--color-accent)' },
+      { label: 'KEPT', value: c.stored.toLocaleString(), color: 'var(--color-accent)' },
+      { label: 'SET ASIDE (NO LICENCE)', value: c.quarantined.toLocaleString(), color: 'var(--color-accent-2)' },
       // the simulation counts in KB-ish units; the service reports real bytes
-      { label: 'CAPTURED', value: live
+      { label: 'DOWNLOADED', value: live
           ? (c.bytes > 1048576 ? (c.bytes / 1048576).toFixed(1) + ' MB' : Math.round(c.bytes / 1024) + ' KB')
           : (c.bytes / 1024).toFixed(1) + ' MB', color: 'var(--color-text)' },
     ];
@@ -1849,8 +2402,8 @@ class Component extends DCLogic {
       goHome: (e) => { if (e && e.preventDefault) e.preventDefault(); this.setState({ view: 'landing' }); window.scrollTo({ top: 0, behavior: 'smooth' }); },
       toTopApp: () => { const m = document.getElementById('dc-main'); if (m) m.scrollTo({ top: 0, behavior: 'smooth' }); window.scrollTo({ top: 0, behavior: 'smooth' }); },
       isCrawl: s.screen === 'crawl', isStore: s.screen === 'store', isQuery: s.screen === 'query',
-      crawlBtnLabel: s.crawlRunning ? (live ? 'Stop crawl' : 'Pause crawl') : 'Start crawl',
-      crawlStatusLabel: s.crawlRunning ? 'CRAWLING' : (s.crawlTicks ? (live ? 'FINISHED' : 'PAUSED') : 'IDLE'),
+      crawlBtnLabel: s.crawlRunning ? 'Stop looking' : 'Search these websites',
+      crawlStatusLabel: s.crawlRunning ? 'LOOKING…' : (s.crawlTicks ? 'DONE' : 'NOT STARTED'),
       crawlDotColor: s.crawlRunning ? 'var(--color-accent)' : 'var(--color-neutral-700)',
       crawlElapsed: (s.crawlRunning || s.crawlTicks)
         ? (live
@@ -1862,10 +2415,25 @@ class Component extends DCLogic {
         if (s.crawlRunning) { this.svc('/api/stop', { method: 'POST' }).catch(() => {}); this.setState({ busyMsg: 'stopping…' }); }
         else this.startLiveCrawl();
       },
+      // Deletes every collected file, permanently. Worth two presses, and worth
+      // saying the number out loud — "Start over" sounds far cheaper than it is.
+      resetLabel: s.confirmReset
+        ? 'Press again to delete ' + s.liveResults.length + ' item(s)'
+        : 'Delete everything',
+      resetStyle: s.confirmReset ? 'var(--color-accent-2)' : 'var(--color-divider)',
       resetCrawl: () => {
+        if (!s.confirmReset) {
+          this.setState({ confirmReset: true, busyMsg: 'That erases everything collected so far, including files on disk.' });
+          clearTimeout(this._resetT);
+          this._resetT = setTimeout(() => this.setState({ confirmReset: false, busyMsg: '' }), 6000);
+          return;
+        }
+        clearTimeout(this._resetT);
         if (live) this.svc('/api/reset', { method: 'POST' }).catch(() => {});
         this.setState({
-          crawlRunning: false, crawlTicks: 0, crawlLog: [], liveResults: [], picked: {}, busyMsg: '',
+          confirmReset: false,
+          crawlRunning: false, crawlTicks: 0, crawlLog: [], liveResults: [], findingsShown: 100, picked: {},
+          busyMsg: 'Everything deleted.',
           crawlCounters: live
             ? { queued: 0, fetched: 0, parsed: 0, stored: 0, quarantined: 0, bytes: 0 }
             : { queued: 1284, fetched: 0, parsed: 0, stored: 0, quarantined: 0, bytes: 0 },
@@ -1873,49 +2441,125 @@ class Component extends DCLogic {
       },
 
       // service mode banner
-      modeLabel: s.svcState === 'live' ? 'LIVE CRAWLER' : (s.svcState === 'checking' ? 'CHECKING…' : 'DEMO MODE'),
+      modeLabel: s.svcState === 'live' ? 'READY' : (s.svcState === 'checking' ? 'STARTING…' : 'NOT RUNNING'),
       modeDot: s.svcState === 'live' ? 'var(--color-accent)' : (s.svcState === 'checking' ? 'var(--color-neutral-600)' : 'var(--color-accent-2)'),
       modeBg: s.svcState === 'live' ? 'color-mix(in srgb, var(--color-accent) 8%, transparent)' : 'var(--color-surface)',
       modeBorder: s.svcState === 'live' ? 'var(--color-accent)' : 'var(--color-divider)',
       modeHint: s.svcState === 'live'
-        ? 'Fetching for real against ' + s.svcUrl + ' — robots.txt honoured, seed hosts only, one request per second per host.'
+        ? 'Ready. Everything here is free to use — nothing copyrighted gets collected.'
         : (s.svcState === 'checking'
-            ? 'Looking for the crawler service…'
-            : 'No crawler service on ' + s.svcUrl + ' — the log below is simulated. Run  npm run crawler  in the project, then re-check.'),
+            ? 'Starting up…'
+            : 'The finder is not running. Open a terminal in this project and type  npm run crawler  — then press Try again.'),
       recheckService: () => { this.setState({ svcState: 'checking' }); this.checkService(); },
+      advOpen: s.advOpen,
+      advToggleLabel: s.advOpen ? 'Hide the advanced bits' : 'Search specific websites instead',
+      toggleAdv: () => this.setState({ advOpen: !s.advOpen }),
       isLive: live,
       enforced: true,
       enforcedNote: live
         ? 'Both are enforced by the service and cannot be switched off from here.'
         : 'Enforced by the crawler service when one is running.',
 
-      // findings
-      hasFindings: live && findingRows.length > 0,
+      // the one list
+      hasFindings: findingRows.length > 0,
+      noFindings: findingRows.length === 0 && !s.discBusy,
       findingRows,
-      pickSummary: (() => {
-        const ids = Object.keys(s.picked).filter(k => s.picked[k]);
-        const rows = s.liveResults.filter(r => ids.includes(r.id));
-        const audio = rows.filter(r => r.type === 'audio').length;
-        return ids.length
-          ? ids.length + ' picked (' + (ids.length - audio) + ' text · ' + audio + ' audio)'
-          : s.liveResults.length + ' found — tick what you want';
-      })(),
+      showFindingsMore: findingsCap < findingsTotal,
+      findingsMoreLabel: 'Show more — ' + findingsCap.toLocaleString()
+        + ' of ' + findingsTotal.toLocaleString() + ' shown',
+      findingsLoadMore: () => this.growFindings(),
+      findingsOnScroll: (e) => {
+        const el = e.currentTarget;
+        if (el.scrollHeight - el.scrollTop - el.clientHeight < 160) this.growFindings();
+      },
+      pickCount: pickedCount,
+      pickSummary: pickedCount
+        ? pickedCount + (pickedCount === 1 ? ' ticked' : ' ticked') + ' of ' + findingsTotal
+        : findingsTotal + (findingsTotal === 1 ? ' result' : ' results') + ' — tick the ones you like',
+      sendLabel: pickedCount ? 'Send ' + pickedCount + ' to Lyrx ↗' : 'Send to Lyrx ↗',
+      downloadLabel: pickedCount ? 'Download ' + pickedCount : 'Download',
       pickAllKept: () => this.setState(st => {
         const picked = { ...st.picked };
-        st.liveResults.forEach(r => { if (r.status !== 'quarantined') picked[r.id] = true; });
+        pool.forEach(t => { if (t.usable) picked[t.id] = true; });
         return { picked };
       }),
       pickNone: () => this.setState({ picked: {} }),
-      downloadBundle: () => {
-        const ids = Object.keys(s.picked).filter(k => s.picked[k]);
-        window.open(s.svcUrl + '/api/bundle' + (ids.length ? '?ids=' + ids.join(',') : ''), '_blank');
+      downloadBundle: async () => {
+        if (!this.pickedIds().length) { this.setState({ busyMsg: 'Tick a track first.' }); return; }
+        const grab = await this.collectPicked();
+        const ids = this.pickedIds().filter(id => id[0] === 'r');
+        if (!ids.length) { this.setState({ busyMsg: grab.note || 'nothing could be fetched' }); return; }
+        this.setState({ busyMsg: 'downloading ' + ids.length + '…' + (grab.note ? ' · ' + grab.note : '') });
+        window.open(s.svcUrl + '/api/bundle?ids=' + ids.join(','), '_blank');
       },
       sendToLyrx: () => this.sendToLyrx(),
       busyMsg: s.busyMsg,
       vaultSummary: s.vaultInfo
-        ? 'Lyrx vault: ' + s.vaultInfo.text + ' text · ' + s.vaultInfo.sample + ' samples · ' + (s.vaultInfo.bytes / 1048576).toFixed(1) + ' MB — open Lyrx › Library to use them.'
+        ? 'Already in Lyrx: ' + s.vaultInfo.sample + ' sounds · ' + s.vaultInfo.text + ' texts — open Lyrx › Library to use them.'
         : 'Nothing sent to Lyrx yet.',
       extraHosts: s.extraHosts, setExtraHosts: (e) => this.setState({ extraHosts: e.target.value }),
+
+      // search
+      discQuery: s.discQuery,
+      setDiscQuery: (e) => this.setState({ discQuery: e.target.value }),
+      discOnKey: (e) => { if (e.key === 'Enter') this.runDiscover(); },
+      discSearch: () => this.runDiscover(),
+      discBtnLabel: s.discBusy ? 'Looking…' : 'Find music',
+      discNote: s.discNote,
+      // One click for anyone who does not know what to type yet.
+      discExamples: [
+        'banjo folk ballad', 'solo piano nocturne', 'gospel choir',
+        'upright bass jazz', 'rain and thunder', 'analog synth 80s',
+        'gregorian chant', 'mariachi trumpet', 'lo-fi drum loop',
+      ].map(q => ({
+        label: q,
+        onClick: () => { this.setState({ discQuery: q }); this.runDiscover(q); },
+        bg: s.discQuery === q ? 'var(--color-accent)' : 'transparent',
+        color: s.discQuery === q ? '#000' : 'var(--color-text)',
+        border: s.discQuery === q ? 'var(--color-accent)' : 'var(--color-divider)',
+      })),
+      discKinds: [['both', 'Anything'], ['audio', 'Music & sounds'], ['text', 'Lyrics & words']].map(([id, label]) => ({
+        label,
+        onClick: () => this.setState({ discKind: id }),
+        bg: s.discKind === id ? 'var(--color-accent)' : 'transparent',
+        color: s.discKind === id ? '#000' : 'var(--color-text)',
+        border: s.discKind === id ? 'var(--color-accent)' : 'var(--color-divider)',
+      })),
+      discLicenses: [
+        ['commercial', 'Fine to use in anything'],
+        ['open', 'Totally free, no credit needed'],
+        ['any', 'Show everything'],
+      ].map(([id, label]) => ({
+        label,
+        onClick: () => this.setState({ discLicense: id }),
+        bg: s.discLicense === id ? 'var(--color-accent)' : 'transparent',
+        color: s.discLicense === id ? '#000' : 'var(--color-text)',
+        border: s.discLicense === id ? 'var(--color-accent)' : 'var(--color-divider)',
+      })),
+      discSources: [
+        ['all', 'Everywhere'],
+        ['freesound', 'Sound effects'],
+        ['jamendo', 'Full songs'],
+        ['commons', 'Classical & folk'],
+        ['archive', 'Old recordings'],
+        ['wikisource', 'Lyrics & poems'],
+      ].map(([id, label]) => ({
+        label,
+        onClick: () => this.setState({ discSource: id }),
+        bg: s.discSource === id ? 'var(--color-accent-2)' : 'transparent',
+        color: s.discSource === id ? '#000' : 'var(--color-text)',
+        border: s.discSource === id ? 'var(--color-accent-2)' : 'var(--color-divider)',
+      })),
+      discSourceHint: {
+        all: 'Searches every library below at once.',
+        freesound: 'Single hits, loops and real-world recordings — rain, doors, birds.',
+        jamendo: 'Complete songs by independent artists.',
+        commons: 'Wikimedia — folk, classical and spoken word.',
+        archive: 'The Internet Archive — old records and netlabel releases.',
+        wikisource: 'Out-of-copyright lyrics and poems (words, no audio).',
+      }[s.discSource],
+      previewErr: s.previewErr,
+      discUseSeeds: () => this.useAsSeeds(),
       crawlLog: s.crawlLog,
       seedText: s.seedText, setSeedText: (e) => this.setState({ seedText: e.target.value }),
       crawlDepth: s.crawlDepth, setCrawlDepth: (e) => this.setState({ crawlDepth: +e.target.value }),
@@ -1985,6 +2629,73 @@ class Component extends DCLogic {
       navItems,
       isHome: s.screen === 'home', isDiscover: s.screen === 'discover', isSources: s.screen === 'sources',
       isKnowledge: s.screen === 'knowledge', isTrain: s.screen === 'train', isVoice: s.screen === 'voice',
+
+      // ── Train ────────────────────────────────────────────────────────────
+      // Reads /api/dataset. When the service is down there are no numbers to
+      // show, and saying so beats inventing some.
+      trainServiceHint: live
+        ? 'Figures below are read from the collected files, not stored settings.'
+        : 'Start the finder to see what you actually have — npm run crawler.',
+      refreshDataset: () => this.refreshDataset(),
+      dsStats: (() => {
+        const d = s.dataset;
+        const t = d ? d.text : { files: 0, tokens: 0 };
+        const a = d ? d.audio : { files: 0, minutes: 0 };
+        const dup = d ? d.duplicates : { files: 0, uniqueHashes: 0 };
+        return [
+          { label: 'WRITING', value: t.files.toLocaleString(),
+            sub: t.tokens.toLocaleString() + ' tokens', color: 'var(--color-accent)' },
+          { label: 'AUDIO', value: a.files.toLocaleString(),
+            sub: a.minutes + ' minutes (approx)', color: '#21E5E5' },
+          { label: 'UNIQUE', value: dup.files ? dup.uniqueHashes.toLocaleString() : '0',
+            sub: 'of ' + dup.files.toLocaleString() + ' files — no repeats', color: 'var(--color-accent-2)' },
+        ];
+      })(),
+      readyChecks: (s.dataset ? s.dataset.checks : []).map(c => ({
+        label: c.label, detail: c.detail,
+        mark: c.ok ? '✓' : '!',
+        dot: c.ok ? 'var(--color-accent)' : '#ffb020',
+      })),
+      trainGoal: s.trainGoal,
+      setTrainGoal: (e) => this.setState({ trainGoal: e.target.value }),
+      trainKinds: [['lyrics', 'Writing'], ['music', 'Audio']].map(([id, label]) => ({
+        label,
+        onClick: () => this.setState({ trainKind: id, prepared: null }),
+        bg: s.trainKind === id ? 'var(--color-accent)' : 'transparent',
+        color: s.trainKind === id ? '#000' : 'var(--color-text)',
+        border: s.trainKind === id ? 'var(--color-accent)' : 'var(--color-divider)',
+      })),
+      trainKindHint: s.trainKind === 'music'
+        ? 'Fine-tunes MusicGen on the recordings. Needs the graphics card.'
+        : 'Fine-tunes a language model on the words. Also runs on an Apple machine.',
+      trainBase: s.trainBase || (s.trainKind === 'music' ? 'facebook/musicgen-small' : 'mistralai/Mistral-7B-v0.3'),
+      setTrainBase: (e) => this.setState({ trainBase: e.target.value }),
+      trainEpochs: s.trainEpochs,
+      setTrainEpochs: (e) => this.setState({ trainEpochs: +e.target.value }),
+      prepareTrain: () => this.prepareTrain(),
+      prepareLabel: s.trainBusy ? 'Writing…' : 'Prepare the run',
+      trainMsg: s.trainMsg,
+      trainMsgColor: /could not|has to be|Nothing to train|forbid/i.test(s.trainMsg) ? '#ffb020' : 'var(--color-accent)',
+      hasPrepared: !!s.prepared,
+      preparedName: s.prepared ? s.prepared.name : '',
+      preparedSummary: s.prepared
+        ? s.prepared.examples + ' example(s), each one unique · ' + s.prepared.config.base
+          + ' · ' + s.prepared.config.epochs + ' pass(es)'
+        : '',
+      preparedCommand: s.prepared ? s.prepared.command : '',
+      preparedFiles: s.prepared
+        ? 'Written to ' + s.prepared.dir + ' — config, dataset, attribution, requirements, train.py and a README.'
+        : '',
+      copyLabel: s.copied ? 'Copied' : 'Copy the command',
+      copyCommand: () => {
+        const cmd = s.prepared && s.prepared.command;
+        if (!cmd || !navigator.clipboard) return;
+        navigator.clipboard.writeText(cmd).then(
+          () => { this.setState({ copied: true }); setTimeout(() => this.setState({ copied: false }), 2000); },
+          () => this.setState({ trainMsg: 'Could not reach the clipboard — select the text instead.' }),
+        );
+      },
+
       isMusic: s.screen === 'music', isCompression: s.screen === 'compression',
       pipelineStages: this.pipelineStages, capsuleContents: this.capsuleContents, pricingTiers: this.pricingTiers,
       waveformBars: this.waveformBarsData,
