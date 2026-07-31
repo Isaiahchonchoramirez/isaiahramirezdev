@@ -622,7 +622,7 @@
         <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:24px; margin-bottom:20px; flex-wrap:wrap;">
           <span style="font-size:12px; opacity:0.6;">Anything it finds joins the same list above.</span>
           <div style="display:flex; gap:8px; flex:none;">
-            <button class="btn btn-secondary" onClick="{{ resetCrawl }}" style="font-size:12px;">Start over</button>
+            <button class="btn btn-secondary" onClick="{{ resetCrawl }}" style="font-size:12px; border-color:{{ resetStyle }};">{{ resetLabel }}</button>
             <button class="btn btn-primary" onClick="{{ toggleCrawl }}" style="font-size:12px;">{{ crawlBtnLabel }}</button>
           </div>
         </div>
@@ -874,26 +874,88 @@
 
     <sc-if value="{{ isTrain }}" hint-placeholder-val="{{ false }}">
       <h6 style="color:var(--color-accent);">TRAIN</h6>
-      <h2 style="margin-bottom:24px;">New training job</h2>
-      <div style="max-width:520px; display:flex; flex-direction:column; gap:20px;">
-        <div class="field"><label>Training goal</label><input class="input" value="Country vocal delivery + song structure" onChange="{{ noop }}"/></div>
-        <div class="field"><label>Dataset version</label><input class="input" value="v4 — reviewed 2026-07-20" onChange="{{ noop }}"/></div>
-        <div class="field"><label>Base model</label><input class="input" value="datacore-base-7b" onChange="{{ noop }}"/></div>
-        <div class="field">
-          <label>Method</label>
-          <div class="seg">
-            <label class="seg-opt"><input type="radio" name="method" checked=""/>LoRA</label>
-            <label class="seg-opt"><input type="radio" name="method"/>Full fine-tune</label>
-            <label class="seg-opt"><input type="radio" name="method"/>Adapter</label>
-          </div>
-        </div>
-        <div class="field">
-          <label>Compute budget: {{ computeBudget }}%</label>
-          <input type="range" min="10" max="100" value="{{ computeBudget }}" onChange="{{ setComputeBudget }}" style="width:100%; accent-color:var(--color-accent);"/>
-        </div>
-        <label class="radio"><input type="checkbox" checked=""/><span class="dot" style="border-radius:0;"></span>Confirmed all sources passed rights review</label>
-        <button class="btn btn-primary" style="align-self:flex-start; padding:12px 24px;">Launch training job</button>
+      <h2 style="margin:0 0 8px;">Teach a model what you collected</h2>
+      <p style="opacity:0.7; font-size:13px; margin:0 0 24px; max-width:660px; line-height:1.7;">
+        Everything below is read off the disk — no examples, no placeholders. When it says a run is ready,
+        it is. Preparing one writes a folder you copy to the computer with the graphics card and run there;
+        a browser tab cannot do the training itself.
+      </p>
+
+      <div style="display:flex; align-items:center; gap:12px; border:1px solid {{ modeBorder }}; background:{{ modeBg }}; padding:12px 16px; margin-bottom:24px; flex-wrap:wrap;">
+        <span style="width:8px; height:8px; flex:none; background:{{ modeDot }}; animation:dcPulse 1.6s ease-in-out infinite;"></span>
+        <span style="font-family:var(--font-heading); font-weight:800; font-size:12px; letter-spacing:0.08em; color:{{ modeDot }}; flex:none;">{{ modeLabel }}</span>
+        <span style="font-size:12px; opacity:0.75; flex:1; min-width:220px;">{{ trainServiceHint }}</span>
+        <button class="btn btn-secondary" onClick="{{ refreshDataset }}" style="font-size:11px; flex:none;">Re-check</button>
       </div>
+
+      <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--color-divider); border:1px solid var(--color-divider); margin-bottom:28px;">
+        <sc-for list="{{ dsStats }}" as="ds" hint-placeholder-count="3">
+          <div style="background:var(--color-surface); padding:16px 18px;">
+            <div style="font-size:10px; letter-spacing:0.1em; opacity:0.55; margin-bottom:6px;">{{ ds.label }}</div>
+            <div style="font-family:var(--font-heading); font-weight:800; font-size:24px; color:{{ ds.color }};">{{ ds.value }}</div>
+            <div style="font-size:11px; opacity:0.45; margin-top:4px;">{{ ds.sub }}</div>
+          </div>
+        </sc-for>
+      </div>
+
+      <h4 style="margin:0 0 12px; font-size:15px;">Is it ready?</h4>
+      <div style="border:1px solid var(--color-divider); margin-bottom:28px;">
+        <sc-for list="{{ readyChecks }}" as="rc" hint-placeholder-count="4">
+          <div style="display:grid; grid-template-columns:26px 1fr 260px; align-items:center; gap:14px; padding:12px 16px; border-bottom:1px solid var(--color-divider);">
+            <span style="width:18px; height:18px; display:flex; align-items:center; justify-content:center; font-family:var(--font-heading); font-weight:800; font-size:12px; color:#000; background:{{ rc.dot }};">{{ rc.mark }}</span>
+            <span style="font-size:13px;">{{ rc.label }}</span>
+            <span style="font-size:11px; opacity:0.6; text-align:right;">{{ rc.detail }}</span>
+          </div>
+        </sc-for>
+      </div>
+
+      <h4 style="margin:0 0 12px; font-size:15px;">Set up a run</h4>
+      <div style="max-width:620px; display:flex; flex-direction:column; gap:18px;">
+        <div class="field">
+          <label>What should it learn to do?</label>
+          <input class="input" value="{{ trainGoal }}" onChange="{{ setTrainGoal }}" placeholder="e.g. write folk verses in my phrasing" style="font-size:13px;"/>
+        </div>
+
+        <div class="field">
+          <label>Train on</label>
+          <div style="display:flex; gap:4px;">
+            <sc-for list="{{ trainKinds }}" as="tk" hint-placeholder-count="2">
+              <button onClick="{{ tk.onClick }}" style="all:unset; cursor:pointer; padding:9px 14px; font-size:11px; font-family:var(--font-heading); font-weight:700; border:1px solid {{ tk.border }}; background:{{ tk.bg }}; color:{{ tk.color }};">{{ tk.label }}</button>
+            </sc-for>
+          </div>
+          <span style="font-size:11px; opacity:0.5; margin-top:6px; display:block;">{{ trainKindHint }}</span>
+        </div>
+
+        <div class="field">
+          <label>Starting model</label>
+          <input class="input" value="{{ trainBase }}" onChange="{{ setTrainBase }}" style="font-size:13px; font-family:var(--font-heading);"/>
+          <span style="font-size:11px; opacity:0.5; margin-top:6px; display:block;">Nobody trains from nothing — this is the model yours starts from.</span>
+        </div>
+
+        <div class="field">
+          <label>Passes over the data: {{ trainEpochs }}</label>
+          <input type="range" min="1" max="12" value="{{ trainEpochs }}" onChange="{{ setTrainEpochs }}" style="width:100%; accent-color:var(--color-accent);"/>
+          <span style="font-size:11px; opacity:0.5; margin-top:6px; display:block;">More passes learn the material harder — and, past a point, memorise it.</span>
+        </div>
+
+        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+          <button class="btn btn-primary" onClick="{{ prepareTrain }}" style="font-size:13px; padding:12px 22px;">{{ prepareLabel }}</button>
+          <span style="font-size:12px; color:{{ trainMsgColor }};">{{ trainMsg }}</span>
+        </div>
+      </div>
+
+      <sc-if value="{{ hasPrepared }}" hint-placeholder-val="{{ false }}">
+        <div style="border:1px solid var(--color-accent); background:color-mix(in srgb, var(--color-accent) 6%, transparent); padding:20px 22px; margin-top:28px; max-width:820px;">
+          <h4 style="margin:0 0 6px; font-size:15px; color:var(--color-accent);">Run ready — {{ preparedName }}</h4>
+          <p style="font-size:13px; opacity:0.8; margin:0 0 14px;">{{ preparedSummary }}</p>
+          <p style="font-size:12px; opacity:0.6; margin:0 0 8px;">On the computer with the graphics card, run:</p>
+          <div style="background:#080808; border:1px solid var(--color-divider); padding:12px 14px; font-family:var(--font-heading); font-size:12px; overflow-x:auto; white-space:pre; color:var(--color-accent);">{{ preparedCommand }}</div>
+          <div style="display:flex; gap:8px; margin-top:14px; flex-wrap:wrap;">
+            <button class="btn btn-secondary" onClick="{{ copyCommand }}" style="font-size:11px;">{{ copyLabel }}</button>
+          </div>
+          <p style="font-size:11px; opacity:0.5; margin:14px 0 0;">{{ preparedFiles }}</p>
+        </div>
+      </sc-if>
     </sc-if>
 
     <sc-if value="{{ isVoice }}" hint-placeholder-val="{{ false }}">
@@ -1053,6 +1115,17 @@ class Component extends DCLogic {
     ].join('\n'),
     // "Search specific websites" is folded away until someone asks for it.
     advOpen: false,
+    confirmReset: false,
+    // Train screen — every number here arrives from /api/dataset, never a constant.
+    dataset: null,
+    trainGoal: 'write folk verses in my phrasing',
+    trainKind: 'lyrics',
+    trainBase: '',
+    trainEpochs: 3,
+    trainMsg: '',
+    trainBusy: false,
+    prepared: null,
+    copied: false,
     extractFields: [
       { name: 'title', selector: 'h1, meta[property="og:title"]', type: 'text' },
       { name: 'body', selector: 'article, main p', type: 'text' },
@@ -1136,6 +1209,7 @@ class Component extends DCLogic {
         this._loadedOnce = true;
         this._lastPoll = 0;
         await this.pollLive();
+        this.refreshDataset();
       }
       return true;
     } catch (e) {
@@ -1147,7 +1221,10 @@ class Component extends DCLogic {
   async startLiveCrawl() {
     this.setState({ busyMsg: 'starting…' });
     try {
-      await this.svc('/api/reset', { method: 'POST' });
+      // Deliberately no /api/reset here. It deletes the whole store, and a
+      // search used to begin by wiping every track ever collected — weeks of
+      // scheduled collecting gone on one button press. The service starts a
+      // fresh job by itself; the files on disk are meant to accumulate.
       await this.svc('/api/crawl', {
         method: 'POST',
         body: JSON.stringify({
@@ -1269,6 +1346,45 @@ class Component extends DCLogic {
       });
     } catch (err) {
       this.setState({ discMore: false, discHasMore: false, discNote: 'could not load more: ' + err.message });
+    }
+  }
+
+  /** Pull the real dataset figures. Cheap, so it runs whenever the screen opens. */
+  async refreshDataset() {
+    if (this.state.svcState !== 'live') return;
+    try {
+      this.setState({ dataset: await this.svc('/api/dataset') });
+    } catch (err) {
+      this.setState({ dataset: null, trainMsg: 'Could not read the dataset: ' + err.message });
+    }
+  }
+
+  /**
+   * Ask the service to write a training run.
+   *
+   * The button does not train anything and does not pretend to — training needs
+   * a GPU. What comes back is a real folder with a real script in it, and the
+   * command to run there.
+   */
+  async prepareTrain() {
+    if (this.state.svcState !== 'live') {
+      this.setState({ trainMsg: 'The finder has to be running — start it with  npm run crawler.' });
+      return;
+    }
+    const s = this.state;
+    this.setState({ trainBusy: true, trainMsg: 'writing the run…', prepared: null, copied: false });
+    try {
+      const out = await this.svc('/api/train/prepare', {
+        method: 'POST',
+        body: JSON.stringify({
+          goal: s.trainGoal, kind: s.trainKind,
+          base: s.trainBase, epochs: s.trainEpochs,
+        }),
+      });
+      this.setState({ trainBusy: false, prepared: out, trainMsg: '' });
+      this.refreshDataset();
+    } catch (err) {
+      this.setState({ trainBusy: false, trainMsg: err.message });
     }
   }
 
@@ -2299,10 +2415,25 @@ class Component extends DCLogic {
         if (s.crawlRunning) { this.svc('/api/stop', { method: 'POST' }).catch(() => {}); this.setState({ busyMsg: 'stopping…' }); }
         else this.startLiveCrawl();
       },
+      // Deletes every collected file, permanently. Worth two presses, and worth
+      // saying the number out loud — "Start over" sounds far cheaper than it is.
+      resetLabel: s.confirmReset
+        ? 'Press again to delete ' + s.liveResults.length + ' item(s)'
+        : 'Delete everything',
+      resetStyle: s.confirmReset ? 'var(--color-accent-2)' : 'var(--color-divider)',
       resetCrawl: () => {
+        if (!s.confirmReset) {
+          this.setState({ confirmReset: true, busyMsg: 'That erases everything collected so far, including files on disk.' });
+          clearTimeout(this._resetT);
+          this._resetT = setTimeout(() => this.setState({ confirmReset: false, busyMsg: '' }), 6000);
+          return;
+        }
+        clearTimeout(this._resetT);
         if (live) this.svc('/api/reset', { method: 'POST' }).catch(() => {});
         this.setState({
-          crawlRunning: false, crawlTicks: 0, crawlLog: [], liveResults: [], findingsShown: 100, picked: {}, busyMsg: '',
+          confirmReset: false,
+          crawlRunning: false, crawlTicks: 0, crawlLog: [], liveResults: [], findingsShown: 100, picked: {},
+          busyMsg: 'Everything deleted.',
           crawlCounters: live
             ? { queued: 0, fetched: 0, parsed: 0, stored: 0, quarantined: 0, bytes: 0 }
             : { queued: 1284, fetched: 0, parsed: 0, stored: 0, quarantined: 0, bytes: 0 },
@@ -2498,6 +2629,73 @@ class Component extends DCLogic {
       navItems,
       isHome: s.screen === 'home', isDiscover: s.screen === 'discover', isSources: s.screen === 'sources',
       isKnowledge: s.screen === 'knowledge', isTrain: s.screen === 'train', isVoice: s.screen === 'voice',
+
+      // ── Train ────────────────────────────────────────────────────────────
+      // Reads /api/dataset. When the service is down there are no numbers to
+      // show, and saying so beats inventing some.
+      trainServiceHint: live
+        ? 'Figures below are read from the collected files, not stored settings.'
+        : 'Start the finder to see what you actually have — npm run crawler.',
+      refreshDataset: () => this.refreshDataset(),
+      dsStats: (() => {
+        const d = s.dataset;
+        const t = d ? d.text : { files: 0, tokens: 0 };
+        const a = d ? d.audio : { files: 0, minutes: 0 };
+        const dup = d ? d.duplicates : { files: 0, uniqueHashes: 0 };
+        return [
+          { label: 'WRITING', value: t.files.toLocaleString(),
+            sub: t.tokens.toLocaleString() + ' tokens', color: 'var(--color-accent)' },
+          { label: 'AUDIO', value: a.files.toLocaleString(),
+            sub: a.minutes + ' minutes (approx)', color: '#21E5E5' },
+          { label: 'UNIQUE', value: dup.files ? dup.uniqueHashes.toLocaleString() : '0',
+            sub: 'of ' + dup.files.toLocaleString() + ' files — no repeats', color: 'var(--color-accent-2)' },
+        ];
+      })(),
+      readyChecks: (s.dataset ? s.dataset.checks : []).map(c => ({
+        label: c.label, detail: c.detail,
+        mark: c.ok ? '✓' : '!',
+        dot: c.ok ? 'var(--color-accent)' : '#ffb020',
+      })),
+      trainGoal: s.trainGoal,
+      setTrainGoal: (e) => this.setState({ trainGoal: e.target.value }),
+      trainKinds: [['lyrics', 'Writing'], ['music', 'Audio']].map(([id, label]) => ({
+        label,
+        onClick: () => this.setState({ trainKind: id, prepared: null }),
+        bg: s.trainKind === id ? 'var(--color-accent)' : 'transparent',
+        color: s.trainKind === id ? '#000' : 'var(--color-text)',
+        border: s.trainKind === id ? 'var(--color-accent)' : 'var(--color-divider)',
+      })),
+      trainKindHint: s.trainKind === 'music'
+        ? 'Fine-tunes MusicGen on the recordings. Needs the graphics card.'
+        : 'Fine-tunes a language model on the words. Also runs on an Apple machine.',
+      trainBase: s.trainBase || (s.trainKind === 'music' ? 'facebook/musicgen-small' : 'mistralai/Mistral-7B-v0.3'),
+      setTrainBase: (e) => this.setState({ trainBase: e.target.value }),
+      trainEpochs: s.trainEpochs,
+      setTrainEpochs: (e) => this.setState({ trainEpochs: +e.target.value }),
+      prepareTrain: () => this.prepareTrain(),
+      prepareLabel: s.trainBusy ? 'Writing…' : 'Prepare the run',
+      trainMsg: s.trainMsg,
+      trainMsgColor: /could not|has to be|Nothing to train|forbid/i.test(s.trainMsg) ? '#ffb020' : 'var(--color-accent)',
+      hasPrepared: !!s.prepared,
+      preparedName: s.prepared ? s.prepared.name : '',
+      preparedSummary: s.prepared
+        ? s.prepared.examples + ' example(s), each one unique · ' + s.prepared.config.base
+          + ' · ' + s.prepared.config.epochs + ' pass(es)'
+        : '',
+      preparedCommand: s.prepared ? s.prepared.command : '',
+      preparedFiles: s.prepared
+        ? 'Written to ' + s.prepared.dir + ' — config, dataset, attribution, requirements, train.py and a README.'
+        : '',
+      copyLabel: s.copied ? 'Copied' : 'Copy the command',
+      copyCommand: () => {
+        const cmd = s.prepared && s.prepared.command;
+        if (!cmd || !navigator.clipboard) return;
+        navigator.clipboard.writeText(cmd).then(
+          () => { this.setState({ copied: true }); setTimeout(() => this.setState({ copied: false }), 2000); },
+          () => this.setState({ trainMsg: 'Could not reach the clipboard — select the text instead.' }),
+        );
+      },
+
       isMusic: s.screen === 'music', isCompression: s.screen === 'compression',
       pipelineStages: this.pipelineStages, capsuleContents: this.capsuleContents, pricingTiers: this.pricingTiers,
       waveformBars: this.waveformBarsData,

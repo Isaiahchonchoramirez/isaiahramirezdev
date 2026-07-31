@@ -20,6 +20,7 @@ import { fileURLToPath } from 'node:url';
 import { lookup } from 'node:dns/promises';
 import { createHash } from 'node:crypto';
 import * as cheerio from 'cheerio';
+import { MUSIC_TRAINER, TEXT_TRAINER, MUSIC_REQS, TEXT_REQS, trainerReadme } from './trainers.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const STORE = path.join(HERE, '..', '.crawl-store');
@@ -536,6 +537,187 @@ function collectedHashes() {
 }
 
 /**
+ * Give everything already on disk a content hash.
+ *
+ * Files collected before hashing existed carry none, so they are invisible to
+ * the duplicate check and a mirror of one of them would sail straight in. One
+ * pass at start-up closes that gap, and drops any twin already sitting there.
+ */
+async function backfillHashes() {
+  let hashed = 0, twins = 0;
+  const seen = new Map();   // hash -> id of the copy being kept
+  for (const [url, it] of Object.entries(manifest.items)) {
+    if (!it.file) continue;
+    let hash = it.hash;
+    if (!hash) {
+      try {
+        const buf = await readFile(path.join(STORE, it.file));
+        hash = it.file.endsWith('.json')
+          ? textHash(JSON.parse(buf.toString('utf8')).text || '')
+          : bytesHash(buf);
+        it.hash = hash;
+        hashed++;
+      } catch { continue; }   // unreadable: leave it for the dataset step to drop
+    }
+    const keeper = seen.get(hash);
+    if (keeper) {
+      // Same content twice. Keep the first, unlink the second from the dataset.
+      it.file = null;
+      it.duplicateOf = keeper;
+      manifest.dead = manifest.dead || {};
+      manifest.dead[url] = { why: `identical to ${keeper}`, at: new Date().toISOString() };
+      twins++;
+    } else {
+      seen.set(hash, it.id);
+    }
+  }
+  if (hashed || twins) await saveManifest();
+  return { hashed, twins };
+}
+
+// Below these, a fine-tune produces a model that has memorised its input rather
+// than learned anything from it. They are the thresholds the Train screen checks
+// against, kept here so the UI cannot quietly disagree with the service.
+const READY = { textTokens: 500000, audioMinutes: 60 };
+
+/** Licences that permit training on the material and publishing the result. */
+const TRAINABLE = /^(CC0|Public domain|CC BY(?!.*-(NC|ND)))/i;
+
+/**
+ * The dataset as it stands, and an honest verdict on whether it can be trained.
+ *
+ * Every number is derived from the manifest — nothing here is a placeholder, so
+ * a screen showing it is reporting the disk rather than describing an intention.
+ */
+function datasetReport() {
+  const items = Object.entries(manifest.items).filter(([, it]) => it.file);
+  const audio = items.filter(([, it]) => /\.(wav|mp3|ogg|oga|flac|m4a|aac)$/i.test(it.file));
+  const text = items.filter(([, it]) => it.file.endsWith('.json'));
+
+  const licences = {};
+  for (const [, it] of items) licences[it.license || 'unknown'] = (licences[it.license || 'unknown'] || 0) + 1;
+
+  const audioBytes = audio.reduce((n, [, it]) => n + (it.bytes || 0), 0);
+  // ~1 MB per minute at a typical mp3 bitrate: rough, and labelled as such.
+  const audioMinutes = Math.round(audioBytes / 1048576);
+  const textChars = text.reduce((n, [, it]) => n + (it.bytes || 0), 0);
+  const textTokens = Math.round(textChars / 4);
+
+  const unusable = items.filter(([, it]) => !TRAINABLE.test(String(it.license || ''))).length;
+  const hashes = new Set(items.map(([, it]) => it.hash).filter(Boolean));
+  const unhashed = items.filter(([, it]) => !it.hash).length;
+
+  return {
+    text: { files: text.length, characters: textChars, tokens: textTokens },
+    audio: { files: audio.length, bytes: audioBytes, minutes: audioMinutes },
+    licences,
+    duplicates: { uniqueHashes: hashes.size, files: items.length, unhashed },
+    targets: READY,
+    checks: [
+      { id: 'text', label: 'Enough writing to learn from',
+        ok: textTokens >= READY.textTokens,
+        detail: textTokens.toLocaleString() + ' of ' + READY.textTokens.toLocaleString() + ' tokens' },
+      { id: 'audio', label: 'Enough audio to learn from',
+        ok: audioMinutes >= READY.audioMinutes,
+        detail: audioMinutes + ' of ' + READY.audioMinutes + ' minutes (approx)' },
+      { id: 'licence', label: 'Every file may be trained on',
+        ok: items.length > 0 && unusable === 0,
+        detail: unusable ? unusable + ' file(s) have a licence that forbids it' : 'all clear' },
+      { id: 'dupes', label: 'No duplicates',
+        ok: items.length > 0 && hashes.size + unhashed === items.length,
+        detail: unhashed ? unhashed + ' file(s) not yet fingerprinted'
+          : (items.length - hashes.size) + ' duplicate(s) found' },
+    ],
+  };
+}
+
+const TRAIN_DIR = path.join(HERE, '..', 'training');
+
+/**
+ * Write everything a training run needs into training/<name>/.
+ *
+ * Deliberately self-contained: the folder can be copied to the machine with the
+ * GPU and run there with nothing else from this project. It carries the resolved
+ * file list (absolute paths resolved at run time from manifest.json), the
+ * hyperparameters, the attribution the licences oblige, and the script itself.
+ */
+async function prepareTraining(opts, report) {
+  const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\..+/, '').replace('T', '-');
+  const name = `${opts.kind}-${stamp}`;
+  const dir = path.join(TRAIN_DIR, name);
+  await mkdir(dir, { recursive: true });
+
+  const wantAudio = opts.kind === 'music';
+  const rows = Object.entries(manifest.items)
+    .filter(([, it]) => it.file && TRAINABLE.test(String(it.license || '')))
+    .filter(([, it]) => /\.(wav|mp3|ogg|oga|flac|m4a|aac)$/i.test(it.file) === wantAudio)
+    // one line per unique fingerprint — the dataset that reaches the trainer
+    // cannot contain the same thing twice
+    .filter((entry, i, all) => all.findIndex(([, o]) => o.hash && o.hash === entry[1].hash) === i)
+    .map(([url, it]) => ({
+      id: it.id, file: it.file, title: it.title || '', url, license: it.license, hash: it.hash || null,
+    }));
+
+  const base = opts.base || (wantAudio ? 'facebook/musicgen-small' : 'mistralai/Mistral-7B-v0.3');
+  const config = {
+    name, goal: opts.goal, kind: opts.kind, base,
+    method: 'lora', epochs: opts.epochs,
+    createdAt: new Date().toISOString(),
+    store: path.resolve(STORE),
+    examples: rows.length,
+    dataset: `${name}.jsonl`,
+    // Written for a 16GB card — a 4080 fits this comfortably, an 8GB card will not.
+    hyper: wantAudio
+      ? { lr: 1e-4, batchSize: 2, gradAccum: 8, clipSeconds: 30, sampleRate: 32000, loraRank: 16, precision: 'bf16' }
+      : { lr: 2e-4, batchSize: 4, gradAccum: 4, maxSeqLen: 1024, loraRank: 16, precision: 'bf16' },
+    readiness: report.checks,
+  };
+
+  await writeFile(path.join(dir, 'config.json'), JSON.stringify(config, null, 2));
+  await writeFile(path.join(dir, `${name}.jsonl`), rows.map(r => JSON.stringify(r)).join('\n') + (rows.length ? '\n' : ''));
+
+  const credited = rows.filter(r => /^CC BY/i.test(r.license));
+  await writeFile(path.join(dir, 'ATTRIBUTION.md'),
+    ['# Attribution', '',
+      `Training run: ${name}`,
+      'These licences require credit wherever the resulting model is used.', '',
+      ...(credited.length
+        ? credited.map(r => `- [${r.title || r.url}](${r.url}) — ${r.license}`)
+        : ['_Everything in this run is CC0 or public domain; no credit is required._']),
+      ''].join('\n'));
+
+  await writeFile(path.join(dir, 'train.py'), wantAudio ? MUSIC_TRAINER : TEXT_TRAINER);
+  await writeFile(path.join(dir, 'requirements.txt'), wantAudio ? MUSIC_REQS : TEXT_REQS);
+  await writeFile(path.join(dir, 'README.md'), trainerReadme(config));
+
+  return {
+    name, dir: path.resolve(dir), examples: rows.length, files: 6,
+    command: `cd ${path.resolve(dir)} && pip install -r requirements.txt && python train.py`,
+    config,
+  };
+}
+
+/** Hash of the actual bytes — the only dedupe that cannot be fooled by a rename. */
+function bytesHash(buf) {
+  return createHash('sha256').update(buf).digest('hex');
+}
+
+/**
+ * An item already holding these exact bytes.
+ *
+ * Archives mirror the same recording under several addresses, and a filename
+ * tells you nothing about that — `song.mp3` and `track-07.mp3` can be identical
+ * files. Comparing content is what makes a second copy impossible.
+ */
+function findByHash(hash) {
+  if (!hash) return null;
+  for (const [url, it] of Object.entries(manifest.items)) {
+    if (it.hash === hash && it.file) return { url, ...it };
+  }
+  return null;
+}
+
+/**
  * Show what has already been collected.
  *
  * A job lives in memory, so after the scheduler has run all night the service
@@ -582,6 +764,15 @@ async function fetchTextRecord(rec) {
   const fields = extract($, job.settings.fields);
   const text = fields.body || readableText($);
   const title = rec.title || (fields.title || $('title').first().text() || '').trim();
+
+  const hash = textHash(text);
+  const twin = findByHash(hash);
+  if (twin) {
+    await noteDead(rec.url, `identical to ${twin.id}`);
+    throw new Error(`duplicate of ${twin.id} — same words, different address`);
+  }
+  rec.hash = hash;
+
   await mkdir(STORE, { recursive: true });
   rec.file = `${rec.id}.json`;
   rec.bytes = Buffer.byteLength(text);
@@ -606,6 +797,19 @@ async function fetchAudio(rec) {
     || (/^(application|binary)\/octet-stream$/.test(ctype) && AUDIO_EXT.test(new URL(finalUrl).pathname));
   if (!isAudio) throw new Error(`not audio (${ctype || 'unknown type'})`);
   const buf = await readCapped(res, LIMITS.maxAudioBytes);
+
+  // Last line of defence, and the only one that actually holds: the bytes are
+  // here, so compare them. A twin means this address is a mirror of something
+  // already collected — record that permanently so no later run pulls it again,
+  // and write nothing.
+  const hash = bytesHash(buf);
+  const twin = findByHash(hash);
+  if (twin) {
+    await noteDead(rec.url, `identical to ${twin.id}`);
+    throw new Error(`duplicate of ${twin.id} — same audio, different address`);
+  }
+  rec.hash = hash;
+
   await mkdir(STORE, { recursive: true });
   const ext = (new URL(finalUrl).pathname.match(/\.(\w+)$/) || [, 'bin'])[1];
   rec.file = `${rec.id}.${ext}`;
@@ -1002,6 +1206,13 @@ const server = http.createServer(async (req, res) => {
       });
     }
 
+    // What is actually on disk, and whether it is enough to train on. The Train
+    // screen used to state a dataset version from a hardcoded string; these are
+    // the real counts, recomputed from the manifest on every request.
+    if (url.pathname === '/api/dataset') {
+      return json(res, 200, datasetReport());
+    }
+
     if (url.pathname === '/api/results') {
       // Results are append-only within a job, so a poller can ask for only what
       // it has not seen yet with ?since=<count it already holds>. `since` out of
@@ -1095,6 +1306,36 @@ const server = http.createServer(async (req, res) => {
       return json(res, 200, { added, notes });
     }
 
+    // Prepare a training run. The browser cannot fine-tune anything — that needs
+    // a GPU and a Python stack — so what this produces is the real, complete
+    // input to one: a resolved dataset, a config, and a script to run on the box
+    // that has the card. Nothing here is illustrative.
+    if (url.pathname === '/api/train/prepare' && req.method === 'POST') {
+      const body = await readBody(req);
+      const report = datasetReport();
+      const blocking = report.checks.filter(c => !c.ok && c.id !== 'text' && c.id !== 'audio');
+      if (blocking.length) {
+        return json(res, 400, { error: blocking.map(c => c.label + ' — ' + c.detail).join(' · ') });
+      }
+      const kind = body.kind === 'lyrics' ? 'lyrics' : 'music';
+      // Writing a run with nothing in it wastes the trip to the GPU machine to
+      // discover it, so refuse here where the answer is already known.
+      const available = kind === 'music' ? report.audio.files : report.text.files;
+      if (!available) {
+        return json(res, 400, {
+          error: `Nothing to train on — no ${kind === 'music' ? 'audio' : 'writing'} collected yet.`,
+        });
+      }
+      const out = await prepareTraining({
+        goal: String(body.goal || 'untitled run').slice(0, 120),
+        kind,
+        base: String(body.base || '').slice(0, 120),
+        epochs: Math.min(20, Math.max(1, Number(body.epochs) || 4)),
+      }, report);
+      logLine('TRAIN', `prepared ${out.name} — ${out.files} file(s)`, '#BF00FF');
+      return json(res, 200, out);
+    }
+
     if (url.pathname === '/api/stop' && req.method === 'POST') {
       job.stopRequested = true;
       return json(res, 200, { stopping: true });
@@ -1126,7 +1367,7 @@ const server = http.createServer(async (req, res) => {
           // A 429 or a timeout is worth trying again tomorrow. "not audio" or
           // "over cap" describes the thing itself and will never come good, so
           // record it and stop spending requests on it.
-          if (/not audio|over cap|not a page|unsupported protocol|not in allowlist/i.test(err.message)) {
+          if (/not audio|over cap|not a page|unsupported protocol|not in allowlist|duplicate of/i.test(err.message)) {
             await noteDead(rec.url, err.message);
           }
           logLine('ERR', `${rec.title} — ${err.message}`, '#ff4d4d');
@@ -1177,6 +1418,9 @@ const server = http.createServer(async (req, res) => {
 server.listen(PORT, '127.0.0.1', async () => {
   await mkdir(STORE, { recursive: true });
   await loadManifest();   // ids continue where the last run stopped, not at r1
+  const { hashed, twins } = await backfillHashes();
+  if (hashed) console.log(`  hashed ${hashed} older file(s) so duplicates can be spotted`);
+  if (twins) console.log(`  dropped ${twins} duplicate(s) already in the store`);
   seedResultsFromManifest();
   const existing = (await readdir(STORE).catch(() => [])).length;
   console.log(`DataCore crawler listening on http://localhost:${PORT}`);

@@ -28,3 +28,6 @@ dist-ssr
 
 # built training data — rebuild with: npm run dataset
 dataset/
+
+# prepared training runs — regenerate from the Train screen
+training/
