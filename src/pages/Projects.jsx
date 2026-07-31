@@ -126,7 +126,7 @@ const ProjectRow = ({ project, index }) => {
             {...linkProps}
             className="mt-8 inline-flex items-center gap-2 uppercase text-sm tracking-wide"
           >
-            Visit site
+            {project.cta ?? "Visit site"}
             <span className="transition-transform duration-300 group-hover:translate-x-1">
               →
             </span>
