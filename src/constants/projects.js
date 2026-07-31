@@ -13,10 +13,16 @@ const projects = [
     year: "2025 — 2026",
     tagline: "When money goes in, and when it comes out",
     image: getAssetPath("/images/projects/trade-assistant.jpg"),
-    href: "https://github.com/Isaiahchonchoramirez/ai-trade-assistant",
+    href: getAssetPath("/trade-assistant/index.html"),
     external: true,
-    cta: "View on GitHub",
+    cta: "Open the dashboard",
     stack: ["Python", "FastAPI", "React", "pandas", "Technical Analysis"],
+    related: {
+      id: "trade-assistant-source",
+      title: "Source on GitHub",
+      blurb: "the signal engine, backtest and API behind the demo",
+      href: "https://github.com/Isaiahchonchoramirez/ai-trade-assistant",
+    },
     description:
       "A market dashboard that scores a stock the way an analyst would, then proves the scoring out on history. Seven technical factors each read the tape independently and combine by weight into one number from −100 to +100, which becomes an action with a real entry, stop and target. The same scoring code is then replayed bar by bar over years of history to show what following it would actually have returned — against simply buying and holding.",
     highlights: [
