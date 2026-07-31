@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# whatever the DataCore crawler has fetched locally
+.crawl-store
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -22,3 +25,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# built training data — rebuild with: npm run dataset
+dataset/

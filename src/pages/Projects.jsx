@@ -69,15 +69,15 @@ const ProjectRow = ({ project, index }) => {
     : { href: project.href };
 
   return (
-    <a
-      {...linkProps}
+    <div
       ref={rowRef}
-      className="group block md:py-20 py-12 border-t border-black-50 first:border-t-0"
-      aria-label={`Open ${project.title}`}
+      className="group md:py-20 py-12 border-t border-black-50 first:border-t-0"
     >
       <div className="grid xl:grid-cols-2 grid-cols-1 gap-10 xl:gap-16 items-center">
         <div className={flipped ? "xl:order-2" : ""}>
-          <ProjectPreview src={project.image} alt={`${project.title} preview`} />
+          <a {...linkProps} className="block" aria-label={`Open ${project.title}`}>
+            <ProjectPreview src={project.image} alt={`${project.title} preview`} />
+          </a>
         </div>
 
         <div className={flipped ? "xl:order-1" : ""}>
@@ -88,9 +88,11 @@ const ProjectRow = ({ project, index }) => {
             <p className="text-white-50 text-sm">{project.year}</p>
           </div>
 
-          <h2 className="md:text-5xl text-3xl font-semibold mt-6 group-hover:text-white-50 transition-colors duration-300">
-            {project.title}
-          </h2>
+          <a {...linkProps} className="block w-fit">
+            <h2 className="md:text-5xl text-3xl font-semibold mt-6 group-hover:text-white-50 transition-colors duration-300">
+              {project.title}
+            </h2>
+          </a>
 
           <p className="text-white-50 md:text-lg mt-5 leading-relaxed">
             {project.description}
@@ -120,15 +122,38 @@ const ProjectRow = ({ project, index }) => {
             </div>
           )}
 
-          <p className="mt-8 inline-flex items-center gap-2 uppercase text-sm tracking-wide">
+          <a
+            {...linkProps}
+            className="mt-8 inline-flex items-center gap-2 uppercase text-sm tracking-wide"
+          >
             Visit site
             <span className="transition-transform duration-300 group-hover:translate-x-1">
               →
             </span>
-          </p>
+          </a>
+
+          {project.related && (
+            <a
+              href={project.related.href}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-6 flex items-center gap-3 w-fit rounded-xl card-border px-4 py-3 text-white-50 hover:text-white transition-colors duration-300"
+            >
+              <span className="text-xs uppercase tracking-wide flex-none">
+                Pairs with
+              </span>
+              <span className="text-sm">
+                <span className="text-white font-semibold">
+                  {project.related.title}
+                </span>{" "}
+                — {project.related.blurb}
+              </span>
+              <span className="flex-none">↗</span>
+            </a>
+          )}
         </div>
       </div>
-    </a>
+    </div>
   );
 };
 

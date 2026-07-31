@@ -1,0 +1,14 @@
+# Sites the scheduled collection walks. One web address per line.
+# Lines starting with # are ignored. Every one of these publishes a licence
+# next to its material — that is why they are on the list.
+
+https://imslp.org/
+https://musopen.org/
+https://www.cpdl.org/
+https://archive.org/details/midi
+https://archive.org/details/audio
+https://commons.wikimedia.org/wiki/Category:Audio_files
+https://en.wikisource.org/wiki/Category:Folk_songs
+https://en.wikipedia.org/wiki/List_of_music_genres_and_styles
+https://en.wikipedia.org/wiki/List_of_musical_instruments
+https://en.wikipedia.org/wiki/Category:Music_theory

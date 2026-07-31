@@ -1,0 +1,2521 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+<script src="../shared/lyrx-vault.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="ds/styles.css">
+  <script src="ds/bundle.js"></script>
+  <style>
+    :root{
+      --color-bg:#000000; --color-surface:#161616; --color-text:#f3f2f2;
+      --color-accent:#2CFF05; --color-accent-2:#BF00FF;
+      --color-divider: color-mix(in srgb, #f3f2f2 22%, transparent);
+      --color-neutral-100:#181818; --color-neutral-200:#2D2D2D; --color-neutral-300:#3d3d3d;
+      --color-neutral-400:#545454; --color-neutral-500:#6e6e6e; --color-neutral-600:#8a8a8a;
+      --color-neutral-700:#a8a8a8; --color-neutral-800:#d4d2d2; --color-neutral-900:#f0efef;
+      --color-accent-100:#0d2003; --color-accent-200:#163a05; --color-accent-300:#1f5407;
+      --color-accent-400:#268f09; --color-accent-500:#2CFF05; --color-accent-600:#25d904;
+      --color-accent-700:#1ea603; --color-accent-800:#9bff7d; --color-accent-900:#d6ffc9;
+      --color-accent-2-100:#1f0329; --color-accent-2-200:#33044a; --color-accent-2-300:#4d0670;
+      --color-accent-2-400:#7a0aae; --color-accent-2-500:#BF00FF; --color-accent-2-600:#a300db;
+      --color-accent-2-700:#7d00a8; --color-accent-2-800:#e896ff; --color-accent-2-900:#f6d9ff;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.6);
+      --shadow-md: 0 4px 16px rgba(191,0,255,0.10);
+      --shadow-lg: 0 16px 40px rgba(44,255,5,0.08);
+    }
+    .tag{ white-space: nowrap; }
+    .btn{ white-space: nowrap; height: auto; min-height: 0; }
+    .theme-light{
+      --color-bg:#f3f2f2; --color-surface:#ffffff; --color-text:#1a1a1a;
+      --color-accent:#1a9e00; --color-accent-2:#9200c4;
+      --color-divider: color-mix(in srgb, #1a1a1a 18%, transparent);
+      --color-neutral-100:#e9e8e8; --color-neutral-200:#dcdbdb; --color-neutral-300:#c9c8c8;
+      --color-neutral-600:#8a8887; --color-neutral-700:#5f5d5c; --color-neutral-800:#3b3937; --color-neutral-900:#232120;
+      --color-accent-400:#23c705;
+    }
+    .dc-gate{ display:block; }
+    .dc-gate .a1, .dc-gate .a2, .dc-gate .a3{ transform-origin:50% 100%; transition:transform .7s cubic-bezier(.2,.7,.3,1), opacity .7s; }
+    .dc-gate:hover .a1{ transform:scale(1.18); opacity:0.35; }
+    .dc-gate:hover .a2{ transform:scale(1.45); opacity:0.18; }
+    .dc-gate:hover .a3{ transform:scale(1.9); opacity:0; }
+    .dc-totop{ position:fixed; right:24px; bottom:24px; z-index:80; border:1px solid var(--color-accent); background:var(--color-bg); color:var(--color-accent); font-family:var(--font-heading); font-weight:800; font-size:11px; letter-spacing:0.1em; padding:10px 14px; cursor:pointer; transition:transform .2s, background .2s; }
+    .dc-totop:hover{ transform:translateY(-3px); background:color-mix(in srgb, var(--color-accent) 14%, var(--color-bg)); }
+    a{ color: var(--color-accent-800); }
+    a:hover{ color: var(--color-accent); }
+    ::selection{ background: color-mix(in srgb, var(--color-accent) 35%, transparent); }
+    .dc-fadein{ animation: dcFade .4s ease both; }
+    @keyframes dcFade{ from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:none;} }
+    @keyframes dcBob{ 0%{transform:translateY(0)} 50%{transform:translateY(-10px)} 100%{transform:translateY(0)} }
+    @keyframes dcScan{ 0%{transform:translateX(-100%)} 100%{transform:translateX(400%)} }
+    @keyframes dcPulse{ 0%,100%{opacity:.35} 50%{opacity:1} }
+    @keyframes dcDriftA{ 0%{transform:translate(0,0)} 33%{transform:translate(26px,-38px)} 66%{transform:translate(-18px,-64px)} 100%{transform:translate(0,0)} }
+    @keyframes dcDriftB{ 0%{transform:translate(0,0)} 50%{transform:translate(-34px,-52px)} 100%{transform:translate(0,0)} }
+    @keyframes dcDriftC{ 0%{transform:translate(0,0)} 40%{transform:translate(18px,42px)} 75%{transform:translate(42px,-16px)} 100%{transform:translate(0,0)} }
+    @keyframes dcTwinkle{ 0%,100%{opacity:.15} 45%{opacity:.95} }
+    @keyframes dcSweepA{ 0%{transform:rotate(-26deg) scaleY(1)} 50%{transform:rotate(21deg) scaleY(1.12)} 100%{transform:rotate(-26deg) scaleY(1)} }
+    @keyframes dcSweepB{ 0%{transform:rotate(18deg) scaleY(1.08)} 50%{transform:rotate(-32deg) scaleY(.94)} 100%{transform:rotate(18deg) scaleY(1.08)} }
+    @keyframes dcSweepC{ 0%{transform:rotate(6deg)} 35%{transform:rotate(-14deg)} 70%{transform:rotate(30deg)} 100%{transform:rotate(6deg)} }
+    .dc-beam{ position:absolute; top:-90px; width:150px; height:520px; pointer-events:none; mix-blend-mode:screen; transform-origin:50% 0%; filter:blur(6px); }
+    .dc-p{ position:absolute; border-radius:50%; pointer-events:none; }
+    .dc-pw{ position:absolute; pointer-events:none; }
+    .dc-pi{ display:block; border-radius:50%; transition:transform .38s cubic-bezier(.2,.8,.3,1); }
+    .dc-d1{ animation:dcDriftA 18s ease-in-out infinite, dcTwinkle 5s ease-in-out infinite; }
+    .dc-d2{ animation:dcDriftB 24s ease-in-out infinite, dcTwinkle 7s ease-in-out infinite .6s; }
+    .dc-d3{ animation:dcDriftC 27s ease-in-out infinite, dcTwinkle 6s ease-in-out infinite 1.2s; }
+    .dc-d4{ animation:dcDriftA 21s ease-in-out infinite 1.4s, dcTwinkle 4.5s ease-in-out infinite .3s; }
+    .dc-d5{ animation:dcDriftB 30s ease-in-out infinite .8s, dcTwinkle 8s ease-in-out infinite 2s; }
+    .dc-d6{ animation:dcDriftC 19s ease-in-out infinite 2.2s, dcTwinkle 5.5s ease-in-out infinite .9s; }
+    .dc-sweep-a{ animation:dcSweepA 13s ease-in-out infinite; }
+    .dc-sweep-b{ animation:dcSweepB 17s ease-in-out infinite; }
+    .dc-sweep-c{ animation:dcSweepC 21s ease-in-out infinite; }
+    @keyframes dcReveal{ from{ opacity:0; transform:translateY(26px); } to{ opacity:1; transform:none; } }
+    .dc-float{ position:absolute; cursor:grab; touch-action:none; user-select:none; }
+    .dc-float:active{ cursor:grabbing; }
+    .dc-bob{ animation: dcBob 6s ease-in-out infinite; }
+    .dc-magnet{ transition: transform .25s cubic-bezier(.2,.7,.3,1), background .2s, color .2s; }
+    .dc-magnet:hover{ transform:translateY(-4px); }
+    /* — cross-link to Lyrx (sibling app) — */
+    .dc-xlink{ --lyrx-acid:#C8FF2E; --lyrx-hot:#FF2E7A; display:inline-flex; align-items:center; gap:10px; text-decoration:none; color:var(--color-text); border:1px solid var(--color-divider); padding:7px 12px; transition:border-color .22s, background .22s, transform .22s, box-shadow .22s; }
+    .dc-xlink:hover, .nav a.dc-xlink:hover{ color:var(--color-text); border-color:var(--lyrx-acid); background:color-mix(in srgb, var(--lyrx-acid) 9%, transparent); transform:translateY(-2px); box-shadow:0 8px 24px color-mix(in srgb, var(--lyrx-acid) 16%, transparent); }
+    .nav a.dc-xlink{ color:var(--color-text); }
+    .dc-xlink .xl-name{ font-family:var(--font-heading); font-weight:800; font-size:13px; letter-spacing:0.04em; }
+    .dc-xlink .xl-arrow{ font-size:12px; opacity:0.55; transition:transform .22s, opacity .22s; }
+    .dc-xlink:hover .xl-arrow{ opacity:1; transform:translate(3px,-3px); }
+    .dc-xband{ display:flex; align-items:center; gap:20px; width:100%; padding:20px 22px; }
+    .lyrx-mark rect{ transform-origin:50% 50%; transition:transform .36s cubic-bezier(.2,.8,.3,1); }
+    .dc-xlink:hover .lyrx-mark .lb1{ transform:scaleY(2.0); }
+    .dc-xlink:hover .lyrx-mark .lb2{ transform:scaleY(.5); }
+    .dc-xlink:hover .lyrx-mark .lb3{ transform:scaleY(.4); }
+    .dc-xlink:hover .lyrx-mark .lb4{ transform:scaleY(1.75); }
+    .dc-xlink:hover .lyrx-mark .lb5{ transform:scaleY(2.6); }
+    ::-webkit-scrollbar{ width:10px; height:10px; }
+    ::-webkit-scrollbar-track{ background:#0a0a0a; }
+    ::-webkit-scrollbar-thumb{ background:#2D2D2D; }
+    ::-webkit-scrollbar-thumb:hover{ background:var(--color-accent-400); }
+  </style>
+</helmet>
+
+<sc-if value="{{ isLanding }}" hint-placeholder-val="{{ true }}">
+<div class="{{ themeClass }}" style="background:var(--color-bg); color:var(--color-text); min-height:100vh;">
+
+  <nav class="nav" style="background:color-mix(in srgb, var(--color-bg) 78%, transparent); backdrop-filter:blur(14px); position:sticky; top:0; z-index:50; padding:{{ navPad }}; transition:padding .25s ease;">
+    <a class="nav-brand" href="#" onClick="{{ goHome }}" style="color:var(--color-text); display:inline-flex; align-items:center; gap:10px; text-decoration:none; cursor:pointer;">
+      <svg class="dc-gate" width="30" height="30" viewBox="0 0 32 32" aria-label="DataCore gate logo">
+        <defs>
+          <linearGradient id="gateGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="var(--color-accent)"></stop>
+            <stop offset="1" stop-color="var(--color-accent-2)"></stop>
+          </linearGradient>
+        </defs>
+        <path class="a3" d="M4 28 V15 A12 12 0 0 1 28 15 V28" fill="url(#gateGrad)" fill-opacity="0.08" stroke="url(#gateGrad)" stroke-width="2" stroke-linecap="square"></path>
+        <path class="a2" d="M9 28 V16.5 A7 7 0 0 1 23 16.5 V28" fill="url(#gateGrad)" fill-opacity="0.12" stroke="url(#gateGrad)" stroke-width="2" opacity="0.75" stroke-linecap="square"></path>
+        <path class="a1" d="M13.5 28 V18 A2.5 2.5 0 0 1 18.5 18 V28" fill="url(#gateGrad)" fill-opacity="0.5" stroke="url(#gateGrad)" stroke-width="1.6" opacity="0.9" stroke-linecap="square"></path>
+        <path d="M1.5 28.6 H30.5" stroke="var(--color-text)" stroke-width="1.4" opacity="0.7"></path>
+      </svg>
+      <span>DATACORE<span style="color:var(--color-accent);">.</span></span></a>
+    <a href="#how">How it works</a>
+    <a href="#rights">Rights-first</a>
+    <a href="#capsule">Capsules</a>
+    <a href="#pricing">Pricing</a>
+    <a class="dc-xlink" href="../lyrx/index.html" title="Lyrx — the studio this data trains for" style="padding:6px 11px;">
+      <svg class="lyrx-mark" width="20" height="20" viewBox="0 0 32 32" aria-label="Lyrx logo">
+        <defs><linearGradient id="lyrxGradNav" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#C8FF2E"></stop><stop offset="1" stop-color="#FF2E7A"></stop></linearGradient></defs>
+        <g fill="url(#lyrxGradNav)">
+          <rect class="lb1" x="2" y="13" width="3.4" height="6"></rect>
+          <rect class="lb2" x="8" y="8" width="3.4" height="16"></rect>
+          <rect class="lb3" x="14" y="3" width="3.4" height="26"></rect>
+          <rect class="lb4" x="20" y="9" width="3.4" height="14"></rect>
+          <rect class="lb5" x="26" y="13" width="3.4" height="6"></rect>
+        </g>
+      </svg>
+      <span class="xl-name">Lyrx</span><span class="xl-arrow">&#8599;</span></a>
+    <button class="btn btn-ghost" onClick="{{ toggleTheme }}" style="font-size:11px; letter-spacing:0.08em;">{{ themeLabel }}</button>
+    <button class="btn btn-primary" onClick="{{ goApp }}">Launch app</button>
+  </nav>
+
+  <section onMouseMove="{{ onHeroMove }}" onClick="{{ onHeroClick }}" style="padding:96px 64px 96px; position:relative; overflow:hidden;">
+    <div style="position:absolute; inset:0; pointer-events:none; background-image:linear-gradient(color-mix(in srgb, var(--color-text) 5%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, var(--color-text) 5%, transparent) 1px, transparent 1px); background-size:64px 64px;"></div>
+    <div style="position:absolute; width:520px; height:520px; border-radius:50%; pointer-events:none; left:{{ glowX }}; top:{{ glowY }}; transform:translate(-50%,-50%); background:radial-gradient(circle, rgba(44,255,5,0.13), rgba(191,0,255,0.07) 45%, transparent 70%); transition:left .25s ease-out, top .25s ease-out;"></div>
+
+    <div style="position:absolute; inset:0; overflow:hidden; pointer-events:none;">
+      <sc-for list="{{ beams }}" as="b" hint-placeholder-count="3">
+        <div class="dc-beam {{ b.cls }}" style="left:{{ b.left }}; width:{{ b.width }}; background:linear-gradient(to bottom, {{ b.tint }}, transparent 76%); transform:{{ b.transform }}; transition:{{ b.transition }};"></div>
+      </sc-for>
+
+      <sc-for list="{{ particles }}" as="p" hint-placeholder-count="40">
+        <span class="dc-pw {{ p.cls }}" style="left:{{ p.left }}; top:{{ p.top }};">
+          <span class="dc-pi" style="width:{{ p.size }}; height:{{ p.size }}; background:{{ p.color }}; transform:{{ p.shift }}; box-shadow:{{ p.glow }}; transition:{{ p.trans }};"></span>
+        </span>
+      </sc-for>
+    </div>
+
+    <div style="position:absolute; inset:0; pointer-events:none; display:{{ floatyDisplay }};">
+      <sc-for list="{{ floaties }}" as="f" hint-placeholder-count="4">
+        <div class="dc-float" onPointerDown="{{ f.onPointerDown }}" style="left:{{ f.left }}; top:{{ f.top }}; pointer-events:auto; z-index:{{ f.z }};">
+          <div class="{{ f.bobClass }}" style="border:1px solid {{ f.color }}; background:var(--color-surface); padding:14px 16px; min-width:170px; box-shadow:0 12px 40px rgba(0,0,0,0.6);">
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+              <span style="width:7px; height:7px; background:{{ f.color }}; animation:dcPulse 2.4s ease-in-out infinite;"></span>
+              <span style="font-size:10px; letter-spacing:0.12em; color:{{ f.color }}; font-family:var(--font-heading); font-weight:800;">{{ f.kicker }}</span>
+            </div>
+            <div style="font-family:var(--font-heading); font-weight:800; font-size:15px;">{{ f.title }}</div>
+            <div style="font-size:11px; opacity:0.6; margin-top:2px;">{{ f.meta }}</div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="position:relative; max-width:1100px;">
+    <div style="display:inline-block; border:1px solid var(--color-accent); color:var(--color-accent); font-size:11px; letter-spacing:0.08em; padding:5px 10px; margin-bottom:20px; font-family:var(--font-heading); font-weight:600; white-space:nowrap; line-height:1.4;">PERMISSION-AWARE KNOWLEDGE PLATFORM</div>
+    <h1 style="font-size:64px; max-width:680px; margin-bottom:20px;">Train an AI on what you're actually allowed to use.</h1>
+    <p style="font-size:18px; max-width:640px; opacity:0.8; margin-bottom:32px;">DataCore discovers, classifies, and compresses text, voice, and music into a governed knowledge base — then trains only from what passes rights review.</p>
+    <div style="display:flex; gap:16px; margin-bottom:56px;">
+      <button class="btn btn-primary" onClick="{{ goApp }}" style="padding:14px 28px; font-size:15px;">Launch app</button>
+      <a class="btn btn-secondary" href="#how" style="padding:14px 28px; font-size:15px;">See how it works</a>
+    </div>
+    <div class="hr"></div>
+    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:32px; padding-top:32px;">
+      <div><h5 style="color:var(--color-accent); margin-bottom:6px;">PROVENANCE</h5><p style="opacity:0.75; font-size:14px; margin:0;">Every learned fact traces back to a source, a license, and an evidence span.</p></div>
+      <div><h5 style="color:var(--color-accent-2); margin-bottom:6px;">CONSENT</h5><p style="opacity:0.75; font-size:14px; margin:0;">Voice and music training require documented rights — never assumed from availability.</p></div>
+      <div><h5 style="color:var(--color-accent); margin-bottom:6px;">RETRIEVAL-FIRST</h5><p style="opacity:0.75; font-size:14px; margin:0;">Facts stay live and citable instead of baked irreversibly into model weights.</p></div>
+    </div>
+    <p style="margin-top:28px; font-size:11px; letter-spacing:0.1em; color:var(--color-neutral-600);">DRAG THE CAPSULE CARDS &middot; CLICK ANYWHERE TO SWIRL THE FIELD</p>
+    </div>
+  </section>
+
+  <button class="dc-totop" onClick="{{ toTopLanding }}">&uarr; TOP</button>
+
+  <div class="hr" style="margin:0;"></div>
+
+  <section id="how" data-reveal="" style="padding:72px 64px; background:var(--color-surface); position:relative; overflow:hidden;">
+    <h6 style="color:var(--color-accent-2);">HOW IT WORKS</h6>
+    <h2 style="margin-bottom:36px; max-width:640px;">A governed refinery, not one giant scraper feeding one giant model.</h2>
+    <div style="display:flex; gap:0; flex-wrap:wrap;">
+      <sc-for list="{{ pipelineStages }}" as="stage" hint-placeholder-count="7">
+        <div class="dc-magnet" style="flex:1; min-width:140px; border:1px solid var(--color-divider); padding:16px; display:flex; flex-direction:column; gap:8px; position:relative; overflow:hidden; background:var(--color-bg);" style-hover="border-color:var(--color-accent); background:#0d1a05;">
+          <div style="position:absolute; top:0; left:0; height:2px; width:25%; background:linear-gradient(90deg, transparent, var(--color-accent), transparent); animation:dcScan 3.4s linear infinite;"></div>
+          <span style="font-size:11px; color:var(--color-accent); font-family:var(--font-heading); font-weight:800;">{{ stage.n }}</span>
+          <span style="font-family:var(--font-heading); font-weight:800; font-size:15px;">{{ stage.label }}</span>
+          <span style="font-size:12px; opacity:0.65;">{{ stage.desc }}</span>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <div class="hr" style="margin:0;"></div>
+
+  <section id="rights" data-reveal="" style="padding:72px 64px;">
+    <h6 style="color:var(--color-accent);">RIGHTS-FIRST POSITIONING</h6>
+    <h2 style="margin-bottom:36px; max-width:640px;">"Publicly reachable" is not "authorized to train on."</h2>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0; border:1px solid var(--color-divider);">
+      <div style="padding:32px; border-right:1px solid var(--color-divider);">
+        <span class="tag tag-neutral" style="margin-bottom:16px; display:inline-flex;">NOT THIS</span>
+        <p style="font-size:16px; opacity:0.75;">"Scrape anything available online and train on it."</p>
+      </div>
+      <div style="padding:32px;">
+        <span class="tag tag-accent" style="margin-bottom:16px; display:inline-flex;">THIS</span>
+        <p style="font-size:16px;">"Train an AI from information you own, created, licensed, or are authorized to use."</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="hr" style="margin:0;"></div>
+
+  <section id="capsule" data-reveal="" style="padding:72px 64px; background:var(--color-surface);">
+    <h6 style="color:var(--color-accent-2);">THE KNOWLEDGE CAPSULE</h6>
+    <h2 style="margin-bottom:12px; max-width:680px;">A compact, portable, inspectable package — not a mystery neural net.</h2>
+    <p style="opacity:0.75; max-width:560px; margin-bottom:32px;">Each capsule bundles purpose, source manifest, licenses, compressed evidence, indexes, adapter, and eval scores.</p>
+    <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:40px;">
+      <sc-for list="{{ capsuleContents }}" as="c" hint-placeholder-count="8">
+        <div class="card dc-magnet" style="background:var(--color-bg); border:1px solid var(--color-divider);" style-hover="border-color:var(--color-accent-2); box-shadow:0 10px 30px rgba(191,0,255,0.18);">
+          <span class="card-title" style="font-size:14px;">{{ c }}</span>
+        </div>
+      </sc-for>
+    </div>
+    <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap; font-family:var(--font-heading); font-weight:800; font-size:15px;">
+      <span class="tag tag-outline" style="border-color:var(--color-accent);">Country Songwriting</span>
+      <span style="color:var(--color-accent-2);">+</span>
+      <span class="tag tag-outline" style="border-color:var(--color-accent);">User's Voice</span>
+      <span style="color:var(--color-accent-2);">+</span>
+      <span class="tag tag-outline" style="border-color:var(--color-accent);">Nashville Instruments</span>
+      <span style="color:var(--color-accent-2);">=</span>
+      <span class="tag tag-accent-2">Custom Country Producer AI</span>
+    </div>
+  </section>
+
+  <div class="hr" style="margin:0;"></div>
+
+  <section data-reveal="" style="padding:72px 64px;">
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:48px;">
+      <div>
+        <h6 style="color:var(--color-accent);">VOICE STUDIO</h6>
+        <h3 style="margin-bottom:12px;">Consent before cloning.</h3>
+        <p style="opacity:0.75; font-size:14px; margin-bottom:16px;">Identity verification and a recorded consent step gate every voice model before synthesis controls unlock.</p>
+        <div style="display:flex; gap:3px; align-items:flex-end; height:48px;">
+          <sc-for list="{{ liveBars }}" as="h" hint-placeholder-count="24">
+            <div style="width:4px; height:{{ h }}%; background:var(--color-accent); transition:height .16s linear;"></div>
+          </sc-for>
+        </div>
+      </div>
+      <div>
+        <h6 style="color:var(--color-accent-2);">MUSIC STUDIO</h6>
+        <h3 style="margin-bottom:12px;">Composition, arrangement, performance — separately.</h3>
+        <p style="opacity:0.75; font-size:14px; margin-bottom:16px;">One generator composing, arranging, performing, and mixing at once is why generic output happens. DataCore stages it.</p>
+        <div style="display:flex; flex-direction:column; gap:6px;">
+          <sc-for list="{{ musicLayers }}" as="layer" hint-placeholder-count="5">
+            <div style="height:10px; width:{{ layer.w }}%; background:var(--color-accent-2); opacity:{{ layer.o }};"></div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="hr" style="margin:0;"></div>
+
+  <section id="pricing" data-reveal="" style="padding:72px 64px; background:var(--color-surface);">
+    <h6 style="color:var(--color-accent);">PRICING</h6>
+    <h2 style="margin-bottom:36px;">Start free. Scale when you train.</h2>
+    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:0; border:1px solid var(--color-divider);">
+      <sc-for list="{{ pricingTiers }}" as="tier" hint-placeholder-count="3">
+        <div style="padding:32px; border-right:1px solid var(--color-divider);">
+          <h6 style="color:var(--color-accent-2);">{{ tier.name }}</h6>
+          <h3 style="margin-bottom:16px;">{{ tier.price }}</h3>
+          <p style="opacity:0.7; font-size:13px; margin-bottom:20px;">{{ tier.desc }}</p>
+          <button class="btn btn-secondary btn-block" onClick="{{ goApp }}">{{ tier.cta }}</button>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <div class="hr" style="margin:0;"></div>
+
+  <section data-reveal="" style="padding:64px 64px 72px; background:var(--color-surface);">
+    <h6 style="color:var(--color-accent-2);">TRY THE SOUND LAYER</h6>
+    <h2 style="margin-bottom:10px; max-width:640px;">Chords in, staged arrangement out.</h2>
+    <p style="opacity:0.7; font-size:14px; margin-bottom:28px; max-width:560px;">Play a chord — it sounds through your speakers and drives the waveform. Sweep the wave to shape it by hand.</p>
+
+    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px; user-select:none; touch-action:none;">
+      <sc-for list="{{ chords }}" as="ch" hint-placeholder-count="6">
+        <button onPointerDown="{{ ch.onDown }}" onPointerEnter="{{ ch.onEnter }}" style="all:unset; cursor:pointer; padding:12px 20px; min-width:64px; text-align:center; font-family:var(--font-heading); font-weight:800; font-size:15px; border:1px solid {{ ch.border }}; background:{{ ch.bg }}; color:{{ ch.color }}; transition:background .18s, transform .18s; transform:{{ ch.lift }};">{{ ch.label }}</button>
+      </sc-for>
+    </div>
+
+    <p style="font-size:11px; letter-spacing:0.08em; color:var(--color-neutral-600); margin:0 0 24px;">{{ strumHint }}</p>
+
+    <div style="display:flex; align-items:center; gap:14px; margin-bottom:20px; flex-wrap:wrap;">
+      <button class="btn {{ kbdBtnCls }}" onClick="{{ toggleKbd }}" style="font-size:12px; padding:11px 20px;">{{ kbdBtnLabel }}</button>
+      <span style="font-size:11px; letter-spacing:0.08em; color:var(--color-neutral-600);">{{ kbdHint }}</span>
+    </div>
+
+    <sc-if value="{{ kbdOn }}" hint-placeholder-val="{{ false }}">
+      <div style="border:1px solid var(--color-accent); background:var(--color-bg); padding:18px; margin-bottom:24px;">
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px; flex-wrap:wrap;">
+          <div style="display:flex; gap:6px;">
+            <sc-for list="{{ kbdModes }}" as="km" hint-placeholder-count="2">
+              <button onClick="{{ km.onClick }}" style="all:unset; cursor:pointer; padding:7px 14px; font-size:11px; font-family:var(--font-heading); font-weight:700; border:1px solid {{ km.border }}; background:{{ km.bg }}; color:{{ km.color }};">{{ km.label }}</button>
+            </sc-for>
+          </div>
+          <span style="font-size:10px; letter-spacing:0.1em; color:var(--color-neutral-600);">{{ kbdModeNote }}</span>
+        </div>
+        <div style="position:relative; height:150px; display:flex; gap:2px; user-select:none; touch-action:none;">
+          <sc-for list="{{ whiteKeys }}" as="k" hint-placeholder-count="8">
+            <button onPointerDown="{{ k.onDown }}" onPointerEnter="{{ k.onEnter }}" style="all:unset; cursor:pointer; flex:1; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; padding-bottom:10px; gap:6px; border:1px solid var(--color-divider); background:{{ k.bg }}; color:{{ k.color }}; transition:background .1s;">
+              <span style="font-family:var(--font-heading); font-weight:800; font-size:13px;">{{ k.label }}</span>
+              <span style="font-size:10px; opacity:0.55; letter-spacing:0.06em;">{{ k.note }}</span>
+            </button>
+          </sc-for>
+          <sc-for list="{{ blackKeys }}" as="k" hint-placeholder-count="5">
+            <button onPointerDown="{{ k.onDown }}" onPointerEnter="{{ k.onEnter }}" style="all:unset; cursor:pointer; position:absolute; top:0; left:{{ k.left }}; width:{{ k.width }}; height:92px; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; padding-bottom:8px; gap:4px; background:{{ k.bg }}; color:{{ k.color }}; border:1px solid var(--color-divider); z-index:3; transition:background .1s;">
+              <span style="font-family:var(--font-heading); font-weight:800; font-size:11px;">{{ k.label }}</span>
+            </button>
+          </sc-for>
+        </div>
+        <p style="margin:12px 0 0; font-size:11px; letter-spacing:0.08em; color:var(--color-neutral-600);">TYPE A S D F G H J K FOR WHITE KEYS &middot; W E T Y U FOR BLACK &middot; ESC TO EXIT</p>
+      </div>
+    </sc-if>
+
+    <div onMouseMove="{{ onWaveMove }}" onMouseLeave="{{ onWaveLeave }}" style="border:1px solid {{ soundBorder }}; box-shadow:{{ soundGlow }}; background:var(--color-bg); padding:20px; display:flex; align-items:flex-end; gap:3px; height:180px; cursor:crosshair; transition:border-color .25s, box-shadow .25s;">
+      <sc-for list="{{ waveBars }}" as="w" hint-placeholder-count="56">
+        <div style="flex:1; height:{{ w.h }}; background:{{ w.color }}; opacity:{{ w.o }}; transition:height .22s cubic-bezier(.2,.8,.3,1), opacity .22s;"></div>
+      </sc-for>
+    </div>
+    <div style="display:flex; justify-content:space-between; margin-top:10px; font-size:11px; letter-spacing:0.1em; color:var(--color-neutral-600);">
+      <span>{{ waveStatus }}</span>
+      <span>SWEEP TO SHAPE &middot; CLICK A CHORD TO PLAY</span>
+    </div>
+
+    <a class="dc-xlink dc-xband" href="../lyrx/index.html#studio" style="margin-top:28px; background:var(--color-bg);">
+      <svg class="lyrx-mark" width="44" height="44" viewBox="0 0 32 32" aria-label="Lyrx logo" style="flex:none;">
+        <defs><linearGradient id="lyrxGradBand" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#C8FF2E"></stop><stop offset="1" stop-color="#FF2E7A"></stop></linearGradient></defs>
+        <g fill="url(#lyrxGradBand)">
+          <rect class="lb1" x="2" y="13" width="3.4" height="6"></rect>
+          <rect class="lb2" x="8" y="8" width="3.4" height="16"></rect>
+          <rect class="lb3" x="14" y="3" width="3.4" height="26"></rect>
+          <rect class="lb4" x="20" y="9" width="3.4" height="14"></rect>
+          <rect class="lb5" x="26" y="13" width="3.4" height="6"></rect>
+        </g>
+      </svg>
+      <span style="flex:1; min-width:0;">
+        <span style="display:block; font-size:10px; letter-spacing:0.14em; color:#C8FF2E; margin-bottom:5px;">THE OTHER HALF OF THE STACK</span>
+        <span class="xl-name" style="display:block; font-size:19px; margin-bottom:5px;">Lyrx — the studio this trains for</span>
+        <span style="display:block; font-size:13px; opacity:0.7;">Twenty-six dockable windows, 85 instruments, a step sequencer and a mixer that all run in one browser tab. DataCore governs the data; Lyrx is where it gets played.</span>
+      </span>
+      <span class="xl-arrow" style="font-size:15px; flex:none;">Open Lyrx &#8599;</span></a>
+  </section>
+
+  <section style="padding:88px 64px; background:var(--color-accent); color:#000;">
+    <h2 style="color:#000; max-width:640px; margin-bottom:24px; font-size:40px;">Build what you're allowed to build.</h2>
+    <button class="btn" style="background:#000; color:var(--color-accent); padding:14px 28px; font-size:15px;" onClick="{{ goApp }}">Launch the app</button>
+  </section>
+
+  <footer style="padding:32px 64px; border-top:2px solid var(--color-divider); display:flex; align-items:center; justify-content:space-between; gap:24px; font-size:13px;">
+    <span style="opacity:0.6;">DataCore</span>
+    <a class="dc-xlink" href="../lyrx/index.html" title="Lyrx — the studio side of the stack" style="padding:6px 12px;">
+      <svg class="lyrx-mark" width="18" height="18" viewBox="0 0 32 32" aria-label="Lyrx logo">
+        <defs><linearGradient id="lyrxGradFoot" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#C8FF2E"></stop><stop offset="1" stop-color="#FF2E7A"></stop></linearGradient></defs>
+        <g fill="url(#lyrxGradFoot)">
+          <rect class="lb1" x="2" y="13" width="3.4" height="6"></rect>
+          <rect class="lb2" x="8" y="8" width="3.4" height="16"></rect>
+          <rect class="lb3" x="14" y="3" width="3.4" height="26"></rect>
+          <rect class="lb4" x="20" y="9" width="3.4" height="14"></rect>
+          <rect class="lb5" x="26" y="13" width="3.4" height="6"></rect>
+        </g>
+      </svg>
+      <span class="xl-name" style="font-size:12px;">Sister project: Lyrx</span><span class="xl-arrow">&#8599;</span></a>
+    <span style="opacity:0.6;">Permission before collection.</span>
+  </footer>
+</div>
+</sc-if>
+
+<sc-if value="{{ isApp }}" hint-placeholder-val="{{ false }}">
+<div class="{{ themeClass }}" style="display:flex; min-height:100vh; background:var(--color-bg); color:var(--color-text);">
+
+  <aside style="width:220px; flex:none; border-right:2px solid var(--color-divider); padding:20px 0; display:flex; flex-direction:column;">
+    <a href="#" onClick="{{ goLanding }}" title="Back to the DataCore site" style="padding:0 20px 20px; font-family:var(--font-heading); font-weight:800; font-size:16px; display:flex; align-items:center; gap:8px; color:var(--color-text); text-decoration:none; cursor:pointer;">
+      <svg class="dc-gate" width="24" height="24" viewBox="0 0 32 32">
+        <defs>
+          <linearGradient id="gateGradApp" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="var(--color-accent)"></stop>
+            <stop offset="1" stop-color="var(--color-accent-2)"></stop>
+          </linearGradient>
+        </defs>
+        <path class="a3" d="M4 28 V15 A12 12 0 0 1 28 15 V28" fill="url(#gateGradApp)" fill-opacity="0.08" stroke="url(#gateGradApp)" stroke-width="2"></path>
+        <path class="a2" d="M9 28 V16.5 A7 7 0 0 1 23 16.5 V28" fill="url(#gateGradApp)" fill-opacity="0.12" stroke="url(#gateGradApp)" stroke-width="2" opacity="0.75"></path>
+        <path class="a1" d="M13.5 28 V18 A2.5 2.5 0 0 1 18.5 18 V28" fill="url(#gateGradApp)" fill-opacity="0.5" stroke="url(#gateGradApp)" stroke-width="1.6" opacity="0.9"></path>
+        <path d="M1.5 28.6 H30.5" stroke="var(--color-text)" stroke-width="1.4" opacity="0.7"></path>
+      </svg>
+      DATACORE<span style="color:var(--color-accent);">.</span></a>
+    <sc-for list="{{ navItems }}" as="item" hint-placeholder-count="8">
+      <button onClick="{{ item.onClick }}" style="all:unset; cursor:pointer; padding:11px 20px; font-size:13px; font-family:var(--font-heading); font-weight:600; border-left:2px solid {{ item.borderColor }}; background:{{ item.bg }}; color:{{ item.color }};">{{ item.label }}</button>
+    </sc-for>
+    <div style="margin-top:auto; padding:20px; display:flex; flex-direction:column; gap:12px;">
+      <a class="dc-xlink" href="../lyrx/index.html#studio" title="Open Lyrx Studio" style="padding:8px 10px;">
+        <svg class="lyrx-mark" width="18" height="18" viewBox="0 0 32 32" aria-label="Lyrx logo" style="flex:none;">
+          <defs><linearGradient id="lyrxGradSide" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#C8FF2E"></stop><stop offset="1" stop-color="#FF2E7A"></stop></linearGradient></defs>
+          <g fill="url(#lyrxGradSide)">
+            <rect class="lb1" x="2" y="13" width="3.4" height="6"></rect>
+            <rect class="lb2" x="8" y="8" width="3.4" height="16"></rect>
+            <rect class="lb3" x="14" y="3" width="3.4" height="26"></rect>
+            <rect class="lb4" x="20" y="9" width="3.4" height="14"></rect>
+            <rect class="lb5" x="26" y="13" width="3.4" height="6"></rect>
+          </g>
+        </svg>
+        <span class="xl-name" style="font-size:11px; flex:1;">Lyrx Studio</span><span class="xl-arrow">&#8599;</span></a>
+      <button class="btn btn-ghost" onClick="{{ toggleTheme }}" style="font-size:11px; letter-spacing:0.08em; align-self:flex-start; padding:6px 0;">{{ themeLabel }}</button>
+      <a href="#" onClick="{{ goLanding }}" style="font-size:12px; color:var(--color-neutral-700);">&larr; Back to site</a>
+    </div>
+  </aside>
+
+  <main id="dc-main" style="flex:1; overflow-y:auto; max-height:100vh; padding:36px 48px; position:relative;" class="dc-fadein">
+    <button class="dc-totop" onClick="{{ toTopApp }}">&uarr; TOP</button>
+
+    <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+      <h6 style="color:var(--color-accent);">PROJECT OVERVIEW</h6>
+      <h2 style="margin-bottom:32px;">Nashville Demo Producer</h2>
+      <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:40px;">
+        <div class="card" style="background:var(--color-surface);"><span class="card-kicker">Readiness</span><span class="card-title" style="font-size:26px;">82%</span></div>
+        <div class="card" style="background:var(--color-surface);"><span class="card-kicker">Knowledge items</span><span class="card-title" style="font-size:26px;">4,208</span></div>
+        <div class="card" style="background:var(--color-surface);"><span class="card-kicker">Source health</span><span class="card-title" style="font-size:26px; color:var(--color-accent);">Good</span></div>
+        <div class="card" style="background:var(--color-surface);"><span class="card-kicker">Last update</span><span class="card-title" style="font-size:26px;">2h ago</span></div>
+      </div>
+      <div class="hr"></div>
+      <h4 style="margin:24px 0 16px;">What this AI knows</h4>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+        <div class="card" style="background:var(--color-surface);"><span class="card-kicker">Allowed</span><p class="card-body">User's songwriting notes · Licensed country chord dataset · User-owned vocal recordings</p></div>
+        <div class="card" style="background:var(--color-surface);"><span class="card-kicker" style="color:var(--color-accent-2);">Blocked</span><p class="card-body">Commercial songs · Named living artists' voices</p></div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isDiscover }}" hint-placeholder-val="{{ false }}">
+      <h6 style="color:var(--color-accent);">DISCOVER</h6>
+      <h2 style="margin-bottom:24px;">Search approved sources</h2>
+      <input class="input" placeholder="Search datasets, audio, documents…" value="{{ discoverQuery }}" onChange="{{ setDiscoverQuery }}" style="max-width:420px; margin-bottom:28px;"/>
+      <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px;">
+        <sc-for list="{{ filteredSources }}" as="s" hint-placeholder-count="6">
+          <div class="card" style="background:var(--color-surface);">
+            <span class="card-kicker">{{ s.type }}</span>
+            <span class="card-title">{{ s.name }}</span>
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+              <span class="tag {{ s.commercialTag }}">{{ s.commercialLabel }}</span>
+              <span class="tag {{ s.trainingTag }}">{{ s.trainingLabel }}</span>
+            </div>
+            <button class="btn btn-secondary btn-block">Add to project</button>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isSources }}" hint-placeholder-val="{{ false }}">
+      <h6 style="color:var(--color-accent);">SOURCES</h6>
+      <h2 style="margin-bottom:24px;">Connected sources</h2>
+      <table class="table">
+        <thead><tr><th>Source</th><th>Type</th><th>Status</th><th>Rights</th><th>Quality</th><th>Last synced</th></tr></thead>
+        <tbody>
+          <sc-for list="{{ sources }}" as="s" hint-placeholder-count="6">
+            <tr>
+              <td>{{ s.name }}</td>
+              <td>{{ s.type }}</td>
+              <td><span class="tag {{ s.statusTag }}">{{ s.status }}</span></td>
+              <td>{{ s.rights }}</td>
+              <td>{{ s.quality }}</td>
+              <td style="opacity:0.6;">{{ s.synced }}</td>
+            </tr>
+          </sc-for>
+        </tbody>
+      </table>
+    </sc-if>
+
+    <sc-if value="{{ isCrawl }}" hint-placeholder-val="{{ false }}">
+      <h6 style="color:var(--color-accent);">FIND MUSIC</h6>
+      <h2 style="margin:0 0 8px;">Find music you're allowed to use</h2>
+      <p style="opacity:0.7; font-size:13px; margin:0 0 22px; max-width:640px; line-height:1.7;">
+        Say what you want to hear. Everything that comes back tells you, in plain words, what you're allowed to do with it.
+        Press <strong style="color:var(--color-accent);">&#9654; Play</strong> to hear it, tick the ones you like,
+        then press <strong style="color:var(--color-accent);">Send to Lyrx</strong> and they'll be waiting for you there.
+      </p>
+
+      <div style="display:flex; align-items:center; gap:12px; border:1px solid {{ modeBorder }}; background:{{ modeBg }}; padding:12px 16px; margin-bottom:24px; flex-wrap:wrap;">
+        <span style="width:8px; height:8px; flex:none; background:{{ modeDot }}; animation:dcPulse 1.6s ease-in-out infinite;"></span>
+        <span style="font-family:var(--font-heading); font-weight:800; font-size:12px; letter-spacing:0.08em; color:{{ modeDot }}; flex:none;">{{ modeLabel }}</span>
+        <span style="font-size:12px; opacity:0.75; flex:1; min-width:220px;">{{ modeHint }}</span>
+        <button class="btn btn-secondary" onClick="{{ recheckService }}" style="font-size:11px; flex:none;">Try again</button>
+      </div>
+
+      <!-- ── 1. ask ─────────────────────────────────────────────────────────── -->
+      <div style="border:1px solid var(--color-divider); background:var(--color-surface); padding:20px 22px; margin-bottom:24px;">
+        <div style="display:flex; align-items:baseline; gap:10px; margin-bottom:12px; flex-wrap:wrap;">
+          <span style="font-family:var(--font-heading); font-weight:800; font-size:11px; letter-spacing:0.12em; color:var(--color-accent);">STEP 1</span>
+          <h4 style="margin:0; font-size:15px;">What do you want to hear?</h4>
+        </div>
+
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:12px;">
+          <input class="input" value="{{ discQuery }}" onChange="{{ setDiscQuery }}" onKeyDown="{{ discOnKey }}" placeholder="try: sad piano  ·  banjo folk ballad  ·  church choir  ·  rain on a window" style="flex:1; min-width:280px; font-size:14px; padding:13px 14px;"/>
+          <button class="btn btn-primary" onClick="{{ discSearch }}" style="font-size:13px; padding:13px 22px;">{{ discBtnLabel }}</button>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:16px;">
+          <span style="font-size:11px; opacity:0.5;">Not sure? Tap one:</span>
+          <sc-for list="{{ discExamples }}" as="ex" hint-placeholder-count="9">
+            <button onClick="{{ ex.onClick }}" style="all:unset; cursor:pointer; padding:6px 12px; font-size:11px; border-radius:999px; border:1px solid {{ ex.border }}; background:{{ ex.bg }}; color:{{ ex.color }};">{{ ex.label }}</button>
+          </sc-for>
+        </div>
+
+        <div style="display:flex; gap:20px; align-items:flex-start; flex-wrap:wrap; padding-top:14px; border-top:1px solid var(--color-divider);">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-size:10px; letter-spacing:0.1em; opacity:0.5; text-transform:uppercase;">I want</span>
+            <div style="display:flex; gap:4px;">
+              <sc-for list="{{ discKinds }}" as="dk" hint-placeholder-count="3">
+                <button onClick="{{ dk.onClick }}" style="all:unset; cursor:pointer; padding:7px 12px; font-size:11px; font-family:var(--font-heading); font-weight:700; border:1px solid {{ dk.border }}; background:{{ dk.bg }}; color:{{ dk.color }};">{{ dk.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-size:10px; letter-spacing:0.1em; opacity:0.5; text-transform:uppercase;">Rules</span>
+            <div style="display:flex; gap:4px; flex-wrap:wrap;">
+              <sc-for list="{{ discLicenses }}" as="dl" hint-placeholder-count="3">
+                <button onClick="{{ dl.onClick }}" style="all:unset; cursor:pointer; padding:7px 12px; font-size:11px; font-family:var(--font-heading); font-weight:700; border:1px solid {{ dl.border }}; background:{{ dl.bg }}; color:{{ dl.color }};">{{ dl.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-size:10px; letter-spacing:0.1em; opacity:0.5; text-transform:uppercase;">Look in</span>
+            <div style="display:flex; gap:4px; flex-wrap:wrap;">
+              <sc-for list="{{ discSources }}" as="ds" hint-placeholder-count="6">
+                <button onClick="{{ ds.onClick }}" style="all:unset; cursor:pointer; padding:7px 12px; font-size:11px; font-family:var(--font-heading); font-weight:700; border:1px solid {{ ds.border }}; background:{{ ds.bg }}; color:{{ ds.color }};">{{ ds.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+        <p style="font-size:11px; opacity:0.45; margin:10px 0 0;">{{ discSourceHint }}</p>
+      </div>
+
+      <!-- ── 2. the one list ────────────────────────────────────────────────── -->
+      <div style="display:flex; align-items:baseline; gap:10px; margin-bottom:10px; flex-wrap:wrap;">
+        <span style="font-family:var(--font-heading); font-weight:800; font-size:11px; letter-spacing:0.12em; color:var(--color-accent);">STEP 2</span>
+        <h4 style="margin:0; font-size:15px;">Listen, then keep what you like</h4>
+        <span style="font-size:12px; opacity:0.6;">{{ pickSummary }}</span>
+      </div>
+      <p style="font-size:11px; color:var(--color-accent); margin:0 0 10px;">{{ discNote }}</p>
+      <p style="font-size:11px; color:#ffb020; margin:0 0 10px;">{{ previewErr }}</p>
+
+      <sc-if value="{{ hasFindings }}" hint-placeholder-val="{{ true }}">
+        <div onScroll="{{ findingsOnScroll }}" style="border:1px solid var(--color-divider); max-height:520px; overflow-y:auto;">
+          <sc-for list="{{ findingRows }}" as="r" hint-placeholder-count="6">
+            <div onClick="{{ r.onToggle }}" title="Click anywhere on the row to tick it" style="display:grid; grid-template-columns:30px 84px 1fr 190px 120px; align-items:center; gap:14px; padding:12px 14px; border-bottom:1px solid var(--color-divider); background:{{ r.bg }}; cursor:{{ r.cursor }}; opacity:{{ r.rowOpacity }};">
+              <span style="width:18px; height:18px; border:1px solid {{ r.boxBorder }}; background:{{ r.boxBg }}; color:#000; font-size:12px; font-family:var(--font-heading); font-weight:800; display:flex; align-items:center; justify-content:center;">{{ r.tick }}</span>
+              <button onClick="{{ r.onPlay }}" title="{{ r.playTitle }}" style="all:unset; cursor:pointer; padding:6px 0; text-align:center; font-size:11px; font-family:var(--font-heading); font-weight:800; letter-spacing:0.04em; color:{{ r.playColor }}; border:1px solid {{ r.playBorder }}; border-radius:999px;">{{ r.playLabel }}</button>
+              <span style="min-width:0; overflow:hidden;">
+                <span style="display:block; font-family:var(--font-heading); font-weight:700; font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ r.title }}</span>
+                <span style="display:block; font-size:11px; opacity:0.45; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ r.from }}</span>
+              </span>
+              <span style="min-width:0; overflow:hidden;">
+                <span title="{{ r.licenseTitle }}" style="display:block; font-size:11px; font-family:var(--font-heading); font-weight:700; color:{{ r.licenseColor }}; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ r.licenseLabel }}</span>
+                <span style="display:block; font-size:10px; letter-spacing:0.1em; font-family:var(--font-heading); font-weight:800; color:{{ r.typeColor }}; opacity:0.7;">{{ r.typeLabel }}</span>
+              </span>
+              <span style="font-size:11px; opacity:0.5; text-align:right;">{{ r.meta }}</span>
+            </div>
+          </sc-for>
+
+          <sc-if value="{{ showFindingsMore }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ findingsLoadMore }}" style="all:unset; cursor:pointer; display:block; width:100%; box-sizing:border-box; padding:12px; text-align:center; font-size:11px; letter-spacing:0.1em; font-family:var(--font-heading); font-weight:700; color:var(--color-accent); background:color-mix(in srgb, var(--color-accent) 6%, transparent);">{{ findingsMoreLabel }}</button>
+          </sc-if>
+        </div>
+
+        <div style="display:flex; gap:8px; margin-top:14px; flex-wrap:wrap; align-items:center;">
+          <button class="btn btn-secondary" onClick="{{ pickAllKept }}" style="font-size:11px;">Tick everything</button>
+          <button class="btn btn-secondary" onClick="{{ pickNone }}" style="font-size:11px;">Untick all</button>
+          <button class="btn btn-secondary" onClick="{{ downloadBundle }}" style="font-size:11px; margin-left:auto;">{{ downloadLabel }}</button>
+          <button class="btn btn-primary" onClick="{{ sendToLyrx }}" style="font-size:12px; padding:11px 20px;">{{ sendLabel }}</button>
+        </div>
+
+        <div style="display:flex; gap:16px; margin-top:10px; flex-wrap:wrap; font-size:11px;">
+          <span style="color:var(--color-accent);">{{ busyMsg }}</span>
+          <span style="opacity:0.5; margin-left:auto;">{{ vaultSummary }}</span>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ noFindings }}" hint-placeholder-val="{{ false }}">
+        <div style="border:1px dashed var(--color-divider); padding:36px 24px; text-align:center;">
+          <p style="font-size:13px; opacity:0.6; margin:0 0 6px;">Nothing here yet.</p>
+          <p style="font-size:12px; opacity:0.4; margin:0;">Type something above and press <strong>Find music</strong>, or tap one of the examples.</p>
+        </div>
+      </sc-if>
+
+      <!-- ── advanced: the crawler, folded away ─────────────────────────────── -->
+      <div class="hr" style="margin:32px 0 16px;"></div>
+      <button class="btn btn-ghost" onClick="{{ toggleAdv }}" style="font-size:11px;">{{ advToggleLabel }}</button>
+
+      <sc-if value="{{ advOpen }}" hint-placeholder-val="{{ false }}">
+        <p style="font-size:12px; opacity:0.6; margin:16px 0 20px; max-width:640px; line-height:1.7;">
+          Searching above looks through music libraries that already label every file. This instead reads
+          the websites you list below, page by page, and keeps anything with a licence saying you may reuse it.
+          It is slower, and you only need it if you have a particular site in mind.
+        </p>
+
+        <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:24px; margin-bottom:20px; flex-wrap:wrap;">
+          <span style="font-size:12px; opacity:0.6;">Anything it finds joins the same list above.</span>
+          <div style="display:flex; gap:8px; flex:none;">
+            <button class="btn btn-secondary" onClick="{{ resetCrawl }}" style="font-size:12px;">Start over</button>
+            <button class="btn btn-primary" onClick="{{ toggleCrawl }}" style="font-size:12px;">{{ crawlBtnLabel }}</button>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:40px; align-items:start;">
+
+          <div style="display:flex; flex-direction:column; gap:20px;">
+            <div class="field">
+              <label>Websites to read through</label>
+              <textarea class="input" rows="8" value="{{ seedText }}" onChange="{{ setSeedText }}" style="font-family:var(--font-heading); font-size:12px; line-height:1.7; resize:vertical;"></textarea>
+              <span style="font-size:11px; opacity:0.5; margin-top:6px; display:block;">One web address per line. These are the pages it starts from — it follows links out of them, staying on the same sites.</span>
+            </div>
+
+            <div class="field">
+              <label>Also allow (where the audio files live)</label>
+              <input class="input" value="{{ extraHosts }}" onChange="{{ setExtraHosts }}" placeholder="upload.wikimedia.org, cdn.example.org" style="font-size:12px;"/>
+              <span style="font-size:11px; opacity:0.5; margin-top:6px; display:block;">The sites above are allowed automatically. Audio often sits on a separate file server — name it here or it will be skipped.</span>
+            </div>
+
+            <div class="field"><label>How many links deep: {{ crawlDepth }}</label><input type="range" min="1" max="8" value="{{ crawlDepth }}" onChange="{{ setCrawlDepth }}" style="width:100%; accent-color:var(--color-accent);"/></div>
+            <div class="field"><label>How fast: {{ rateLimit }} pages a second</label><input type="range" min="1" max="20" value="{{ rateLimit }}" onChange="{{ setRateLimit }}" style="width:100%; accent-color:var(--color-accent);"/></div>
+
+            <div>
+              <label style="font-size:11px; letter-spacing:0.08em; text-transform:uppercase; opacity:0.7; display:block; margin-bottom:10px;">What to pull off each page</label>
+              <div style="display:flex; flex-direction:column; gap:1px; background:var(--color-divider); border:1px solid var(--color-divider);">
+                <div style="display:grid; grid-template-columns:1fr 1.4fr 92px; gap:1px; background:var(--color-divider);">
+                  <div style="background:var(--color-surface); padding:8px 10px; font-size:10px; letter-spacing:0.1em; opacity:0.6;">CALL IT</div>
+                  <div style="background:var(--color-surface); padding:8px 10px; font-size:10px; letter-spacing:0.1em; opacity:0.6;">FIND IT WITH</div>
+                  <div style="background:var(--color-surface); padding:8px 10px; font-size:10px; letter-spacing:0.1em; opacity:0.6;">TYPE</div>
+                </div>
+                <sc-for list="{{ extractFields }}" as="f" hint-placeholder-count="4">
+                  <div style="display:grid; grid-template-columns:1fr 1.4fr 92px; gap:1px; background:var(--color-divider);">
+                    <input value="{{ f.name }}" onChange="{{ f.onName }}" style="all:unset; background:var(--color-bg); padding:9px 10px; font-size:12px; color:var(--color-text);"/>
+                    <input value="{{ f.selector }}" onChange="{{ f.onSelector }}" style="all:unset; background:var(--color-bg); padding:9px 10px; font-size:12px; color:var(--color-accent); font-family:var(--font-heading);"/>
+                    <div style="background:var(--color-bg); padding:9px 10px; font-size:11px; opacity:0.6;">{{ f.type }}</div>
+                  </div>
+                </sc-for>
+              </div>
+              <button class="btn btn-ghost" onClick="{{ addField }}" style="font-size:11px; margin-top:8px;">+ Add one</button>
+            </div>
+
+            <div class="field">
+              <label>Repeat this</label>
+              <div class="seg">
+                <sc-for list="{{ schedules }}" as="sc" hint-placeholder-count="4">
+                  <button onClick="{{ sc.onClick }}" style="all:unset; cursor:pointer; flex:1; text-align:center; padding:9px 12px; font-size:12px; font-family:var(--font-heading); font-weight:600; background:{{ sc.bg }}; color:{{ sc.color }};">{{ sc.label }}</button>
+                </sc-for>
+              </div>
+            </div>
+
+            <label class="radio"><input type="checkbox" checked="{{ enforced }}" disabled="{{ enforced }}"/><span class="dot" style="border-radius:0;"></span>Follow each site's rules about what robots may read</label>
+            <label class="radio"><input type="checkbox" checked="{{ enforced }}" disabled="{{ enforced }}"/><span class="dot" style="border-radius:0;"></span>Set aside anything that doesn't say you may reuse it</label>
+            <span style="font-size:11px; opacity:0.45; margin-top:-6px;">{{ enforcedNote }}</span>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:20px;">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span style="width:8px; height:8px; background:{{ crawlDotColor }}; animation:dcPulse 1.6s ease-in-out infinite;"></span>
+              <span style="font-family:var(--font-heading); font-weight:800; font-size:13px; color:{{ crawlDotColor }};">{{ crawlStatusLabel }}</span>
+              <span style="font-size:11px; opacity:0.5;">{{ crawlElapsed }}</span>
+            </div>
+
+            <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:1px; background:var(--color-divider); border:1px solid var(--color-divider);">
+              <sc-for list="{{ crawlStats }}" as="st" hint-placeholder-count="6">
+                <div style="background:var(--color-surface); padding:14px 16px;">
+                  <div style="font-size:10px; letter-spacing:0.1em; opacity:0.55; margin-bottom:4px;">{{ st.label }}</div>
+                  <div style="font-family:var(--font-heading); font-weight:800; font-size:22px; color:{{ st.color }};">{{ st.value }}</div>
+                </div>
+              </sc-for>
+            </div>
+
+            <div>
+              <label style="font-size:11px; letter-spacing:0.08em; text-transform:uppercase; opacity:0.7; display:block; margin-bottom:8px;">What it's doing right now</label>
+              <div style="border:1px solid var(--color-divider); background:#080808; height:280px; overflow:hidden; display:flex; flex-direction:column-reverse; padding:10px 12px; gap:5px;">
+                <sc-for list="{{ crawlLog }}" as="line" hint-placeholder-count="6">
+                  <div style="font-family:var(--font-heading); font-size:11px; display:flex; gap:8px; line-height:1.5;">
+                    <span style="opacity:0.35; flex:none;">{{ line.t }}</span>
+                    <span style="color:{{ line.color }}; flex:none; width:56px;">{{ line.code }}</span>
+                    <span style="opacity:0.8; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ line.msg }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+    </sc-if>
+
+    <sc-if value="{{ isStore }}" hint-placeholder-val="{{ false }}">
+      <h6 style="color:var(--color-accent);">DATA STORE</h6>
+      <h2 style="margin-bottom:8px;">Where everything lands</h2>
+      <p style="opacity:0.65; font-size:13px; margin-bottom:28px; max-width:600px;">Four tiers, one lineage. Every row keeps a pointer back to the raw capture it came from, so nothing in the store is orphaned from its licence.</p>
+
+      <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:12px;">
+        <sc-for list="{{ tiers }}" as="t" hint-placeholder-count="4">
+          <button class="dc-magnet" onClick="{{ t.onClick }}" style="all:unset; cursor:pointer; border:1px solid {{ t.border }}; background:{{ t.bg }}; padding:16px; display:flex; flex-direction:column; gap:8px;">
+            <div style="display:flex; justify-content:space-between; align-items:baseline;">
+              <span style="font-size:10px; letter-spacing:0.12em; color:{{ t.kickerColor }}; font-family:var(--font-heading); font-weight:800;">{{ t.step }}</span>
+              <span style="font-size:11px; opacity:0.5;">{{ t.retention }}</span>
+            </div>
+            <span style="font-family:var(--font-heading); font-weight:800; font-size:15px;">{{ t.name }}</span>
+            <span style="font-size:12px; opacity:0.6;">{{ t.records }} &middot; {{ t.size }}</span>
+            <span style="font-size:11px; opacity:0.5; line-height:1.5;">{{ t.engine }}</span>
+          </button>
+        </sc-for>
+      </div>
+      <p style="font-size:11px; letter-spacing:0.08em; color:var(--color-neutral-600); margin:0 0 24px;">CLICK A TIER TO INSPECT IT</p>
+
+      <div style="display:flex; gap:8px; margin-bottom:24px;">
+        <sc-for list="{{ storeViews }}" as="v" hint-placeholder-count="2">
+          <button onClick="{{ v.onClick }}" style="all:unset; cursor:pointer; padding:9px 16px; font-size:12px; font-family:var(--font-heading); font-weight:700; border:1px solid {{ v.border }}; background:{{ v.bg }}; color:{{ v.color }};">{{ v.label }}</button>
+        </sc-for>
+      </div>
+
+      <sc-if value="{{ isBrowse }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex; align-items:center; gap:16px; margin-bottom:16px;">
+          <input class="input" placeholder="Filter records…" value="{{ browseQuery }}" onChange="{{ setBrowseQuery }}" style="max-width:320px;"/>
+          <span style="font-size:12px; opacity:0.6;">{{ browseCount }} records in {{ activeTier.name }}</span>
+        </div>
+        <table class="table">
+          <thead>
+            <tr>
+              <sc-for list="{{ browseCols }}" as="bc" hint-placeholder-count="5">
+                <th>{{ bc }}</th>
+              </sc-for>
+            </tr>
+          </thead>
+          <tbody>
+            <sc-for list="{{ browseRows }}" as="br" hint-placeholder-count="8">
+              <tr>
+                <sc-for list="{{ br.cells }}" as="cell" hint-placeholder-count="5">
+                  <td style="font-size:12px;">{{ cell }}</td>
+                </sc-for>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+        <p style="font-size:11px; color:var(--color-neutral-600); margin-top:12px; letter-spacing:0.05em;">RAW TIER PICKS UP NEW CAPTURES LIVE WHILE A CRAWL RUNS — START ONE UNDER CRAWLERS.</p>
+      </sc-if>
+
+      <sc-if value="{{ isSchema }}" hint-placeholder-val="{{ true }}">
+      <div style="display:grid; grid-template-columns:1.3fr 1fr; gap:40px; align-items:start;">
+        <div>
+          <h4 style="margin:0 0 4px;">{{ activeTier.name }} schema</h4>
+          <p style="font-size:12px; opacity:0.6; margin:0 0 16px;">{{ activeTier.note }}</p>
+          <table class="table">
+            <thead><tr><th>Column</th><th>Type</th><th>Notes</th></tr></thead>
+            <tbody>
+              <sc-for list="{{ activeTier.schema }}" as="col" hint-placeholder-count="6">
+                <tr>
+                  <td style="font-family:var(--font-heading); font-weight:600;">{{ col.name }}</td>
+                  <td style="color:var(--color-accent); font-size:12px;">{{ col.type }}</td>
+                  <td style="opacity:0.6; font-size:12px;">{{ col.note }}</td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:16px;">
+          <div class="card" style="background:var(--color-surface);">
+            <span class="card-kicker">Write path</span>
+            <p class="card-body" style="font-size:12px;">{{ activeTier.writePath }}</p>
+          </div>
+          <div class="card" style="background:var(--color-surface);">
+            <span class="card-kicker" style="color:var(--color-accent-2);">Access</span>
+            <p class="card-body" style="font-size:12px;">{{ activeTier.access }}</p>
+          </div>
+          <div class="card" style="background:var(--color-surface);">
+            <span class="card-kicker">Lineage key</span>
+            <span class="card-title" style="font-size:14px; color:var(--color-accent); font-family:var(--font-heading);">{{ activeTier.lineage }}</span>
+            <span class="card-meta">Resolves to the original capture and its licence record.</span>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+    </sc-if>
+
+    <sc-if value="{{ isQuery }}" hint-placeholder-val="{{ false }}">
+      <h6 style="color:var(--color-accent);">WORKBENCH</h6>
+      <h2 style="margin-bottom:24px;">Work with the data</h2>
+
+      <div style="display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap;">
+        <sc-for list="{{ queryModes }}" as="m" hint-placeholder-count="3">
+          <button onClick="{{ m.onClick }}" style="all:unset; cursor:pointer; padding:9px 16px; font-size:12px; font-family:var(--font-heading); font-weight:700; border:1px solid {{ m.border }}; background:{{ m.bg }}; color:{{ m.color }};">{{ m.label }}</button>
+        </sc-for>
+      </div>
+
+      <textarea class="input" rows="4" value="{{ queryText }}" onChange="{{ setQueryText }}" style="font-family:var(--font-heading); font-size:13px; line-height:1.8; color:var(--color-accent); resize:vertical; margin-bottom:12px;"></textarea>
+
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px;">
+        <sc-for list="{{ snippets }}" as="sn" hint-placeholder-count="3">
+          <button class="btn btn-ghost" onClick="{{ sn.onClick }}" style="font-size:11px;">{{ sn.label }}</button>
+        </sc-for>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:16px; margin-bottom:28px;">
+        <button class="btn btn-primary" onClick="{{ runQuery }}" style="font-size:12px; padding:11px 22px;">{{ runLabel }}</button>
+        <span style="font-size:12px; opacity:0.6;">{{ queryMeta }}</span>
+      </div>
+
+      <sc-if value="{{ hasResults }}" hint-placeholder-val="{{ true }}">
+        <table class="table">
+          <thead>
+            <tr>
+              <sc-for list="{{ resultCols }}" as="c" hint-placeholder-count="4">
+                <th>{{ c }}</th>
+              </sc-for>
+            </tr>
+          </thead>
+          <tbody>
+            <sc-for list="{{ resultRows }}" as="r" hint-placeholder-count="5">
+              <tr>
+                <sc-for list="{{ r.cells }}" as="cell" hint-placeholder-count="4">
+                  <td style="font-size:12px;">{{ cell }}</td>
+                </sc-for>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+
+        <div class="hr" style="margin:28px 0;"></div>
+        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+          <span style="font-size:11px; letter-spacing:0.08em; opacity:0.55; margin-right:6px;">SEND RESULT SET TO</span>
+          <sc-for list="{{ exports }}" as="ex" hint-placeholder-count="5">
+            <button class="btn {{ ex.cls }}" style="font-size:11px; opacity:{{ ex.opacity }};">{{ ex.label }}</button>
+          </sc-for>
+        </div>
+      </sc-if>
+    </sc-if>
+
+    <sc-if value="{{ isKnowledge }}" hint-placeholder-val="{{ false }}">
+      <h6 style="color:var(--color-accent);">KNOWLEDGE</h6>
+      <h2 style="margin-bottom:20px;">Explore what was learned</h2>
+      <div style="display:flex; gap:8px; margin-bottom:24px; flex-wrap:wrap;">
+        <sc-for list="{{ knowledgeTabs }}" as="t" hint-placeholder-count="5">
+          <button class="btn {{ t.cls }}" onClick="{{ t.onClick }}" style="font-size:12px; padding:8px 14px;">{{ t.label }}</button>
+        </sc-for>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:1px; background:var(--color-divider);">
+        <sc-for list="{{ knowledgeItems }}" as="k" hint-placeholder-count="5">
+          <div style="background:var(--color-bg); padding:14px 16px; display:flex; justify-content:space-between; gap:16px; align-items:center;">
+            <div><p style="margin:0; font-size:14px;">{{ k.value }}</p><span style="font-size:11px; opacity:0.5;">{{ k.source }}</span></div>
+            <span class="tag tag-outline" style="border-color:var(--color-accent); color:var(--color-accent); flex:none;">{{ k.confidence }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isTrain }}" hint-placeholder-val="{{ false }}">
+      <h6 style="color:var(--color-accent);">TRAIN</h6>
+      <h2 style="margin-bottom:24px;">New training job</h2>
+      <div style="max-width:520px; display:flex; flex-direction:column; gap:20px;">
+        <div class="field"><label>Training goal</label><input class="input" value="Country vocal delivery + song structure" onChange="{{ noop }}"/></div>
+        <div class="field"><label>Dataset version</label><input class="input" value="v4 — reviewed 2026-07-20" onChange="{{ noop }}"/></div>
+        <div class="field"><label>Base model</label><input class="input" value="datacore-base-7b" onChange="{{ noop }}"/></div>
+        <div class="field">
+          <label>Method</label>
+          <div class="seg">
+            <label class="seg-opt"><input type="radio" name="method" checked=""/>LoRA</label>
+            <label class="seg-opt"><input type="radio" name="method"/>Full fine-tune</label>
+            <label class="seg-opt"><input type="radio" name="method"/>Adapter</label>
+          </div>
+        </div>
+        <div class="field">
+          <label>Compute budget: {{ computeBudget }}%</label>
+          <input type="range" min="10" max="100" value="{{ computeBudget }}" onChange="{{ setComputeBudget }}" style="width:100%; accent-color:var(--color-accent);"/>
+        </div>
+        <label class="radio"><input type="checkbox" checked=""/><span class="dot" style="border-radius:0;"></span>Confirmed all sources passed rights review</label>
+        <button class="btn btn-primary" style="align-self:flex-start; padding:12px 24px;">Launch training job</button>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isVoice }}" hint-placeholder-val="{{ false }}">
+      <h6 style="color:var(--color-accent);">VOICE STUDIO</h6>
+      <h2 style="margin-bottom:10px;">Isaiah Voice Model v3</h2>
+      <p style="font-size:12px; opacity:0.5; margin-bottom:20px;">Renders locally. The hand-off is lyrics in, timed vocal out — take the render into Lyrx to sit it on a track.</p>
+
+      <a class="dc-xlink dc-xband" href="../lyrx/index.html#studio" style="margin-bottom:28px; background:var(--color-surface); padding:16px 18px;">
+        <svg class="lyrx-mark" width="34" height="34" viewBox="0 0 32 32" aria-label="Lyrx logo" style="flex:none;">
+          <defs><linearGradient id="lyrxGradVoice" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#C8FF2E"></stop><stop offset="1" stop-color="#FF2E7A"></stop></linearGradient></defs>
+          <g fill="url(#lyrxGradVoice)">
+            <rect class="lb1" x="2" y="13" width="3.4" height="6"></rect>
+            <rect class="lb2" x="8" y="8" width="3.4" height="16"></rect>
+            <rect class="lb3" x="14" y="3" width="3.4" height="26"></rect>
+            <rect class="lb4" x="20" y="9" width="3.4" height="14"></rect>
+            <rect class="lb5" x="26" y="13" width="3.4" height="6"></rect>
+          </g>
+        </svg>
+        <span style="flex:1; min-width:0;">
+          <span style="display:block; font-size:10px; letter-spacing:0.14em; color:#C8FF2E; margin-bottom:4px;">VOCAL HAND-OFF</span>
+          <span class="xl-name" style="display:block; font-size:15px; margin-bottom:3px;">Lyrx Studio</span>
+          <span style="display:block; font-size:12px; opacity:0.65;">Drop the vocal into a session — comp it, tune it, mix it against the beat.</span>
+        </span>
+        <span class="xl-arrow" style="font-size:13px; flex:none;">Open &#8599;</span></a>
+      <div style="display:grid; grid-template-columns:1.2fr 1fr; gap:40px;">
+        <div style="display:flex; flex-direction:column; gap:20px;">
+          <div class="field"><label>Accent strength: {{ accentStrength }}%</label><input type="range" value="{{ accentStrength }}" onChange="{{ setAccentStrength }}" style="width:100%; accent-color:var(--color-accent-2);"/></div>
+          <div class="field"><label>Pitch range: {{ pitchRange }}%</label><input type="range" value="{{ pitchRange }}" onChange="{{ setPitchRange }}" style="width:100%; accent-color:var(--color-accent-2);"/></div>
+          <div class="field"><label>Emotional intensity: {{ emotionalIntensity }}%</label><input type="range" value="{{ emotionalIntensity }}" onChange="{{ setEmotionalIntensity }}" style="width:100%; accent-color:var(--color-accent-2);"/></div>
+          <div class="field"><label>Breathiness: {{ breathiness }}%</label><input type="range" value="{{ breathiness }}" onChange="{{ setBreathiness }}" style="width:100%; accent-color:var(--color-accent-2);"/></div>
+        </div>
+        <div class="card" style="background:var(--color-surface); gap:16px;">
+          <span class="tag tag-accent">Consent verified</span>
+          <div style="display:flex; gap:3px; align-items:flex-end; height:64px;">
+            <sc-for list="{{ liveBars }}" as="h" hint-placeholder-count="24">
+              <div style="width:5px; height:{{ h }}%; background:var(--color-accent-2); transition:height .16s linear;"></div>
+            </sc-for>
+          </div>
+          <span class="card-meta">Recorded consent · clean enrollment · watermarked output</span>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isMusic }}" hint-placeholder-val="{{ false }}">
+      <h6 style="color:var(--color-accent);">MUSIC STUDIO</h6>
+      <h2 style="margin-bottom:10px;">Staged generation</h2>
+      <p style="font-size:12px; opacity:0.5; margin-bottom:20px;">Lyric and structure input for the composition stage comes from Lyrx — write the section map there, stage it here.</p>
+
+      <a class="dc-xlink dc-xband" href="../lyrx/index.html#studio" style="margin-bottom:28px; background:var(--color-surface); padding:16px 18px;">
+        <svg class="lyrx-mark" width="34" height="34" viewBox="0 0 32 32" aria-label="Lyrx logo" style="flex:none;">
+          <defs><linearGradient id="lyrxGradMusic" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#C8FF2E"></stop><stop offset="1" stop-color="#FF2E7A"></stop></linearGradient></defs>
+          <g fill="url(#lyrxGradMusic)">
+            <rect class="lb1" x="2" y="13" width="3.4" height="6"></rect>
+            <rect class="lb2" x="8" y="8" width="3.4" height="16"></rect>
+            <rect class="lb3" x="14" y="3" width="3.4" height="26"></rect>
+            <rect class="lb4" x="20" y="9" width="3.4" height="14"></rect>
+            <rect class="lb5" x="26" y="13" width="3.4" height="6"></rect>
+          </g>
+        </svg>
+        <span style="flex:1; min-width:0;">
+          <span style="display:block; font-size:10px; letter-spacing:0.14em; color:#C8FF2E; margin-bottom:4px;">ARRANGEMENT HAND-OFF</span>
+          <span class="xl-name" style="display:block; font-size:15px; margin-bottom:3px;">Lyrx Studio</span>
+          <span style="display:block; font-size:12px; opacity:0.65;">Sequencer, piano roll, plugin rack and mixer — where these stems become an arrangement.</span>
+        </span>
+        <span class="xl-arrow" style="font-size:13px; flex:none;">Open &#8599;</span></a>
+      <div style="display:flex; gap:0; margin-bottom:32px; border:1px solid var(--color-divider);">
+        <sc-for list="{{ musicStages }}" as="ms" hint-placeholder-count="5">
+          <button onClick="{{ ms.onClick }}" style="all:unset; cursor:pointer; flex:1; text-align:left; padding:16px; border-right:1px solid var(--color-divider); background:{{ ms.bg }}; color:{{ ms.color }};">
+            <div style="font-family:var(--font-heading); font-weight:800; font-size:13px; margin-bottom:4px;">{{ ms.label }}</div>
+            <div style="font-size:11px; opacity:0.7;">{{ ms.hint }}</div>
+          </button>
+        </sc-for>
+      </div>
+      <h4 style="margin-bottom:12px;">{{ activeMusicStage.label }} output</h4>
+      <p style="opacity:0.7; font-size:13px; margin-bottom:24px; max-width:520px;">{{ activeMusicStage.detail }}</p>
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <sc-for list="{{ stems }}" as="stem" hint-placeholder-count="4">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <span style="width:64px; font-size:12px; opacity:0.7;">{{ stem.name }}</span>
+            <div style="flex:1; height:14px; background:var(--color-surface); position:relative;">
+              <div style="height:100%; width:{{ stem.w }}%; background:{{ stem.color }};"></div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isCompression }}" hint-placeholder-val="{{ false }}">
+      <h6 style="color:var(--color-accent);">COMPRESSION</h6>
+      <h2 style="margin-bottom:8px;">What was removed — and why</h2>
+      <p style="opacity:0.65; font-size:13px; margin-bottom:28px; max-width:560px;">Never marketed as lossless. Storage reduction and knowledge retention are tracked separately.</p>
+      <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:36px; max-width:640px;">
+        <sc-for list="{{ compressionStages }}" as="cs" hint-placeholder-count="9">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <span style="width:150px; font-size:12px; opacity:0.75;">{{ cs.label }}</span>
+            <div style="flex:1; height:16px; background:var(--color-surface);">
+              <div style="height:100%; width:{{ cs.pct }}%; background:{{ cs.color }}; transition:width 1s cubic-bezier(.2,.7,.3,1);"></div>
+            </div>
+            <span style="width:70px; text-align:right; font-size:12px; font-family:var(--font-heading); font-weight:800;">{{ cs.size }}</span>
+          </div>
+        </sc-for>
+      </div>
+      <div class="hr"></div>
+      <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-top:24px;">
+        <div class="card" style="background:var(--color-surface);"><span class="card-kicker">Storage reduction</span><span class="card-title" style="font-size:22px;">96.7%</span></div>
+        <div class="card" style="background:var(--color-surface);"><span class="card-kicker">Fact retention</span><span class="card-title" style="font-size:22px; color:var(--color-accent);">99.1%</span></div>
+        <div class="card" style="background:var(--color-surface);"><span class="card-kicker">Retrieval recall</span><span class="card-title" style="font-size:22px;">94.4%</span></div>
+        <div class="card" style="background:var(--color-surface);"><span class="card-kicker">Audio fidelity</span><span class="card-title" style="font-size:22px; color:var(--color-accent-2);">A-grade</span></div>
+      </div>
+    </sc-if>
+
+  </main>
+</div>
+</sc-if>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    view: 'landing',
+    screen: 'home',
+    discoverQuery: '',
+    computeBudget: 60,
+    accentStrength: 40,
+    pitchRange: 55,
+    emotionalIntensity: 65,
+    breathiness: 30,
+    knowledgeTab: 'facts',
+    musicStage: 'composition',
+    glow: { x: 420, y: 320 },
+    scrolled: false,
+    phase: 0,
+    floaties: [
+      { id: 'f1', x: 720, y: 40, kicker: 'CAPSULE', title: 'Country Songwriting', meta: '1.2 GB · CC-BY-4.0', color: '#2CFF05' },
+      { id: 'f2', x: 940, y: 210, kicker: 'VOICE', title: 'Isaiah Voice v3', meta: 'consent verified', color: '#BF00FF' },
+      { id: 'f3', x: 700, y: 360, kicker: 'ADAPTER', title: 'nashville-lora-17', meta: '620 MB · rank 16', color: '#2CFF05' },
+      { id: 'f4', x: 980, y: 470, kicker: 'RIGHTS', title: '6 sources reviewed', meta: '1 quarantined', color: '#BF00FF' },
+    ],
+    dragId: null,
+    crawlRunning: false,
+    crawlTicks: 0,
+    crawlCounters: { queued: 1284, fetched: 0, parsed: 0, stored: 0, quarantined: 0, bytes: 0 },
+    crawlLog: [],
+    // Libraries that publish a licence next to every file. Beginners never have
+    // to touch this — it only matters if they open "Search specific websites".
+    seedText: [
+      'https://imslp.org/',
+      'https://musopen.org/',
+      'https://www.cpdl.org/',
+      'https://archive.org/details/midi',
+      'https://archive.org/details/audio',
+      'https://commons.wikimedia.org/wiki/Category:Audio_files',
+      'https://en.wikisource.org/wiki/Category:Folk_songs',
+      'https://en.wikipedia.org/wiki/List_of_music_genres_and_styles',
+      'https://en.wikipedia.org/wiki/List_of_musical_instruments',
+      'https://en.wikipedia.org/wiki/Category:Music_theory',
+    ].join('\n'),
+    // "Search specific websites" is folded away until someone asks for it.
+    advOpen: false,
+    extractFields: [
+      { name: 'title', selector: 'h1, meta[property="og:title"]', type: 'text' },
+      { name: 'body', selector: 'article, main p', type: 'text' },
+      { name: 'licence', selector: 'a[rel="license"] @href', type: 'url' },
+      { name: 'published', selector: 'time @datetime', type: 'date' },
+    ],
+    crawlDepth: 3,
+    rateLimit: 4,
+    // live crawler service (npm run crawler); falls back to the simulation
+    svcState: 'checking',
+    svcUrl: 'http://localhost:8787',
+    extraHosts: 'upload.wikimedia.org',
+    liveResults: [],
+    // How many finds the table actually puts in the DOM. A crawl can hold
+    // thousands; rendering them all is what locks the tab up.
+    findingsShown: 100,
+    picked: {},
+    // seed discovery — "I don't know where to look"
+    discQuery: 'folk ballad banjo',
+    discKind: 'both',
+    discLicense: 'commercial',
+    discSource: 'all',
+    discPageSize: 20,
+    discPage: 1,
+    discHasMore: false,
+    discMore: false,
+    discEffective: '',
+    // audio audition — one player, shared by both tables
+    previewId: null,
+    previewLoading: false,
+    previewErr: '',
+    discBusy: false,
+    discNote: '',
+    discList: [],
+    busyMsg: '',
+    vaultInfo: null,
+    schedule: 'daily',
+    tier: 'raw',
+    theme: 'dark',
+    burst: null,
+    chordPlaying: null,
+    chordAt: 0,
+    waveX: null,
+    kbdOn: false,
+    chordMode: true,
+    activeNote: null,
+    storeView: 'schema',
+    browseQuery: '',
+    queryMode: 'sql',
+    queryText: "SELECT s.host, count(*) AS docs, sum(d.tokens) AS tokens\nFROM documents d JOIN sources s USING (source_id)\nWHERE d.licence_class = 'reusable'\nGROUP BY 1 ORDER BY tokens DESC LIMIT 5;",
+    queryRunning: false,
+    queryRan: true,
+  };
+
+  // ── live crawler service ───────────────────────────────────────────────────
+  // The service does the fetching; this page only drives it and shows results.
+  // With nothing listening on svcUrl the screen falls back to the simulation,
+  // which is what the deployed (static) build always does.
+  svc(path, opts) {
+    return fetch(this.state.svcUrl + path, {
+      ...opts,
+      headers: opts && opts.body ? { 'content-type': 'application/json' } : undefined,
+    }).then(r => r.json().then(j => (r.ok ? j : Promise.reject(new Error(j.error || r.status)))));
+  }
+
+  async checkService() {
+    try {
+      await this.svc('/api/health');
+      if (this.state.svcState !== 'live') {
+        // The idle counters are the simulation's; a live service starts empty.
+        const fresh = !this.state.crawlTicks && !this.state.liveResults.length;
+        this.setState({
+          svcState: 'live',
+          ...(fresh ? { crawlCounters: { queued: 0, fetched: 0, parsed: 0, stored: 0, quarantined: 0, bytes: 0 } } : {}),
+        });
+      }
+      // Pull once on connecting. The scheduled job collects overnight while
+      // nothing is open, so without this the screen says "Nothing here yet"
+      // to someone whose disk holds hundreds of tracks.
+      if (!this._loadedOnce) {
+        this._loadedOnce = true;
+        this._lastPoll = 0;
+        await this.pollLive();
+      }
+      return true;
+    } catch (e) {
+      if (this.state.svcState !== 'offline') this.setState({ svcState: 'offline', crawlRunning: false });
+      return false;
+    }
+  }
+
+  async startLiveCrawl() {
+    this.setState({ busyMsg: 'starting…' });
+    try {
+      await this.svc('/api/reset', { method: 'POST' });
+      await this.svc('/api/crawl', {
+        method: 'POST',
+        body: JSON.stringify({
+          seeds: this.state.seedText,
+          extraHosts: this.state.extraHosts,
+          depth: this.state.crawlDepth,
+          rateLimit: this.state.rateLimit,
+          audio: true,
+          fields: this.state.extractFields.map(f => ({ name: f.name, selector: f.selector })),
+        }),
+      });
+      this.setState({ crawlRunning: true, liveResults: [], findingsShown: 100, picked: {}, busyMsg: '', crawlLog: [] });
+    } catch (err) {
+      this.setState({ busyMsg: 'could not start: ' + err.message, crawlRunning: false });
+    }
+  }
+
+  async pollLive() {
+    if (Date.now() - (this._lastPoll || 0) < 1100) return;
+    this._lastPoll = Date.now();
+    try {
+      const st = await this.svc('/api/status');
+      const s = this.state;
+      // Ask only for finds we do not already hold. Re-pulling the whole list
+      // every second is what made a long crawl crawl.
+      const out = await this.svc('/api/results?since=' + s.liveResults.length);
+      // A service too old to echo `since` ignored the parameter and sent the
+      // whole list, so fall back to replacing rather than appending twice.
+      const since = Number(out.since) || 0;
+      const results = since === 0 ? out.results : s.liveResults.concat(out.results);
+      // A poll that brought nothing new must not re-render: the findings table
+      // rebuilds every row object on each render, so idle polls are not free.
+      const changed = results.length !== s.liveResults.length
+        || st.running !== s.crawlRunning
+        || st.counters.fetched !== s.crawlTicks
+        || st.log.length !== s.crawlLog.length
+        || (st.log[0] || {}).t !== (s.crawlLog[0] || {}).t;
+      if (!changed) return;
+      this.setState({
+        crawlRunning: st.running,
+        crawlTicks: st.counters.fetched,
+        crawlCounters: st.counters,
+        crawlLog: st.log,
+        liveResults: results,
+      });
+    } catch (err) {
+      this.setState({ svcState: 'offline', crawlRunning: false });
+    }
+  }
+
+  /** `q` lets an example chip search itself without waiting for a re-render. */
+  async runDiscover(q) {
+    const query = q || this.state.discQuery;
+    if (this.state.svcState !== 'live') {
+      this.setState({ discNote: 'Searching needs the finder running — start it with  npm run crawler.' });
+      return;
+    }
+    if (!String(query).trim()) { this.setState({ discNote: 'Type what you are after, or pick an example.' }); return; }
+    this.stopPreview();
+    this.setState(st => ({
+      discQuery: query,
+      discBusy: true, discNote: 'looking…',
+      discList: [], discPage: 1, discHasMore: false, findingsShown: 100,
+      // A new search drops the old search's ticks but keeps anything already
+      // collected — both share one pick list now.
+      picked: this.keepCollectedPicks(st.picked),
+    }));
+    try {
+      const out = await this.svc('/api/discover', {
+        method: 'POST',
+        body: JSON.stringify({
+          q: query,
+          kind: this.state.discKind,
+          license: this.state.discLicense,
+          source: this.state.discSource,
+          page: 1,
+          pageSize: this.state.discPageSize,
+        }),
+      });
+      const note = out.candidates.length
+        ? (out.note || `Found ${out.candidates.length} — every one says who may use it`)
+        : 'Nothing came back. Try fewer words, or "Show everything" above.'
+          + (out.problems.length ? ' · ' + out.problems.join(' · ') : '');
+      this.setState({
+        discBusy: false, discList: out.candidates, discNote: note,
+        discHasMore: !!out.hasMore, discEffective: out.effectiveQuery || query,
+      });
+    } catch (err) {
+      this.setState({ discBusy: false, discNote: 'Search failed: ' + err.message });
+    }
+  }
+
+  /** Next page, appended. Driven by scrolling near the end, or the button. */
+  async loadMoreDisc() {
+    const s = this.state;
+    if (s.discMore || s.discBusy || !s.discHasMore || s.svcState !== 'live') return;
+    const page = s.discPage + 1;
+    this.setState({ discMore: true });
+    try {
+      const out = await this.svc('/api/discover', {
+        method: 'POST',
+        body: JSON.stringify({
+          q: s.discEffective || s.discQuery,
+          kind: s.discKind, license: s.discLicense, source: s.discSource,
+          page, pageSize: s.discPageSize,
+        }),
+      });
+      this.setState(st => {
+        const seen = new Set(st.discList.map(c => c.url));
+        const fresh = out.candidates.filter(c => !seen.has(c.url));
+        return {
+          discMore: false,
+          discPage: page,
+          discList: st.discList.concat(fresh),
+          discHasMore: !!out.hasMore && fresh.length > 0,
+          discNote: (st.discList.length + fresh.length) + ' found'
+            + (out.hasMore && fresh.length ? ' — keep scrolling for more' : " — that's everything"),
+        };
+      });
+    } catch (err) {
+      this.setState({ discMore: false, discHasMore: false, discNote: 'could not load more: ' + err.message });
+    }
+  }
+
+  /**
+   * Widen the one list by a page. Show what is already in hand before asking
+   * the service for more — that is what keeps the DOM bounded no matter how
+   * many results pile up.
+   */
+  growFindings() {
+    const s = this.state;
+    const held = s.discList.length + s.liveResults.length;
+    if (s.findingsShown < held) {
+      this.setState({ findingsShown: s.findingsShown + 100 });   // setState always re-renders, so guard here
+      return;
+    }
+    this.loadMoreDisc();
+  }
+
+  // ── audio audition ─────────────────────────────────────────────────────────
+  stopPreview() {
+    this._previewSeq = (this._previewSeq || 0) + 1;   // invalidates any in-flight load
+    if (this._previewSrc) {
+      try { this._previewSrc.onended = null; this._previewSrc.stop(); } catch (e) { /* already ended */ }
+      this._previewSrc = null;
+    }
+    if (this.state.previewId || this.state.previewLoading) {
+      this.setState({ previewId: null, previewLoading: false });
+    }
+  }
+
+  /**
+   * Audition a candidate through Web Audio — the same engine Lyrx runs on.
+   *
+   * An <audio> element pointed at these CDNs stalls at readyState 0 forever
+   * even though a plain fetch of the identical URL returns in milliseconds,
+   * so the bytes are fetched and decoded by hand instead. Every source we use
+   * answers ranged CORS requests, so only the head of the file is pulled:
+   * enough to hear, and it keeps a 28MB "preview" from tying up the device.
+   */
+  async togglePreview(id, url) {
+    if (this.state.previewId === id) { this.stopPreview(); return; }
+    this.stopPreview();
+
+    this._previewSeq = (this._previewSeq || 0) + 1;
+    const seq = this._previewSeq;
+    this.setState({ previewId: id, previewLoading: true, previewErr: '' });
+
+    try {
+      if (!this._ctx) this._ctx = new (window.AudioContext || window.webkitAudioContext)();
+      if (this._ctx.state === 'suspended') await this._ctx.resume();
+
+      const res = await fetch(url, { headers: { Range: 'bytes=0-8388607' } });   // first 8MB
+      if (!res.ok && res.status !== 206) throw new Error('HTTP ' + res.status);
+      const bytes = await res.arrayBuffer();
+      if (seq !== this._previewSeq) return;                 // superseded by a later click
+
+      const buffer = await this._ctx.decodeAudioData(bytes);
+      if (seq !== this._previewSeq) return;
+
+      const src = this._ctx.createBufferSource();
+      src.buffer = buffer;
+      src.connect(this._ctx.destination);
+      src.onended = () => {
+        if (seq === this._previewSeq) this.setState({ previewId: null, previewLoading: false });
+      };
+      src.start();
+      this._previewSrc = src;
+      this.setState({ previewLoading: false });
+    } catch (err) {
+      if (seq !== this._previewSeq) return;
+      const truncated = /decод|decode|EncodingError/i.test(err.name + err.message);
+      this.setState({
+        previewId: null, previewLoading: false,
+        previewErr: truncated
+          ? 'couldn’t decode that one (often a very long file cut short for preview) — it may still download fine'
+          : 'could not load that audio (' + err.message + ')',
+      });
+    }
+  }
+
+  discPickedItems() {
+    return this.state.discList.filter(c => this.state.picked[c.id]);
+  }
+
+  /**
+   * The one list mixes two kinds of row: search hits (`c…` ids, nothing fetched
+   * yet) and collected tracks (`r…` ids, the service holds the file). Anything
+   * that needs a real file has to turn the first kind into the second.
+   */
+  keepCollectedPicks(picked) {
+    const kept = {};
+    for (const id of Object.keys(picked)) if (picked[id] && id[0] === 'r') kept[id] = true;
+    return kept;
+  }
+
+  /** Put the chosen candidates in the seed box, and their media hosts alongside. */
+  useAsSeeds() {
+    const chosen = this.discPickedItems();
+    if (!chosen.length) { this.setState({ discNote: 'tick something first' }); return; }
+    const seeds = [...new Set(chosen.map(c => c.pageUrl || c.url))];
+    const seedHosts = new Set(seeds.map(u => { try { return new URL(u).hostname; } catch { return ''; } }));
+    // media lives off-site often enough that the host list has to come along
+    const media = [...new Set(chosen.map(c => c.host).filter(h => h && !seedHosts.has(h)))];
+    const existing = this.state.extraHosts.split(/[\s,]+/).filter(Boolean);
+    this.setState({
+      seedText: seeds.join('\n'),
+      extraHosts: [...new Set([...existing, ...media])].join(', '),
+      discNote: `${seeds.length} seed(s) loaded${media.length ? ` · added ${media.length} media host(s)` : ''} — press Start crawl`,
+    });
+  }
+
+  /**
+   * Catalogue hits already carry a licence, so they can skip the crawl and be
+   * downloaded straight away. Runs by itself before a send or a download — the
+   * person picking tracks never has to know this step exists.
+   *
+   * Returns { ok, note }; the ticks move from the `c…` ids onto the `r…` ids
+   * the service just created, so the row stays selected in the one list.
+   */
+  async collectPicked() {
+    const chosen = this.discPickedItems();
+    if (!chosen.length) return { ok: true, note: '' };
+    this.setState({ busyMsg: 'fetching ' + chosen.length + ' track(s)…' });
+    try {
+      const out = await this.svc('/api/adopt', {
+        method: 'POST',
+        body: JSON.stringify({ items: chosen.map(c => ({
+          url: c.url, pageUrl: c.pageUrl, title: c.title, license: c.license, kind: c.kind, source: c.source, creator: c.creator,
+        })) }),
+      });
+      this._lastPoll = 0; // bypass the poll throttle so the rows appear at once
+      await this.pollLive();
+      this.setState(st => {
+        const picked = this.keepCollectedPicks(st.picked);
+        (out.added || []).forEach(id => { picked[id] = true; });
+        // the "found N" line describes the search, and the list just grew past it
+        return { picked, discNote: '' };
+      });
+      const skipped = out.notes || [];
+      return {
+        ok: (out.added || []).length > 0,
+        note: skipped.length ? `couldn't fetch ${skipped.length}: ${skipped[0]}` : '',
+      };
+    } catch (err) {
+      return { ok: false, note: 'could not fetch: ' + err.message };
+    }
+  }
+
+  pickedIds() {
+    return Object.keys(this.state.picked).filter(id => this.state.picked[id]);
+  }
+
+  /** Fetch anything not fetched yet → pull the bytes → write into Lyrx's vault. */
+  async sendToLyrx() {
+    if (!this.pickedIds().length) { this.setState({ busyMsg: 'Tick a track first.' }); return; }
+    if (!window.LyrxVault) { this.setState({ busyMsg: 'vault script missing' }); return; }
+    const grab = await this.collectPicked();
+    const ids = this.pickedIds().filter(id => id[0] === 'r');
+    if (!ids.length) { this.setState({ busyMsg: grab.note || 'nothing could be fetched' }); return; }
+    this.setState({ busyMsg: 'sending ' + ids.length + ' to Lyrx…' });
+    try {
+      const { collected, failed } = await this.svc('/api/collect', { method: 'POST', body: JSON.stringify({ ids }) });
+      let sent = 0;
+      for (const item of collected) {
+        const res = await fetch(this.state.svcUrl + '/api/file/' + item.id);
+        if (!res.ok) continue;
+        if (item.type === 'audio') {
+          await window.LyrxVault.put({
+            kind: 'sample', title: item.title, url: item.url, license: item.license,
+            mime: item.mime, blob: await res.blob(),
+          });
+        } else {
+          const doc = await res.json();
+          await window.LyrxVault.put({
+            kind: 'text', title: doc.title || item.title, url: item.url, license: item.license,
+            text: doc.text || '', mime: 'text/plain',
+          });
+        }
+        sent++;
+      }
+      const info = await window.LyrxVault.count();
+      this.setState({
+        vaultInfo: info,
+        busyMsg: sent + ' sent to Lyrx — open Lyrx and they are waiting for you'
+          + (failed.length ? ' · ' + failed.length + " couldn't be sent (" + failed[0].error + ')' : '')
+          + (grab.note ? ' · ' + grab.note : ''),
+      });
+    } catch (err) {
+      this.setState({ busyMsg: 'send failed: ' + err.message });
+    }
+  }
+
+  async refreshVault() {
+    if (!window.LyrxVault) return;
+    try { this.setState({ vaultInfo: await window.LyrxVault.count() }); } catch (e) { /* ignore */ }
+  }
+
+  crawlTick() {
+    if (!this.state.crawlRunning) { this._lastCrawl = 0; return; }
+    const now = Date.now();
+    if (!this._lastCrawl) { this._lastCrawl = now; this.crawlStep(); return; }
+    const dt = now - this._lastCrawl;
+    if (dt < 560) return;
+    this._lastCrawl = now;
+    const steps = Math.max(1, Math.min(10, Math.round(dt / 620)));
+    for (let k = 0; k < steps; k++) this.crawlStep();
+  }
+
+  crawlStep() {
+    const hosts = ['folkarchive.example', 'commoncrawl.org', 'openlyrics.example', 'docs.datacore.dev', 'publicdomainsongs.example'];
+    const paths = ['/songs/1897/wayfaring', '/collections/warc-00421', '/archive/ballads/p12', '/robots-policy', '/index/segment-08', '/entries/appalachian-tunings'];
+    const t = this.state.crawlTicks + 1;
+    const h = hosts[t % hosts.length];
+    const p = paths[(t * 3) % paths.length];
+    const roll = t % 9;
+    let code = '200 OK', color = 'var(--color-accent)', msg = h + p;
+    if (roll === 4) { code = '429', color = '#ffb020'; msg = h + ' throttled — backing off ' + this.state.rateLimit + 's'; }
+    else if (roll === 7) { code = 'HOLD', color = 'var(--color-accent-2)'; msg = h + p + ' — no reusable licence, quarantined'; }
+    else if (roll === 2) { code = 'SKIP'; color = 'var(--color-neutral-700)'; msg = h + p + ' — duplicate of stored capture'; }
+    const stamp = new Date().toLocaleTimeString('en-GB', { hour12: false });
+    this.setState(s => {
+      const c = { ...s.crawlCounters };
+      c.fetched += 1;
+      c.queued = Math.max(0, c.queued - 1 + (roll % 3));
+      if (code === '200 OK') { c.parsed += 1; c.stored += 1; c.bytes += 180 + (t % 90); }
+      if (code === 'HOLD') c.quarantined += 1;
+      return {
+        crawlTicks: t,
+        crawlCounters: c,
+        crawlLog: [{ t: stamp, code, color, msg }, ...s.crawlLog].slice(0, 14),
+      };
+    });
+  }
+
+  /**
+   * `phase` only drives the hero particles, the crawl waveform and the music
+   * wave bars. Bumping it when none of those are on screen re-renders the whole
+   * findings table six times a second for nothing.
+   */
+  needsPhase() {
+    const s = this.state;
+    if (s.view === 'landing') return true;
+    if (s.screen === 'crawl' && s.crawlRunning) return true;
+    if (s.screen === 'music' && s.chordAt && Date.now() - s.chordAt < 1500) return true;
+    return false;
+  }
+
+  pump() {
+    clearTimeout(this._pumpT);
+    this._pumpT = setTimeout(() => {
+      this._pumpAlive = Date.now();
+      if (this.needsPhase()) this.setState(s => ({ phase: s.phase + 1 }));
+      if (this.state.svcState === 'live') {
+        if (this.state.crawlRunning || this.state.liveResults.length) this.pollLive();
+      } else if (this.state.crawlRunning) {
+        this.crawlTick();
+      }
+      this.pump();
+    }, 160);
+  }
+
+  boot() {
+    if (this._booted) return;
+    this._booted = true;
+    this._pumpAlive = Date.now();
+    this.checkService();
+    this.refreshVault();
+    // Deep links from Lyrx: #app, #voice, #music, #app/voice, …
+    try {
+      const parts = (location.hash || '').replace(/^#\/?/, '').toLowerCase().split('/').filter(Boolean);
+      const screens = ['home','discover','sources','crawl','store','query','knowledge','train','voice','music','compression'];
+      const screen = parts.find(p => screens.includes(p));
+      if (screen || parts[0] === 'app') {
+        // Runs before the first render reads state, so assign straight through.
+        this.state.view = 'app';
+        this.state.screen = screen || 'home';
+      }
+    } catch (e) {}
+    window.__dcBooted = (window.__dcBooted || 0) + 1;
+    this._io = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('dc-in'); });
+    }, { threshold: 0.15 });
+    setTimeout(() => {
+      document.querySelectorAll('[data-reveal]').forEach(el => this._io.observe(el));
+    }, 60);
+    this._onScroll = () => {
+      const y = window.scrollY || document.documentElement.scrollTop;
+      const next = y > 40;
+      if (next !== this.state.scrolled) this.setState({ scrolled: next });
+    };
+    window.addEventListener('scroll', this._onScroll, { passive: true });
+    this._onMove = (e) => {
+      if (!this.state.dragId || !this._start) return;
+      const dx = e.clientX - this._start.px, dy = e.clientY - this._start.py;
+      this.setState(s => ({
+        floaties: s.floaties.map(f => f.id === s.dragId
+          ? { ...f, x: this._start.fx + dx, y: this._start.fy + dy } : f),
+      }));
+    };
+    this._onUp = () => {
+      if (this.state.dragId) this.setState({ dragId: null });
+      if (this._strum) { this._strum = false; this.setState({ strumming: false }); }
+      if (this._glide) { this._glide = false; this.setState({ gliding: false }); }
+    };
+    this._onKey = (e) => {
+      if (!this.state.kbdOn) return;
+      if (e.key === 'Escape') { this.setState({ kbdOn: false }); return; }
+      if (e.metaKey || e.ctrlKey || e.altKey || e.repeat) return;
+      const tag = (e.target && e.target.tagName) || '';
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+      const k = this.keysData.find(x => x.key === e.key.toLowerCase());
+      if (!k) return;
+      e.preventDefault();
+      this.playNote(k);
+    };
+    window.addEventListener('keydown', this._onKey);
+    window.addEventListener('pointermove', this._onMove);
+    window.addEventListener('pointerup', this._onUp);
+    this.pump();
+    this._layout = () => {
+      const W = window.innerWidth, wide = W >= 1180;
+      this.setState(s => ({
+        wide,
+        floaties: s.dragId ? s.floaties : s.floaties.map((f, i) => ({
+          ...f, x: W - 360 + (i % 2 === 0 ? -40 : 40), y: 50 + i * 135,
+        })),
+      }));
+    };
+    this._layout();
+    window.addEventListener('resize', this._layout);
+  }
+
+  componentWillUnmount() {
+    if (this._io) this._io.disconnect();
+    window.removeEventListener('resize', this._layout);
+    window.removeEventListener('scroll', this._onScroll);
+    window.removeEventListener('keydown', this._onKey);
+    window.removeEventListener('pointermove', this._onMove);
+    window.removeEventListener('pointerup', this._onUp);
+    clearTimeout(this._pumpT);
+  }
+
+  startDrag(f, e) {
+    this._start = { px: e.clientX, py: e.clientY, fx: f.x, fy: f.y };
+    this.setState({ dragId: f.id, floaties: [...this.state.floaties.filter(x => x.id !== f.id), f] });
+  }
+
+  sourcesData = [
+    { name: 'wikipedia.org', type: 'Website', status: 'Active', statusTag: 'tag-accent', rights: 'CC-BY-SA', quality: 'High', synced: '2h ago', commercial: 'Yes', trainingStatus: 'Reviewed', commercialTag: 'tag-accent', trainingTag: 'tag-accent' },
+    { name: 'commoncrawl.org', type: 'Dataset', status: 'Active', statusTag: 'tag-accent', rights: 'Open', quality: 'Medium', synced: '1d ago', commercial: 'Yes', trainingStatus: 'Reviewed', commercialTag: 'tag-accent', trainingTag: 'tag-accent' },
+    { name: 'freesound.org', type: 'Audio', status: 'Quarantined', statusTag: 'tag-accent-2', rights: 'CC-BY-NC', quality: 'High', synced: '3d ago', commercial: 'No', trainingStatus: 'Quarantined', commercialTag: 'tag-neutral', trainingTag: 'tag-accent-2' },
+    { name: 'user-uploads', type: 'Upload', status: 'Active', statusTag: 'tag-accent', rights: 'Owned', quality: 'High', synced: 'Just now', commercial: 'Yes', trainingStatus: 'Reviewed', commercialTag: 'tag-accent', trainingTag: 'tag-accent' },
+    { name: 'archive.org', type: 'Archive', status: 'In review', statusTag: 'tag-outline', rights: 'Public domain (mixed)', quality: 'Medium', synced: '5d ago', commercial: 'Mixed', trainingStatus: 'In review', commercialTag: 'tag-neutral', trainingTag: 'tag-outline' },
+    { name: 'spotify-api.com', type: 'API', status: 'Blocked', statusTag: 'tag-neutral', rights: 'Commercial license required', quality: '—', synced: '—', commercial: 'No', trainingStatus: 'Rejected', commercialTag: 'tag-neutral', trainingTag: 'tag-neutral' },
+  ];
+
+  pipelineStages = [
+    { n: '01', label: 'Discover', desc: 'Find sources with a policy record' },
+    { n: '02', label: 'Acquire', desc: 'HTTP or sandboxed fetch' },
+    { n: '03', label: 'Classify rights', desc: 'License + consent check' },
+    { n: '04', label: 'Extract', desc: 'Structure, not just text' },
+    { n: '05', label: 'Compress', desc: 'Structural + semantic + dedup' },
+    { n: '06', label: 'Index', desc: 'Vector, text, graph stores' },
+    { n: '07', label: 'Train / retrieve', desc: 'Adapter or live citation' },
+  ];
+
+  capsuleContents = ['Purpose', 'Source manifest', 'Licenses', 'Compressed evidence', 'Search index', 'Knowledge graph', 'Model adapter', 'Eval scores'];
+
+  pricingTiers = [
+    { name: 'FREE', price: '$0', desc: 'Personal projects, retrieval-only, 3 sources.', cta: 'Start free' },
+    { name: 'DEVELOPER', price: '$39/mo', desc: 'Fine-tuning, voice studio, 50 sources.', cta: 'Start trial' },
+    { name: 'TEAM', price: 'Custom', desc: 'Music studio, governance, unlimited sources.', cta: 'Talk to us' },
+  ];
+
+  compressionData = [
+    { label: 'Original data', size: '184 GB', val: 184 },
+    { label: 'Exact duplicates', size: '-41 GB', val: 41 },
+    { label: 'Near duplicates', size: '-27 GB', val: 27 },
+    { label: 'Unsupported media', size: '-8 GB', val: 8 },
+    { label: 'Low-quality content', size: '-19 GB', val: 19 },
+    { label: 'Restricted content', size: '-32 GB', val: 32 },
+    { label: 'Compressed archive', size: '21 GB', val: 21 },
+    { label: 'Knowledge index', size: '6 GB', val: 6 },
+    { label: 'Training dataset', size: '4 GB', val: 4 },
+  ];
+
+  musicStagesData = [
+    { id: 'composition', label: 'Composition', hint: 'Form, key, melody', detail: 'Song form, key, tempo, chord progression, melody and lyrical meter.' },
+    { id: 'arrangement', label: 'Arrangement', hint: 'Instruments, density', detail: 'Instrument selection, register, density, fills, transitions and dynamic buildup.' },
+    { id: 'performance', label: 'Performance', hint: 'Timing, feel', detail: 'Timing variation, velocity, articulation, slides, bends and drum feel.' },
+    { id: 'rendering', label: 'Rendering', hint: 'Samples, synths', detail: 'Sample libraries, synthesizers, neural instruments and vocal synthesis.' },
+    { id: 'production', label: 'Production', hint: 'Mix, master', detail: 'EQ, compression, saturation, reverb, panning and mastering.' },
+  ];
+
+  knowledgeTabsData = ['facts', 'people', 'musical patterns', 'voices', 'conflicts'];
+
+  knowledgeItemsData = {
+    facts: [
+      { value: 'The device supports 48 kHz recording.', source: 'manufacturer page · CC-BY-4.0', confidence: '0.97' },
+      { value: 'Product supports 32 tracks (v3 release notes, June 2026).', source: 'release-notes.pdf', confidence: '0.94' },
+      { value: 'Common Crawl indexes let you locate captures without full archive downloads.', source: 'commoncrawl.org/docs', confidence: '0.90' },
+    ],
+    people: [
+      { value: 'Isaiah — enrolled voice, consent verified 2026-06-02.', source: 'voice enrollment', confidence: 'verified' },
+      { value: 'Named living artists — training blocked by policy.', source: 'governance rule', confidence: 'enforced' },
+    ],
+    'musical patterns': [
+      { value: '122 BPM, A minor, 4-bar intro — country demo template.', source: 'user session', confidence: '1.00' },
+    ],
+    voices: [
+      { value: 'Isaiah Voice Model v3 — pronunciation + prosody adapter.', source: 'voice studio', confidence: 'active' },
+    ],
+    conflicts: [
+      { value: 'Track count: 16 (manufacturer page) vs 32 (v3 release notes).', source: 'unresolved — recency favors v3', confidence: '0.6' },
+    ],
+  };
+
+  stemsData = [
+    { name: 'Vocals', w: 78, color: 'var(--color-accent-2)' },
+    { name: 'Guitar', w: 60, color: 'var(--color-accent)' },
+    { name: 'Bass', w: 45, color: 'var(--color-accent-2)' },
+    { name: 'Drums', w: 85, color: 'var(--color-accent)' },
+  ];
+
+  tiersData = [
+    { id: 'raw', step: 'TIER 01', name: 'Raw captures', retention: '90 days', records: '1.4 M objects', size: '184 GB', engine: 'WARC + object storage, content-addressed by SHA-256',
+      note: 'Immutable. Written once by the crawler, never edited — the audit trail every other tier points back to.',
+      writePath: 'Crawler worker streams the response body straight to object storage, then emits one row here. No parsing happens on the write path.',
+      access: 'Read-only to everything downstream. Direct download requires a licence check and is logged.',
+      lineage: 'capture_id',
+      schema: [
+        { name: 'capture_id', type: 'uuid pk', note: 'Primary lineage key' },
+        { name: 'url', type: 'text', note: 'Canonicalised, query-sorted' },
+        { name: 'sha256', type: 'bytea', note: 'Dedupe + integrity' },
+        { name: 'fetched_at', type: 'timestamptz', note: 'UTC fetch time' },
+        { name: 'status', type: 'int', note: 'HTTP status code' },
+        { name: 'headers', type: 'jsonb', note: 'Includes licence hints' },
+        { name: 'warc_ref', type: 'text', note: 'bucket/segment#offset' },
+        { name: 'robots_ok', type: 'bool', note: 'Permission at fetch time' },
+      ] },
+    { id: 'parsed', step: 'TIER 02', name: 'Parsed documents', retention: 'indefinite', records: '912 K rows', size: '38 GB', engine: 'Postgres + Parquet mirror for analytics',
+      note: 'Extraction map applied: boilerplate stripped, fields typed, language and licence classified.',
+      writePath: 'Parser reads the capture, applies the crawler\u2019s extraction map, and upserts on (capture_id, field_set_version) so re-parsing never duplicates rows.',
+      access: 'SQL for analysts, Parquet for batch jobs. Rows failing licence classification stay flagged, not deleted.',
+      lineage: 'capture_id \u2192 document_id',
+      schema: [
+        { name: 'document_id', type: 'uuid pk', note: 'One per capture per parse version' },
+        { name: 'capture_id', type: 'uuid fk', note: 'Back-pointer to Tier 01' },
+        { name: 'title', type: 'text', note: 'From extraction map' },
+        { name: 'body', type: 'text', note: 'Boilerplate removed' },
+        { name: 'lang', type: 'char(2)', note: 'Detected, confidence stored' },
+        { name: 'licence_class', type: 'enum', note: 'reusable / restricted / unknown' },
+        { name: 'tokens', type: 'int', note: 'Budgeting + cost estimates' },
+        { name: 'quality', type: 'float', note: '0\u20131 heuristic score' },
+      ] },
+    { id: 'chunks', step: 'TIER 03', name: 'Chunks + vectors', retention: 'rebuildable', records: '4.6 M chunks', size: '21 GB', engine: 'pgvector / HNSW, 1024-dim',
+      note: 'Retrieval layer. Disposable by design — can always be rebuilt from Tier 02.',
+      writePath: 'Semantic chunker splits on headings and sentence boundaries with overlap, then the embedder writes vectors in batches of 512.',
+      access: 'Vector + hybrid BM25 search through the retrieval API. Every hit returns its document_id.',
+      lineage: 'document_id \u2192 chunk_id',
+      schema: [
+        { name: 'chunk_id', type: 'uuid pk', note: 'Stable across re-embeds' },
+        { name: 'document_id', type: 'uuid fk', note: 'Back-pointer to Tier 02' },
+        { name: 'ordinal', type: 'int', note: 'Position in document' },
+        { name: 'text', type: 'text', note: '~800 tokens, 80 overlap' },
+        { name: 'embedding', type: 'vector(1024)', note: 'HNSW index, cosine' },
+        { name: 'section', type: 'text', note: 'Heading path' },
+        { name: 'licence_class', type: 'enum', note: 'Denormalised for filtered search' },
+      ] },
+    { id: 'facts', step: 'TIER 04', name: 'Knowledge facts', retention: 'versioned', records: '4,208 facts', size: '6 GB', engine: 'Fact table + conflict graph',
+      note: 'Extracted claims with citations and confidence. Conflicts are kept, not silently resolved.',
+      writePath: 'Extractor proposes claims from chunks; anything below 0.75 confidence or contradicting an existing fact goes to a review queue instead of the table.',
+      access: 'Read by the Knowledge explorer, the training set builder, and the retrieval prompt assembler.',
+      lineage: 'chunk_id \u2192 fact_id',
+      schema: [
+        { name: 'fact_id', type: 'uuid pk', note: 'Versioned on change' },
+        { name: 'subject', type: 'text', note: 'Normalised entity' },
+        { name: 'predicate', type: 'text', note: 'Controlled vocabulary' },
+        { name: 'object', type: 'jsonb', note: 'Value + unit' },
+        { name: 'cited_chunks', type: 'uuid[]', note: 'At least one required' },
+        { name: 'confidence', type: 'float', note: 'Below 0.75 \u2192 review queue' },
+        { name: 'conflicts_with', type: 'uuid[]', note: 'Kept, surfaced to the user' },
+        { name: 'valid_from', type: 'date', note: 'Recency beats staleness' },
+      ] },
+  ];
+
+  particlesData = (() => {
+    const out = [];
+    let seed = 7;
+    const rnd = () => { seed = (seed * 1103515245 + 12345) % 2147483648; return seed / 2147483648; };
+    for (let i = 0; i < 248; i++) {
+      const r = rnd();
+      out.push({
+        id: 'p' + i,
+        xPct: 1 + rnd() * 98,
+        yPct: 4 + rnd() * 92,
+        size: 1.5 + Math.round(rnd() * 4),
+        accent2: r > 0.58,
+        ang: rnd() * Math.PI * 2,
+        ring: 46 + rnd() * 120,
+        cls: 'dc-d' + (1 + (i % 6)),
+      });
+    }
+    return out;
+  })();
+
+  beamsData = [
+    { left: 14, width: 150, accent2: false, cls: 'dc-sweep-a' },
+    { left: 46, width: 190, accent2: true, cls: 'dc-sweep-b' },
+    { left: 74, width: 120, accent2: false, cls: 'dc-sweep-c' },
+  ];
+
+  keysData = [
+    { note: 'C4', key: 'a', freq: 261.63, black: false },
+    { note: 'C#4', key: 'w', freq: 277.18, black: true },
+    { note: 'D4', key: 's', freq: 293.66, black: false },
+    { note: 'D#4', key: 'e', freq: 311.13, black: true },
+    { note: 'E4', key: 'd', freq: 329.63, black: false },
+    { note: 'F4', key: 'f', freq: 349.23, black: false },
+    { note: 'F#4', key: 't', freq: 369.99, black: true },
+    { note: 'G4', key: 'g', freq: 392.00, black: false },
+    { note: 'G#4', key: 'y', freq: 415.30, black: true },
+    { note: 'A4', key: 'h', freq: 440.00, black: false },
+    { note: 'A#4', key: 'u', freq: 466.16, black: true },
+    { note: 'B4', key: 'j', freq: 493.88, black: false },
+    { note: 'C5', key: 'k', freq: 523.25, black: false },
+  ];
+
+  startGlide(k, e) {
+    if (e && e.currentTarget && e.currentTarget.releasePointerCapture && e.pointerId != null) {
+      try { e.currentTarget.releasePointerCapture(e.pointerId); } catch (err) {}
+    }
+    this._glide = true;
+    this.setState({ gliding: true });
+    this.playNote(k);
+  }
+
+  playNote(k) {
+    const qual0 = { 'C4': 'maj', 'D4': 'min', 'E4': 'min', 'F4': 'maj', 'G4': 'maj', 'A4': 'min', 'B4': 'dim', 'C5': 'maj' }[k.note] || 'maj';
+    const t0 = qual0 === 'maj' ? 1.259921 : 1.189207;
+    const f0 = qual0 === 'dim' ? 1.414214 : 1.498307;
+    let freqs = this.state.chordMode ? [k.freq, k.freq * t0, k.freq * f0] : [k.freq];
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      this._ac = this._ac || new AC();
+      const ac = this._ac;
+      if (ac.state === 'suspended') ac.resume();
+      const now = ac.currentTime;
+      freqs.forEach((f, i) => {
+        const t = now + i * 0.03;
+        const o = ac.createOscillator(), g = ac.createGain();
+        o.type = i === 0 ? 'triangle' : 'sine';
+        o.frequency.value = f;
+        g.gain.setValueAtTime(0, t);
+        g.gain.linearRampToValueAtTime(0.2 / (i + 1.2), t + 0.015);
+        g.gain.exponentialRampToValueAtTime(0.0008, t + 1.3);
+        o.connect(g).connect(ac.destination);
+        o.start(t); o.stop(t + 1.4);
+      });
+    } catch (e) {}
+    this.setState({ activeNote: k.note, chordAt: Date.now(), chordPlaying: null, activeFreqs: freqs });
+    clearTimeout(this._noteT);
+    this._noteT = setTimeout(() => this.setState({ activeNote: null }), 320);
+  }
+
+  chordsData = [
+    { id: 'Am', label: 'Am', freqs: [220.0, 261.6, 329.6] },
+    { id: 'C', label: 'C', freqs: [261.6, 329.6, 392.0] },
+    { id: 'G', label: 'G', freqs: [196.0, 246.9, 293.7] },
+    { id: 'F', label: 'F', freqs: [174.6, 220.0, 261.6] },
+    { id: 'Dm', label: 'Dm', freqs: [146.8, 174.6, 220.0] },
+    { id: 'E7', label: 'E7', freqs: [164.8, 207.7, 246.9] },
+  ];
+
+  playChord(ch) {
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      this._ac = this._ac || new AC();
+      const ac = this._ac;
+      if (ac.state === 'suspended') ac.resume();
+      const now = ac.currentTime;
+      ch.freqs.forEach((f, i) => {
+        const o = ac.createOscillator(), g = ac.createGain();
+        o.type = i === 0 ? 'triangle' : 'sine';
+        o.frequency.value = f;
+        g.gain.setValueAtTime(0, now);
+        g.gain.linearRampToValueAtTime(0.16 / (i + 1), now + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0008, now + 1.5);
+        o.connect(g).connect(ac.destination);
+        o.start(now); o.stop(now + 1.6);
+      });
+    } catch (e) {}
+    this.setState({ chordPlaying: ch.id, chordAt: Date.now(), activeFreqs: ch.freqs, activeNote: null });
+    clearTimeout(this._chordT);
+    this._chordT = setTimeout(() => this.setState({ chordPlaying: null }), 1400);
+  }
+
+  heroBurst(x, y) {
+    this.setState({ burst: 'swirl', glow: { x, y } });
+    clearTimeout(this._burstT1); clearTimeout(this._burstT2);
+    this._burstT1 = setTimeout(() => this.setState({ burst: 'out' }), 780);
+    this._burstT2 = setTimeout(() => this.setState({ burst: null }), 1560);
+  }
+
+  browseData = {
+    raw: { cols: ['capture_id', 'url', 'status', 'size', 'robots', 'fetched'],
+      rows: [
+        ['c9e1…4af2', 'commoncrawl.org/collections/CC-MAIN-2026-26', '200', '1.8 MB', 'ok', '2h ago'],
+        ['b774…09c1', 'folkarchive.example/ballads/p12', '200', '214 KB', 'ok', '2h ago'],
+        ['a1c0…77d3', 'openlyrics.example/archive/1937', '200', '96 KB', 'ok', '3h ago'],
+        ['f2b8…c554', 'publicdomainsongs.example/gloss', '200', '61 KB', 'ok', '5h ago'],
+        ['0d43…19ee', 'lyricsite.example/top-hits-2026', '451', '—', 'ok', '5h ago'],
+        ['77aa…3b02', 'folkarchive.example/tunings/intro', '200', '183 KB', 'ok', '1d ago'],
+      ] },
+    parsed: { cols: ['document_id', 'title', 'lang', 'licence', 'tokens', 'quality'],
+      rows: [
+        ['d114…8890', 'Wayfaring Stranger — origins and variants', 'en', 'reusable', '4,812', '0.93'],
+        ['d115…02bc', 'Open tunings in Appalachian ballads', 'en', 'reusable', '3,206', '0.91'],
+        ['d116…44f1', 'Field recordings, 1937 Kentucky sessions', 'en', 'reusable', '7,540', '0.88'],
+        ['d117…9a03', 'Top hits 2026 lyric compilation', 'en', 'restricted', '12,003', '0.95'],
+        ['d118…6d77', 'Sawmill tuning glossary entry', 'en', 'unknown', '918', '0.71'],
+        ['d119…310a', 'DC-32 recorder release notes v3', 'en', 'reusable', '2,144', '0.97'],
+      ] },
+    chunks: { cols: ['chunk_id', 'document', 'ordinal', 'section', 'licence'],
+      rows: [
+        ['ch-88a1', 'Wayfaring Stranger — origins', '3', 'History › Variants', 'reusable'],
+        ['ch-88a2', 'Open tunings in Appalachian ballads', '1', 'Intro', 'reusable'],
+        ['ch-88a3', 'Field recordings, 1937 Kentucky', '12', 'Session log › Day 2', 'reusable'],
+        ['ch-88a4', 'Sawmill tuning glossary', '1', 'Definition', 'unknown'],
+        ['ch-88a5', 'DC-32 release notes v3', '4', 'Specs › Tracks', 'reusable'],
+        ['ch-88a6', 'Open tunings in Appalachian ballads', '7', 'Technique › Drones', 'reusable'],
+      ] },
+    facts: { cols: ['fact_id', 'subject', 'predicate', 'object', 'confidence'],
+      rows: [
+        ['f-2201', 'DC-32 recorder', 'track_count', '32', '0.94'],
+        ['f-2202', 'DC-32 recorder', 'sample_rate', '48 kHz', '0.97'],
+        ['f-2203', 'Wayfaring Stranger', 'first_published', '1858', '0.81'],
+        ['f-2204', 'Open D tuning', 'alt_name', 'Vestapol', '0.89'],
+        ['f-2205', 'Sawmill tuning', 'instrument', 'banjo', '0.86'],
+        ['f-2206', 'Isaiah voice v3', 'consent_scope', 'personal projects', 'verified'],
+      ] },
+  };
+
+  queryPresets = {
+    sql: {
+      text: "SELECT s.host, count(*) AS docs, sum(d.tokens) AS tokens\nFROM documents d JOIN sources s USING (source_id)\nWHERE d.licence_class = 'reusable'\nGROUP BY 1 ORDER BY tokens DESC LIMIT 5;",
+      meta: '5 rows · 214 ms · 912,441 scanned',
+      cols: ['host', 'docs', 'tokens'],
+      rows: [
+        ['commoncrawl.org', '412,880', '1.02 B'],
+        ['folkarchive.example', '68,204', '181 M'],
+        ['openlyrics.example', '31,996', '77 M'],
+        ['publicdomainsongs.example', '12,410', '29 M'],
+        ['docs.datacore.dev', '1,884', '6 M'],
+      ],
+    },
+    semantic: {
+      text: 'find chunks about open tunings used in appalachian ballads\nfilter licence_class = reusable AND lang = en\ntop_k 5 rerank true',
+      meta: '5 chunks · 61 ms · cosine + BM25 hybrid',
+      cols: ['score', 'chunk', 'document', 'licence'],
+      rows: [
+        ['0.91', 'Open D tuning appears throughout…', 'folkarchive/ballads/p12', 'CC-BY-4.0'],
+        ['0.88', 'Modal drone strings let a singer…', 'folkarchive/tunings/intro', 'CC-BY-4.0'],
+        ['0.84', 'Sawmill tuning, also called…', 'publicdomainsongs/gloss', 'Public domain'],
+        ['0.79', 'The banjo\u2019s reentrant string…', 'folkarchive/instruments/2', 'CC-BY-4.0'],
+        ['0.74', 'Field recordings from 1937 show…', 'openlyrics/archive/1937', 'Public domain'],
+      ],
+    },
+    graph: {
+      text: 'MATCH (f:Fact)-[:CITES]->(c:Chunk)-[:FROM]->(d:Document)\nWHERE f.conflicts_with IS NOT NULL\nRETURN f.subject, f.predicate, count(d) AS sources',
+      meta: '4 conflicts · 88 ms · nothing auto-resolved',
+      cols: ['subject', 'predicate', 'sources', 'state'],
+      rows: [
+        ['DC-32 recorder', 'track_count', '2', 'unresolved'],
+        ['Wayfaring Stranger', 'first_published', '3', 'unresolved'],
+        ['Open D tuning', 'alt_name', '2', 'merged'],
+        ['Isaiah voice v3', 'consent_scope', '2', 'review'],
+      ],
+    },
+  };
+
+  waveformBarsData = [30,55,40,70,90,60,45,80,35,65,50,95,40,60,75,30,55,85,45,65,40,70,50,60];
+
+  renderVals() {
+    /** Licence codes mean nothing to someone new — say what they may do with it. */
+    const plainLicense = (raw) => {
+      const l = String(raw || '').toUpperCase();
+      if (!l || l === 'UNKNOWN') return 'Licence not stated';
+      if (/CC0|PUBLIC DOMAIN|PD/.test(l)) return 'Free — no strings';
+      if (/-NC/.test(l) && /-ND/.test(l)) return 'Personal use, no edits';
+      if (/-ND/.test(l)) return 'Free, but no edits';
+      if (/-NC/.test(l)) return 'Free for non-paid work';
+      if (/-SA/.test(l)) return 'Free — credit + share alike';
+      if (/CC BY|CC-BY/.test(l)) return 'Free — just credit them';
+      return raw;
+    };
+    this.boot();
+    if (Date.now() - (this._pumpAlive || 0) > 900) { this._pumpAlive = Date.now(); this.pump(); }
+    const s = this.state;
+    const live = s.svcState === 'live';
+    const setScreen = (name) => this.setState({ screen: name });
+    const navDefs = [
+      ['home', 'Home'], ['discover', 'Discover'], ['sources', 'Sources'],
+      ['crawl', 'Find Music'], ['store', 'Data Store'], ['query', 'Workbench'],
+      ['knowledge', 'Knowledge'], ['train', 'Train'], ['voice', 'Voice Studio'],
+      ['music', 'Music Studio'], ['compression', 'Compression'],
+    ];
+    const navItems = navDefs.map(([id, label]) => ({
+      label,
+      onClick: () => setScreen(id),
+      bg: s.screen === id ? 'color-mix(in srgb, var(--color-accent) 12%, transparent)' : 'transparent',
+      color: s.screen === id ? 'var(--color-accent)' : 'var(--color-text)',
+      borderColor: s.screen === id ? 'var(--color-accent)' : 'transparent',
+    }));
+
+    const q = s.discoverQuery.toLowerCase();
+    const filteredSources = this.sourcesData
+      .filter(src => src.name.toLowerCase().includes(q))
+      .map(src => ({ ...src,
+        commercialLabel: 'Commercial: ' + src.commercial,
+        trainingLabel: 'Training: ' + src.trainingStatus }));
+
+    const knowledgeTabs = this.knowledgeTabsData.map(t => ({
+      label: t,
+      onClick: () => this.setState({ knowledgeTab: t }),
+      cls: s.knowledgeTab === t ? 'btn-primary' : 'btn-secondary',
+    }));
+
+    const musicStages = this.musicStagesData.map(m => ({
+      ...m,
+      onClick: () => this.setState({ musicStage: m.id }),
+      bg: s.musicStage === m.id ? 'var(--color-accent-2)' : 'transparent',
+      color: s.musicStage === m.id ? '#000' : 'var(--color-text)',
+    }));
+    const activeMusicStage = this.musicStagesData.find(m => m.id === s.musicStage) || this.musicStagesData[0];
+
+    const maxGb = 184;
+    const compressionStages = this.compressionData.map((c, i) => ({
+      label: c.label, size: c.size,
+      pct: Math.max(4, (c.val / maxGb) * 100),
+      color: i < 6 ? 'var(--color-accent-2)' : 'var(--color-accent)',
+    }));
+
+    const floaties = s.floaties.map((f, i) => ({
+      ...f,
+      left: f.x + 'px', top: f.y + 'px', z: s.dragId === f.id ? 30 : 10 + i,
+      bobClass: s.dragId === f.id ? '' : 'dc-bob',
+      onPointerDown: (e) => this.startDrag(f, e),
+    }));
+    const hw = s.heroW || 1200, hh = s.heroH || 620, R = 320;
+    const spin = (s.phase % 360) * 3;
+    const particles = this.particlesData.map(p => {
+      const px = (p.xPct / 100) * hw, py = (p.yPct / 100) * hh;
+      const dx = px - s.glow.x, dy = py - s.glow.y;
+      const d = Math.sqrt(dx * dx + dy * dy) || 1;
+      const color = p.accent2 ? 'var(--color-accent-2)' : 'var(--color-accent)';
+      const ux = dx / d, uy = dy / d;
+      let tx, ty, size = p.size, glow = 'none', trans = 'transform .38s cubic-bezier(.2,.8,.3,1), box-shadow .3s, width .3s, height .3s';
+
+      if (s.burst === 'swirl' && d < 520) {
+        const a = p.ang + (spin * Math.PI) / 180;
+        tx = s.glow.x + Math.cos(a) * p.ring - px;
+        ty = s.glow.y + Math.sin(a) * p.ring * 0.7 - py;
+        size = p.size + 1.4;
+        glow = '0 0 12px ' + color;
+        trans = 'transform .7s cubic-bezier(.3,.9,.2,1), box-shadow .4s';
+      } else if (s.burst === 'out') {
+        const f = d < 520 ? 300 + (520 - d) * 0.6 : 90;
+        tx = ux * f; ty = uy * f;
+        size = p.size + 0.8;
+        glow = '0 0 16px ' + color;
+        trans = 'transform .85s cubic-bezier(.12,.9,.2,1), box-shadow .6s';
+      } else {
+        const near = d < R;
+        const push = near ? (1 - d / R) : 0;
+        const k = push * push * 130;
+        tx = ux * k; ty = uy * k;
+        if (near) { size = p.size + push * 4; glow = '0 0 ' + (8 + push * 20).toFixed(0) + 'px ' + color; }
+        trans = 'transform .3s cubic-bezier(.2,.8,.3,1), box-shadow .3s';
+      }
+
+      return {
+        ...p,
+        left: p.xPct.toFixed(2) + '%',
+        top: p.yPct.toFixed(2) + '%',
+        size: size.toFixed(1) + 'px',
+        color, glow, trans,
+        shift: 'translate(' + tx.toFixed(1) + 'px,' + ty.toFixed(1) + 'px)',
+      };
+    });
+
+    const beams = this.beamsData.map(b => {
+      const bx = (b.left / 100) * hw;
+      const dx = s.glow.x - bx, dy = Math.max(50, s.glow.y + 70);
+      const aim = Math.abs(dx) < 900 && s.heroW;
+      const deg = Math.max(-72, Math.min(72, (Math.atan2(dx, dy) * 180) / Math.PI));
+      const tint = 'color-mix(in srgb, ' + (b.accent2 ? 'var(--color-accent-2)' : 'var(--color-accent)') + ' ' + (aim ? 44 : 18) + '%, transparent)';
+      return {
+        left: b.left + '%', width: b.width + 'px', tint,
+        cls: aim ? '' : b.cls,
+        transform: aim ? 'rotate(' + deg.toFixed(1) + 'deg) scaleY(1.05)' : 'none',
+        transition: 'transform .18s cubic-bezier(.25,.7,.2,1), background .25s',
+      };
+    });
+
+    const chordActive = this.chordsData.find(c => c.id === s.chordPlaying);
+    const chords = this.chordsData.map(c => ({
+      label: c.label,
+      onDown: (e) => {
+        if (e && e.currentTarget && e.currentTarget.releasePointerCapture && e.pointerId != null) {
+          try { e.currentTarget.releasePointerCapture(e.pointerId); } catch (err) {}
+        }
+        this._strum = true;
+        this.setState({ strumming: true });
+        this.playChord(c);
+      },
+      onEnter: () => { if (this._strum) this.playChord(c); },
+      bg: s.chordPlaying === c.id ? 'var(--color-accent-2)' : 'transparent',
+      color: s.chordPlaying === c.id ? '#000' : 'var(--color-text)',
+      border: s.chordPlaying === c.id ? 'var(--color-accent-2)' : 'var(--color-divider)',
+      lift: s.chordPlaying === c.id ? 'translateY(-3px)' : 'none',
+    }));
+
+    const whites = this.keysData.filter(k => !k.black);
+    const whiteKeys = whites.map(k => ({
+      label: k.key.toUpperCase(), note: k.note,
+      onDown: (e) => this.startGlide(k, e),
+      onEnter: () => { if (this._glide) this.playNote(k); },
+      bg: s.activeNote === k.note ? 'var(--color-accent)' : '#f0efef',
+      color: '#161616',
+    }));
+    const blackAfter = { 'C#4': 0, 'D#4': 1, 'F#4': 3, 'G#4': 4, 'A#4': 5 };
+    const wCount = whites.length;
+    const blackKeys = this.keysData.filter(k => k.black).map(k => {
+      const idx = blackAfter[k.note];
+      const unit = 100 / wCount;
+      return {
+        label: k.key.toUpperCase(),
+        onDown: (e) => this.startGlide(k, e),
+        onEnter: () => { if (this._glide) this.playNote(k); },
+        left: 'calc(' + ((idx + 1) * unit).toFixed(3) + '% - ' + (unit * 0.3).toFixed(2) + '%)',
+        width: (unit * 0.6).toFixed(2) + '%',
+        bg: s.activeNote === k.note ? 'var(--color-accent-2)' : '#0b0b0b',
+        color: s.activeNote === k.note ? '#000' : '#f0efef',
+      };
+    });
+
+    const decay = s.chordAt ? Math.max(0, 1 - (Date.now() - s.chordAt) / 1400) : 0;
+    const liveFreqs = s.activeFreqs || [];
+    const waveBars = [];
+    for (let i = 0; i < 56; i++) {
+      const base = 14 + 26 * Math.abs(Math.sin(i * 0.42)) + 10 * Math.abs(Math.sin(i * 0.13));
+      let h = base;
+      if (decay > 0 && liveFreqs.length) {
+        const f = liveFreqs[i % liveFreqs.length] / 200;
+        h = base + 46 * decay * Math.abs(Math.sin(i * 0.5 * f + s.phase * 0.35));
+      }
+      if (s.waveX != null) {
+        const dist = Math.abs(i / 55 - s.waveX);
+        if (dist < 0.22) h += (0.22 - dist) * 240;
+      }
+      waveBars.push({
+        h: Math.min(100, h).toFixed(1) + '%',
+        color: i % 4 === 0 ? 'var(--color-accent-2)' : 'var(--color-accent)',
+        o: (0.35 + Math.min(0.65, h / 100)).toFixed(2),
+      });
+    }
+    const liveBars = this.waveformBarsData.map((h, i) =>
+      Math.round(28 + (h - 28) * (0.6 + 0.4 * Math.abs(Math.sin((s.phase + i * 1.7) / 4)))));
+
+    // ── the one list ──────────────────────────────────────────────────────────
+    // Search hits and collected tracks used to live in two separate tables, which
+    // read like two different tools. They are one pool now: search hits first
+    // (they are what you just asked for), then anything already collected.
+    // `resultRows` / `hasResults` belong to the Workbench screen further down
+    // this same vals object, so these keys must not collide.
+    const collectedUrls = new Set(s.liveResults.map(r => r.url));
+    const pool = [
+      ...s.discList.filter(c => !collectedUrls.has(c.url)).map(c => ({
+        id: c.id, url: c.pageUrl || c.url, mediaUrl: c.url, title: c.title,
+        // `kind` is what it is; `playable` is whether we hold a URL that can be
+        // played right now — an Archive item page is audio but not yet playable.
+        audio: c.kind === 'audio', playable: !!c.playable,
+        license: c.license, usable: true, collected: false,
+        from: c.source + (c.creator ? ' · ' + c.creator : ''),
+        len: c.duration ? Math.floor(c.duration / 60000) + ':' + String(Math.round((c.duration % 60000) / 1000)).padStart(2, '0') : '',
+        bytes: c.bytes || 0,
+      })),
+      ...s.liveResults.map(r => ({
+        id: r.id, url: r.url, mediaUrl: r.url, title: r.title,
+        audio: r.type === 'audio', playable: r.type === 'audio', license: r.license,
+        usable: r.status !== 'quarantined', collected: true,
+        from: r.host || 'collected', len: '', bytes: r.bytes || 0,
+      })),
+    ];
+    const findingsTotal = pool.length;
+    const findingsCap = Math.min(s.findingsShown, findingsTotal);
+    const pickedCount = Object.keys(s.picked).filter(k => s.picked[k]).length;
+    const findingRows = pool.slice(0, findingsCap).map(t => {
+      const playing = s.previewId === t.id;
+      const size = t.bytes
+        ? (t.bytes > 999999 ? (t.bytes / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(t.bytes / 1024)) + ' KB')
+        : '';
+      return {
+        id: t.id, url: t.url, title: t.title,
+        tick: s.picked[t.id] ? '✓' : '',
+        boxBorder: s.picked[t.id] ? 'var(--color-accent)' : 'var(--color-neutral-500)',
+        boxBg: s.picked[t.id] ? 'var(--color-accent)' : 'transparent',
+        bg: s.picked[t.id] ? 'color-mix(in srgb, var(--color-accent) 7%, transparent)' : 'transparent',
+        // one control, one word: it says what pressing it does. Music we hold no
+        // direct file for yet says so, rather than showing a dead gap.
+        playLabel: t.playable
+          ? (playing ? (s.previewLoading ? '· · ·' : '■ Stop') : '▶ Play')
+          : (t.audio ? 'tick to get' : ''),
+        playColor: playing ? 'var(--color-accent)'
+          : (t.playable ? 'var(--color-neutral-600)' : 'var(--color-neutral-700)'),
+        // no pill at all when there is nothing to play — an empty outline reads
+        // like a button that is simply broken
+        playBorder: !t.playable ? 'transparent' : (playing ? 'var(--color-accent)' : 'var(--color-neutral-600)'),
+        playTitle: t.playable ? 'Hear it before you keep it' : '',
+        onPlay: (e) => {
+          if (e && e.stopPropagation) e.stopPropagation();
+          if (t.playable) this.togglePreview(t.id, t.mediaUrl);
+        },
+        onToggle: t.usable
+          ? () => this.setState(st => ({ picked: { ...st.picked, [t.id]: !st.picked[t.id] } }))
+          : () => this.setState({ busyMsg: "That one has no licence saying you can reuse it, so it can't be kept." }),
+        typeLabel: t.audio ? 'MUSIC' : 'WORDS',
+        typeColor: t.audio ? '#21E5E5' : 'var(--color-accent)',
+        licenseLabel: t.usable ? plainLicense(t.license) : "Can't use this one",
+        licenseColor: t.usable ? 'var(--color-accent-800)' : 'var(--color-accent-2)',
+        licenseTitle: t.license || '',
+        from: t.from,
+        meta: [t.len, size].filter(Boolean).join(' · ') || (t.collected ? 'ready to send' : ''),
+        cursor: t.usable ? 'pointer' : 'not-allowed',
+        rowOpacity: t.usable ? '1' : '0.45',
+      };
+    });
+    const c = s.crawlCounters;
+    const crawlStats = [
+      { label: 'STILL TO CHECK', value: c.queued.toLocaleString(), color: 'var(--color-text)' },
+      { label: 'PAGES OPENED', value: c.fetched.toLocaleString(), color: 'var(--color-text)' },
+      { label: 'PAGES READ', value: c.parsed.toLocaleString(), color: 'var(--color-accent)' },
+      { label: 'KEPT', value: c.stored.toLocaleString(), color: 'var(--color-accent)' },
+      { label: 'SET ASIDE (NO LICENCE)', value: c.quarantined.toLocaleString(), color: 'var(--color-accent-2)' },
+      // the simulation counts in KB-ish units; the service reports real bytes
+      { label: 'DOWNLOADED', value: live
+          ? (c.bytes > 1048576 ? (c.bytes / 1048576).toFixed(1) + ' MB' : Math.round(c.bytes / 1024) + ' KB')
+          : (c.bytes / 1024).toFixed(1) + ' MB', color: 'var(--color-text)' },
+    ];
+    const extractFields = s.extractFields.map((f, i) => ({
+      ...f,
+      onName: (e) => this.setState(st => ({ extractFields: st.extractFields.map((x, j) => j === i ? { ...x, name: e.target.value } : x) })),
+      onSelector: (e) => this.setState(st => ({ extractFields: st.extractFields.map((x, j) => j === i ? { ...x, selector: e.target.value } : x) })),
+    }));
+    const schedules = [['manual', 'Manual'], ['hourly', 'Hourly'], ['daily', 'Daily'], ['weekly', 'Weekly']].map(([id, label]) => ({
+      label,
+      onClick: () => this.setState({ schedule: id }),
+      bg: s.schedule === id ? 'var(--color-accent)' : 'transparent',
+      color: s.schedule === id ? '#000' : 'var(--color-text)',
+    }));
+
+    const tiers = this.tiersData.map(t => ({
+      ...t,
+      onClick: () => this.setState({ tier: t.id }),
+      bg: s.tier === t.id ? 'color-mix(in srgb, var(--color-accent) 10%, var(--color-bg))' : 'var(--color-surface)',
+      border: s.tier === t.id ? 'var(--color-accent)' : 'var(--color-divider)',
+      kickerColor: s.tier === t.id ? 'var(--color-accent)' : 'var(--color-neutral-700)',
+    }));
+    const activeTier = this.tiersData.find(t => t.id === s.tier) || this.tiersData[0];
+
+    const storeViews = [['schema', 'Schema'], ['browse', 'Browse data']].map(([id, label]) => ({
+      label,
+      onClick: () => this.setState({ storeView: id }),
+      bg: s.storeView === id ? 'var(--color-accent)' : 'transparent',
+      color: s.storeView === id ? '#000' : 'var(--color-text)',
+      border: s.storeView === id ? 'var(--color-accent)' : 'var(--color-divider)',
+    }));
+    const bd = this.browseData[s.tier];
+    const liveRaw = s.tier === 'raw'
+      ? s.crawlLog.filter(l => l.code === '200 OK').map((l, i) => ['live…' + (900 + i), l.msg, '200', (140 + i * 17) + ' KB', 'ok', 'just now'])
+      : [];
+    const bq = s.browseQuery.toLowerCase();
+    const allRows = [...liveRaw, ...bd.rows].filter(r => !bq || r.join(' ').toLowerCase().includes(bq));
+    const browseRows = allRows.map((r, i) => ({ cells: r, key: i }));
+
+    const preset = this.queryPresets[s.queryMode];
+    const queryModes = [['sql', 'SQL'], ['semantic', 'Semantic search'], ['graph', 'Fact graph']].map(([id, label]) => ({
+      label,
+      onClick: () => this.setState({ queryMode: id, queryText: this.queryPresets[id].text, queryRan: true }),
+      bg: s.queryMode === id ? 'var(--color-accent)' : 'transparent',
+      color: s.queryMode === id ? '#000' : 'var(--color-text)',
+      border: s.queryMode === id ? 'var(--color-accent)' : 'var(--color-divider)',
+    }));
+    const snippetDefs = {
+      sql: [['Licence audit', "SELECT licence_class, count(*) FROM documents GROUP BY 1;"], ['Freshest captures', 'SELECT url, fetched_at FROM captures ORDER BY fetched_at DESC LIMIT 20;'], ['Dedupe check', 'SELECT sha256, count(*) FROM captures GROUP BY 1 HAVING count(*) > 1;']],
+      semantic: [['Chord voicings', 'find chunks about open tunings used in appalachian ballads\nfilter licence_class = reusable\ntop_k 5'], ['Consent language', 'find chunks about vocal consent and likeness rights\ntop_k 8']],
+      graph: [['Open conflicts', 'MATCH (f:Fact) WHERE f.conflicts_with IS NOT NULL RETURN f LIMIT 20'], ['Orphan facts', 'MATCH (f:Fact) WHERE size(f.cited_chunks) = 0 RETURN f']],
+    };
+    const snippets = (snippetDefs[s.queryMode] || []).map(([label, text]) => ({
+      label, onClick: () => this.setState({ queryText: text, queryRan: false }),
+    }));
+
+    return {
+      crawlStats, extractFields, schedules, tiers, activeTier, queryModes, snippets, storeViews,
+      isSchema: s.storeView === 'schema', isBrowse: s.storeView === 'browse',
+      browseCols: bd.cols, browseRows, browseCount: allRows.length.toLocaleString(),
+      browseQuery: s.browseQuery, setBrowseQuery: (e) => this.setState({ browseQuery: e.target.value }),
+      themeClass: s.theme === 'light' ? 'theme-light' : '',
+      themeLabel: s.theme === 'light' ? '◐ DARK MODE' : '◑ LIGHT MODE',
+      toggleTheme: () => this.setState(st => ({ theme: st.theme === 'light' ? 'dark' : 'light' })),
+      toTopLanding: () => window.scrollTo({ top: 0, behavior: 'smooth' }),
+      goHome: (e) => { if (e && e.preventDefault) e.preventDefault(); this.setState({ view: 'landing' }); window.scrollTo({ top: 0, behavior: 'smooth' }); },
+      toTopApp: () => { const m = document.getElementById('dc-main'); if (m) m.scrollTo({ top: 0, behavior: 'smooth' }); window.scrollTo({ top: 0, behavior: 'smooth' }); },
+      isCrawl: s.screen === 'crawl', isStore: s.screen === 'store', isQuery: s.screen === 'query',
+      crawlBtnLabel: s.crawlRunning ? 'Stop looking' : 'Search these websites',
+      crawlStatusLabel: s.crawlRunning ? 'LOOKING…' : (s.crawlTicks ? 'DONE' : 'NOT STARTED'),
+      crawlDotColor: s.crawlRunning ? 'var(--color-accent)' : 'var(--color-neutral-700)',
+      crawlElapsed: (s.crawlRunning || s.crawlTicks)
+        ? (live
+            ? s.crawlCounters.fetched + ' fetched · depth ' + s.crawlDepth + ' · ' + s.rateLimit + ' req/s'
+            : Math.round(s.crawlTicks * 0.62) + 's elapsed · depth ' + s.crawlDepth + ' · ' + s.rateLimit + ' req/s')
+        : 'not started',
+      toggleCrawl: () => {
+        if (!live) return this.setState(st => ({ crawlRunning: !st.crawlRunning }));
+        if (s.crawlRunning) { this.svc('/api/stop', { method: 'POST' }).catch(() => {}); this.setState({ busyMsg: 'stopping…' }); }
+        else this.startLiveCrawl();
+      },
+      resetCrawl: () => {
+        if (live) this.svc('/api/reset', { method: 'POST' }).catch(() => {});
+        this.setState({
+          crawlRunning: false, crawlTicks: 0, crawlLog: [], liveResults: [], findingsShown: 100, picked: {}, busyMsg: '',
+          crawlCounters: live
+            ? { queued: 0, fetched: 0, parsed: 0, stored: 0, quarantined: 0, bytes: 0 }
+            : { queued: 1284, fetched: 0, parsed: 0, stored: 0, quarantined: 0, bytes: 0 },
+        });
+      },
+
+      // service mode banner
+      modeLabel: s.svcState === 'live' ? 'READY' : (s.svcState === 'checking' ? 'STARTING…' : 'NOT RUNNING'),
+      modeDot: s.svcState === 'live' ? 'var(--color-accent)' : (s.svcState === 'checking' ? 'var(--color-neutral-600)' : 'var(--color-accent-2)'),
+      modeBg: s.svcState === 'live' ? 'color-mix(in srgb, var(--color-accent) 8%, transparent)' : 'var(--color-surface)',
+      modeBorder: s.svcState === 'live' ? 'var(--color-accent)' : 'var(--color-divider)',
+      modeHint: s.svcState === 'live'
+        ? 'Ready. Everything here is free to use — nothing copyrighted gets collected.'
+        : (s.svcState === 'checking'
+            ? 'Starting up…'
+            : 'The finder is not running. Open a terminal in this project and type  npm run crawler  — then press Try again.'),
+      recheckService: () => { this.setState({ svcState: 'checking' }); this.checkService(); },
+      advOpen: s.advOpen,
+      advToggleLabel: s.advOpen ? 'Hide the advanced bits' : 'Search specific websites instead',
+      toggleAdv: () => this.setState({ advOpen: !s.advOpen }),
+      isLive: live,
+      enforced: true,
+      enforcedNote: live
+        ? 'Both are enforced by the service and cannot be switched off from here.'
+        : 'Enforced by the crawler service when one is running.',
+
+      // the one list
+      hasFindings: findingRows.length > 0,
+      noFindings: findingRows.length === 0 && !s.discBusy,
+      findingRows,
+      showFindingsMore: findingsCap < findingsTotal,
+      findingsMoreLabel: 'Show more — ' + findingsCap.toLocaleString()
+        + ' of ' + findingsTotal.toLocaleString() + ' shown',
+      findingsLoadMore: () => this.growFindings(),
+      findingsOnScroll: (e) => {
+        const el = e.currentTarget;
+        if (el.scrollHeight - el.scrollTop - el.clientHeight < 160) this.growFindings();
+      },
+      pickCount: pickedCount,
+      pickSummary: pickedCount
+        ? pickedCount + (pickedCount === 1 ? ' ticked' : ' ticked') + ' of ' + findingsTotal
+        : findingsTotal + (findingsTotal === 1 ? ' result' : ' results') + ' — tick the ones you like',
+      sendLabel: pickedCount ? 'Send ' + pickedCount + ' to Lyrx ↗' : 'Send to Lyrx ↗',
+      downloadLabel: pickedCount ? 'Download ' + pickedCount : 'Download',
+      pickAllKept: () => this.setState(st => {
+        const picked = { ...st.picked };
+        pool.forEach(t => { if (t.usable) picked[t.id] = true; });
+        return { picked };
+      }),
+      pickNone: () => this.setState({ picked: {} }),
+      downloadBundle: async () => {
+        if (!this.pickedIds().length) { this.setState({ busyMsg: 'Tick a track first.' }); return; }
+        const grab = await this.collectPicked();
+        const ids = this.pickedIds().filter(id => id[0] === 'r');
+        if (!ids.length) { this.setState({ busyMsg: grab.note || 'nothing could be fetched' }); return; }
+        this.setState({ busyMsg: 'downloading ' + ids.length + '…' + (grab.note ? ' · ' + grab.note : '') });
+        window.open(s.svcUrl + '/api/bundle?ids=' + ids.join(','), '_blank');
+      },
+      sendToLyrx: () => this.sendToLyrx(),
+      busyMsg: s.busyMsg,
+      vaultSummary: s.vaultInfo
+        ? 'Already in Lyrx: ' + s.vaultInfo.sample + ' sounds · ' + s.vaultInfo.text + ' texts — open Lyrx › Library to use them.'
+        : 'Nothing sent to Lyrx yet.',
+      extraHosts: s.extraHosts, setExtraHosts: (e) => this.setState({ extraHosts: e.target.value }),
+
+      // search
+      discQuery: s.discQuery,
+      setDiscQuery: (e) => this.setState({ discQuery: e.target.value }),
+      discOnKey: (e) => { if (e.key === 'Enter') this.runDiscover(); },
+      discSearch: () => this.runDiscover(),
+      discBtnLabel: s.discBusy ? 'Looking…' : 'Find music',
+      discNote: s.discNote,
+      // One click for anyone who does not know what to type yet.
+      discExamples: [
+        'banjo folk ballad', 'solo piano nocturne', 'gospel choir',
+        'upright bass jazz', 'rain and thunder', 'analog synth 80s',
+        'gregorian chant', 'mariachi trumpet', 'lo-fi drum loop',
+      ].map(q => ({
+        label: q,
+        onClick: () => { this.setState({ discQuery: q }); this.runDiscover(q); },
+        bg: s.discQuery === q ? 'var(--color-accent)' : 'transparent',
+        color: s.discQuery === q ? '#000' : 'var(--color-text)',
+        border: s.discQuery === q ? 'var(--color-accent)' : 'var(--color-divider)',
+      })),
+      discKinds: [['both', 'Anything'], ['audio', 'Music & sounds'], ['text', 'Lyrics & words']].map(([id, label]) => ({
+        label,
+        onClick: () => this.setState({ discKind: id }),
+        bg: s.discKind === id ? 'var(--color-accent)' : 'transparent',
+        color: s.discKind === id ? '#000' : 'var(--color-text)',
+        border: s.discKind === id ? 'var(--color-accent)' : 'var(--color-divider)',
+      })),
+      discLicenses: [
+        ['commercial', 'Fine to use in anything'],
+        ['open', 'Totally free, no credit needed'],
+        ['any', 'Show everything'],
+      ].map(([id, label]) => ({
+        label,
+        onClick: () => this.setState({ discLicense: id }),
+        bg: s.discLicense === id ? 'var(--color-accent)' : 'transparent',
+        color: s.discLicense === id ? '#000' : 'var(--color-text)',
+        border: s.discLicense === id ? 'var(--color-accent)' : 'var(--color-divider)',
+      })),
+      discSources: [
+        ['all', 'Everywhere'],
+        ['freesound', 'Sound effects'],
+        ['jamendo', 'Full songs'],
+        ['commons', 'Classical & folk'],
+        ['archive', 'Old recordings'],
+        ['wikisource', 'Lyrics & poems'],
+      ].map(([id, label]) => ({
+        label,
+        onClick: () => this.setState({ discSource: id }),
+        bg: s.discSource === id ? 'var(--color-accent-2)' : 'transparent',
+        color: s.discSource === id ? '#000' : 'var(--color-text)',
+        border: s.discSource === id ? 'var(--color-accent-2)' : 'var(--color-divider)',
+      })),
+      discSourceHint: {
+        all: 'Searches every library below at once.',
+        freesound: 'Single hits, loops and real-world recordings — rain, doors, birds.',
+        jamendo: 'Complete songs by independent artists.',
+        commons: 'Wikimedia — folk, classical and spoken word.',
+        archive: 'The Internet Archive — old records and netlabel releases.',
+        wikisource: 'Out-of-copyright lyrics and poems (words, no audio).',
+      }[s.discSource],
+      previewErr: s.previewErr,
+      discUseSeeds: () => this.useAsSeeds(),
+      crawlLog: s.crawlLog,
+      seedText: s.seedText, setSeedText: (e) => this.setState({ seedText: e.target.value }),
+      crawlDepth: s.crawlDepth, setCrawlDepth: (e) => this.setState({ crawlDepth: +e.target.value }),
+      rateLimit: s.rateLimit, setRateLimit: (e) => this.setState({ rateLimit: +e.target.value }),
+      addField: () => this.setState(st => ({ extractFields: [...st.extractFields, { name: 'new_field', selector: '.selector', type: 'text' }] })),
+      queryText: s.queryText, setQueryText: (e) => this.setState({ queryText: e.target.value }),
+      runQuery: () => {
+        this.setState({ queryRunning: true });
+        setTimeout(() => this.setState({ queryRunning: false, queryRan: true }), 550);
+      },
+      runLabel: s.queryRunning ? 'Running…' : 'Run query',
+      queryMeta: s.queryRan ? preset.meta : 'not run yet',
+      hasResults: s.queryRan && !s.queryRunning,
+      resultCols: preset.cols,
+      resultRows: preset.rows.map((r, i) => ({ cells: r, key: i })),
+      exports: [
+        { label: 'JSON', cls: 'btn-secondary', opacity: 1 },
+        { label: 'Parquet', cls: 'btn-secondary', opacity: 1 },
+        { label: 'CSV', cls: 'btn-secondary', opacity: 1 },
+        { label: 'Training set builder', cls: 'btn-secondary', opacity: 1 },
+        { label: 'Lyrx — connect later', cls: 'btn-ghost', opacity: 0.45 },
+      ],
+      isLanding: s.view === 'landing', isApp: s.view === 'app',
+      floaties,
+      glowX: s.glow.x + 'px', glowY: s.glow.y + 'px',
+      onHeroMove: (e) => {
+        const r = e.currentTarget.getBoundingClientRect();
+        this.setState({ glow: { x: e.clientX - r.left, y: e.clientY - r.top }, heroW: r.width, heroH: r.height });
+      },
+      particles, beams, chords, waveBars, whiteKeys, blackKeys,
+      kbdOn: s.kbdOn,
+      kbdBtnLabel: s.kbdOn ? 'Exit keyboard' : 'Try out the keyboard',
+      kbdBtnCls: s.kbdOn ? 'btn-primary' : 'btn-secondary',
+      kbdHint: s.kbdOn ? 'YOUR LAPTOP KEYS ARE LIVE — PRESS ESC TO EXIT' : 'PLAY IT WITH YOUR OWN KEYBOARD',
+      toggleKbd: () => this.setState(st => ({ kbdOn: !st.kbdOn })),
+      kbdModes: [['chords', 'Chords'], ['single', 'Single notes']].map(([id, label]) => ({
+        label,
+        onClick: () => this.setState({ chordMode: id === 'chords' }),
+        bg: (s.chordMode === (id === 'chords')) ? 'var(--color-accent)' : 'transparent',
+        color: (s.chordMode === (id === 'chords')) ? '#000' : 'var(--color-text)',
+        border: (s.chordMode === (id === 'chords')) ? 'var(--color-accent)' : 'var(--color-divider)',
+      })),
+      kbdModeNote: s.gliding
+        ? 'GLIDING — DRAG ACROSS THE KEYS'
+        : (s.chordMode ? 'DIATONIC TRIADS IN C MAJOR · HOLD AND DRAG TO GLIDE' : 'SINGLE NOTES · HOLD AND DRAG TO GLIDE'),
+      onHeroClick: (e) => {
+        const r = e.currentTarget.getBoundingClientRect();
+        this.heroBurst(e.clientX - r.left, e.clientY - r.top);
+      },
+      onWaveMove: (e) => {
+        const r = e.currentTarget.getBoundingClientRect();
+        this.setState({ waveX: (e.clientX - r.left) / r.width });
+      },
+      onWaveLeave: () => this.setState({ waveX: null }),
+      strumHint: s.strumming ? 'STRUMMING — DRAG ACROSS THE PADS' : 'HOLD AND DRAG ACROSS THE PADS TO STRUM A PROGRESSION',
+      waveStatus: s.chordPlaying ? 'PLAYING ' + s.chordPlaying
+        : (s.activeNote ? 'PLAYING ' + s.activeNote + (s.chordMode ? ' TRIAD' : '') : 'IDLE — 56 BAND MONITOR'),
+      soundGlow: decay > 0.02
+        ? '0 0 ' + (10 + decay * 46).toFixed(0) + 'px rgba(191,0,255,' + (0.16 + decay * 0.4).toFixed(2) + ')'
+        : 'none',
+      soundBorder: decay > 0.02 ? 'var(--color-accent-2)' : 'var(--color-divider)',
+      navPad: s.scrolled ? '8px 16px' : '12px 16px',
+      floatyDisplay: s.wide ? 'block' : 'none',
+      liveBars,
+      goApp: () => this.setState({ view: 'app' }),
+      goLanding: (e) => { if (e && e.preventDefault) e.preventDefault(); this.setState({ view: 'landing' }); },
+      navItems,
+      isHome: s.screen === 'home', isDiscover: s.screen === 'discover', isSources: s.screen === 'sources',
+      isKnowledge: s.screen === 'knowledge', isTrain: s.screen === 'train', isVoice: s.screen === 'voice',
+      isMusic: s.screen === 'music', isCompression: s.screen === 'compression',
+      pipelineStages: this.pipelineStages, capsuleContents: this.capsuleContents, pricingTiers: this.pricingTiers,
+      waveformBars: this.waveformBarsData,
+      musicLayers: [{w:90,o:1},{w:70,o:0.8},{w:55,o:0.6},{w:40,o:0.4},{w:25,o:0.25}],
+      discoverQuery: s.discoverQuery, setDiscoverQuery: (e) => this.setState({ discoverQuery: e.target.value }),
+      filteredSources, sources: this.sourcesData,
+      computeBudget: s.computeBudget, setComputeBudget: (e) => this.setState({ computeBudget: e.target.value }),
+      noop: () => {},
+      accentStrength: s.accentStrength, setAccentStrength: (e) => this.setState({ accentStrength: e.target.value }),
+      pitchRange: s.pitchRange, setPitchRange: (e) => this.setState({ pitchRange: e.target.value }),
+      emotionalIntensity: s.emotionalIntensity, setEmotionalIntensity: (e) => this.setState({ emotionalIntensity: e.target.value }),
+      breathiness: s.breathiness, setBreathiness: (e) => this.setState({ breathiness: e.target.value }),
+      knowledgeTabs, knowledgeItems: this.knowledgeItemsData[s.knowledgeTab] || [],
+      musicStages, activeMusicStage, stems: this.stemsData,
+      compressionStages,
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="./support.js"></script>
+<script src="../shared/lyrx-vault.js"></script>
 </head>
 <body>
 <x-dc>
@@ -47,6 +48,17 @@
       0% { transform: translate(-50%,-50%) scale(1); opacity: 1; }
       100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0.1); opacity: 0; }
     }
+    /* — cross-link to DataCore (sibling app) — */
+    .lx-xlink { --dc-green: #2CFF05; --dc-violet: #BF00FF; display: inline-flex; align-items: center; gap: 10px; text-decoration: none; color: var(--color-text); border: 1px solid var(--color-divider); border-radius: var(--radius-sm); padding: 7px 12px; transition: border-color .2s, background .2s, transform .2s, box-shadow .2s; }
+    .lx-xlink:hover { color: var(--color-text); border-color: var(--dc-green); background: color-mix(in srgb, var(--dc-green) 9%, transparent); transform: translateY(-2px); box-shadow: 0 8px 24px color-mix(in srgb, var(--dc-violet) 20%, transparent); }
+    .lx-xlink .xl-name { font-family: var(--font-heading); font-weight: 700; font-size: 13px; letter-spacing: 0.02em; }
+    .lx-xlink .xl-arrow { font-family: var(--font-mono); font-size: 12px; color: var(--color-neutral-400); transition: transform .2s, color .2s; }
+    .lx-xlink:hover .xl-arrow { color: var(--dc-green); transform: translate(3px,-3px); }
+    .lx-xband { display: flex; align-items: center; gap: 20px; width: 100%; padding: 20px 22px; }
+    .dc-mark path { transform-origin: 50% 100%; transition: transform .55s cubic-bezier(.2,.7,.3,1), opacity .55s; }
+    .lx-xlink:hover .dc-mark .a1 { transform: scale(1.18); opacity: .35; }
+    .lx-xlink:hover .dc-mark .a2 { transform: scale(1.45); opacity: .18; }
+    .lx-xlink:hover .dc-mark .a3 { transform: scale(1.9); opacity: 0; }
   </style>
 </helmet>
 <div style="min-height: 100vh; color: var(--color-text);">
@@ -55,6 +67,15 @@
     <sc-for list="{{ navItems }}" as="nv" hint-placeholder-count="5">
       <a href="#" data-view="{{ nv.id }}" onClick="{{ goView }}" style="font-size: 14px; text-decoration: none; padding: 6px 10px; border-radius: var(--radius-sm); color: {{ nv.color }}; background: {{ nv.bg }};">{{ nv.label }}</a>
     </sc-for>
+    <a class="lx-xlink" href="../datacore/index.html" title="DataCore — the governed data side of the stack" style="padding:6px 11px;">
+      <svg class="dc-mark" width="20" height="20" viewBox="0 0 32 32" aria-label="DataCore logo">
+        <defs><linearGradient id="dcGradNav" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2CFF05"></stop><stop offset="1" stop-color="#BF00FF"></stop></linearGradient></defs>
+        <path class="a3" d="M4 28 V15 A12 12 0 0 1 28 15 V28" fill="url(#dcGradNav)" fill-opacity="0.08" stroke="url(#dcGradNav)" stroke-width="2" stroke-linecap="square"></path>
+        <path class="a2" d="M9 28 V16.5 A7 7 0 0 1 23 16.5 V28" fill="url(#dcGradNav)" fill-opacity="0.12" stroke="url(#dcGradNav)" stroke-width="2" opacity="0.75" stroke-linecap="square"></path>
+        <path class="a1" d="M13.5 28 V18 A2.5 2.5 0 0 1 18.5 18 V28" fill="url(#dcGradNav)" fill-opacity="0.5" stroke="url(#dcGradNav)" stroke-width="1.6" opacity="0.9" stroke-linecap="square"></path>
+        <path d="M1.5 28.6 H30.5" stroke="var(--color-text)" stroke-width="1.4" opacity="0.7"></path>
+      </svg>
+      <span class="xl-name">DataCore</span><span class="xl-arrow">&#8599;</span></a>
     <button style-hover="background:color-mix(in srgb, var(--color-accent) 16%, transparent);color:var(--color-accent);" style="border:1px solid var(--color-accent);background:transparent;color:var(--color-accent);font-family:var(--font-mono);font-size:12px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;padding:9px 16px;border-radius:2px;cursor:pointer;transition:background .12s,border-color .12s,color .12s;white-space: nowrap;" data-view="studio" onClick="{{ goView }}">Open studio</button>
   </nav>
 
@@ -120,7 +141,35 @@
         <p style="font-size: 16px; line-height: 26px; color: var(--color-neutral-300); margin: 0 0 24px;">Your first loop takes about ninety seconds. Everything saves in this browser automatically.</p>
         <button style-hover="background:color-mix(in srgb, var(--color-accent) 16%, transparent);color:var(--color-accent);" style="border:1px solid var(--color-accent);background:transparent;color:var(--color-accent);font-family:var(--font-mono);font-size:12px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;padding:9px 16px;border-radius:2px;cursor:pointer;transition:background .12s,border-color .12s,color .12s;white-space: nowrap;" data-view="studio" onClick="{{ goView }}">Open the studio</button>
       </div>
+
+      <a class="lx-xlink lx-xband" href="../datacore/index.html" style="margin-top: 64px; background: var(--color-section);">
+        <svg class="dc-mark" width="44" height="44" viewBox="0 0 32 32" aria-label="DataCore logo" style="flex: 0 0 auto;">
+          <defs><linearGradient id="dcGradBand" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2CFF05"></stop><stop offset="1" stop-color="#BF00FF"></stop></linearGradient></defs>
+          <path class="a3" d="M4 28 V15 A12 12 0 0 1 28 15 V28" fill="url(#dcGradBand)" fill-opacity="0.08" stroke="url(#dcGradBand)" stroke-width="2" stroke-linecap="square"></path>
+          <path class="a2" d="M9 28 V16.5 A7 7 0 0 1 23 16.5 V28" fill="url(#dcGradBand)" fill-opacity="0.12" stroke="url(#dcGradBand)" stroke-width="2" opacity="0.75" stroke-linecap="square"></path>
+          <path class="a1" d="M13.5 28 V18 A2.5 2.5 0 0 1 18.5 18 V28" fill="url(#dcGradBand)" fill-opacity="0.5" stroke="url(#dcGradBand)" stroke-width="1.6" opacity="0.9" stroke-linecap="square"></path>
+          <path d="M1.5 28.6 H30.5" stroke="var(--color-text)" stroke-width="1.4" opacity="0.7"></path>
+        </svg>
+        <span style="flex: 1 1 auto; min-width: 0;">
+          <span style="display: block; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #2CFF05; margin-bottom: 6px;">The other half of the stack</span>
+          <span class="xl-name" style="display: block; font-size: 19px; margin-bottom: 6px;">DataCore — where the training data is governed</span>
+          <span style="display: block; font-size: 14px; line-height: 22px; color: var(--color-neutral-300);">A seven-stage pipeline that only keeps what it is licensed to keep: rights classification per source, consent before any voice is cloned, and a full audit of what got removed and why. Lyrx is the studio it feeds.</span>
+        </span>
+        <span class="xl-arrow" style="flex: 0 0 auto; font-size: 14px;">Open DataCore &#8599;</span></a>
     </section>
+
+    <footer style="border-top: 1px solid var(--color-divider); padding: 28px clamp(20px, 5vw, 72px); max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; font-size: 13px; color: var(--color-neutral-400);">
+      <span>Lyrx — everything runs in this tab.</span>
+      <a class="lx-xlink" href="../datacore/index.html" title="DataCore — governed AI training data" style="padding: 6px 12px;">
+        <svg class="dc-mark" width="18" height="18" viewBox="0 0 32 32" aria-label="DataCore logo">
+          <defs><linearGradient id="dcGradFoot" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2CFF05"></stop><stop offset="1" stop-color="#BF00FF"></stop></linearGradient></defs>
+          <path class="a3" d="M4 28 V15 A12 12 0 0 1 28 15 V28" fill="url(#dcGradFoot)" fill-opacity="0.08" stroke="url(#dcGradFoot)" stroke-width="2" stroke-linecap="square"></path>
+          <path class="a2" d="M9 28 V16.5 A7 7 0 0 1 23 16.5 V28" fill="url(#dcGradFoot)" fill-opacity="0.12" stroke="url(#dcGradFoot)" stroke-width="2" opacity="0.75" stroke-linecap="square"></path>
+          <path class="a1" d="M13.5 28 V18 A2.5 2.5 0 0 1 18.5 18 V28" fill="url(#dcGradFoot)" fill-opacity="0.5" stroke="url(#dcGradFoot)" stroke-width="1.6" opacity="0.9" stroke-linecap="square"></path>
+          <path d="M1.5 28.6 H30.5" stroke="var(--color-text)" stroke-width="1.4" opacity="0.7"></path>
+        </svg>
+        <span class="xl-name" style="font-size: 12px;">Sister project: DataCore</span><span class="xl-arrow">&#8599;</span></a>
+    </footer>
   </sc-if>
 
   <sc-if value="{{ isStudio }}" hint-placeholder-val="{{ false }}">
@@ -152,6 +201,15 @@
           <button style="border:1px solid var(--color-neutral-700);background:transparent;color:var(--color-neutral-300);font-family:var(--font-mono);font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;padding:5px 9px;border-radius:2px;cursor:pointer;white-space:nowrap;" style-hover="border-color:var(--color-accent);color:var(--color-accent);" onClick="{{ exportProject }}">Save</button>
           <button style="border:1px solid var(--color-neutral-700);background:transparent;color:var(--color-neutral-300);font-family:var(--font-mono);font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;padding:5px 9px;border-radius:2px;cursor:pointer;white-space:nowrap;border-color:var(--color-accent);color:var(--color-accent);" style-hover="background:color-mix(in srgb, var(--color-accent) 16%, transparent);" onClick="{{ exportWav }}">{{ wavLabel }}</button>
           <input type="file" ref="{{ fileRef }}" onChange="{{ onImportFile }}" accept="audio/*,.json" style="display: none;">
+          <a class="lx-xlink" href="../datacore/index.html#music" title="DataCore — governed training data for this studio" style="padding: 3px 9px; gap: 7px; border-color: var(--color-neutral-700);">
+            <svg class="dc-mark" width="15" height="15" viewBox="0 0 32 32" aria-label="DataCore logo">
+              <defs><linearGradient id="dcGradTransport" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2CFF05"></stop><stop offset="1" stop-color="#BF00FF"></stop></linearGradient></defs>
+              <path class="a3" d="M4 28 V15 A12 12 0 0 1 28 15 V28" fill="url(#dcGradTransport)" fill-opacity="0.08" stroke="url(#dcGradTransport)" stroke-width="2" stroke-linecap="square"></path>
+              <path class="a2" d="M9 28 V16.5 A7 7 0 0 1 23 16.5 V28" fill="url(#dcGradTransport)" fill-opacity="0.12" stroke="url(#dcGradTransport)" stroke-width="2" opacity="0.75" stroke-linecap="square"></path>
+              <path class="a1" d="M13.5 28 V18 A2.5 2.5 0 0 1 18.5 18 V28" fill="url(#dcGradTransport)" fill-opacity="0.5" stroke="url(#dcGradTransport)" stroke-width="1.6" opacity="0.9" stroke-linecap="square"></path>
+              <path d="M1.5 28.6 H30.5" stroke="var(--color-text)" stroke-width="1.4" opacity="0.7"></path>
+            </svg>
+            <span style="font-family: var(--font-mono); font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-neutral-300);">DataCore</span><span class="xl-arrow" style="font-size: 10px;">&#8599;</span></a>
         </div>
       </div>
 
@@ -1032,6 +1090,43 @@
 
   <sc-if value="{{ isLibrary }}" hint-placeholder-val="{{ false }}">
     <div style="max-width: 1200px; margin: 0 auto; padding: 48px clamp(20px, 5vw, 72px) 80px;">
+      <sc-if value="{{ hasVaultErr }}" hint-placeholder-val="{{ false }}">
+        <div style="border:1px solid var(--color-hot);background:color-mix(in srgb, var(--color-hot) 8%, transparent);padding:14px 16px;border-radius:3px;margin-bottom:28px;">
+          <span style="font-family:var(--font-mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-hot);">Library unavailable</span>
+          <p style="margin:6px 0 0;font-size:14px;color:var(--color-neutral-200);">{{ vaultErr }}</p>
+        </div>
+      </sc-if>
+      <sc-if value="{{ hasVault }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:12px;">
+          <span style="display:block;font-size:13px;letter-spacing:0.06em;text-transform:uppercase;color:#2CFF05;">Imported from DataCore</span>
+          <span style="font-size:12px;color:var(--color-neutral-400);">{{ vaultNote }}</span>
+          <button style-hover="border-color:var(--color-hot);color:var(--color-hot);" style="margin-left:auto;border:1px solid var(--color-neutral-700);background:transparent;color:var(--color-neutral-400);font-family:var(--font-mono);font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;padding:5px 10px;border-radius:2px;cursor:pointer;" onClick="{{ refreshVault }}">Refresh</button>
+        </div>
+        <p style="color:var(--color-neutral-300);margin:0 0 20px;max-width:58ch;font-size:14px;">Everything here was fetched by DataCore under a licence it could verify. Text drops into the Lyrics window; samples land on a pad.</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:var(--space-4);margin-bottom:56px;">
+          <sc-for list="{{ vaultRows }}" as="vi" hint-placeholder-count="2">
+            <div style="background:var(--color-surface);border:1px solid var(--color-divider);border-left:2px solid {{ vi.accent }};border-radius:3px;padding:var(--space-4);display:flex;flex-direction:column;gap:var(--space-2);">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="font-family:var(--font-mono);font-size:10px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:{{ vi.accent }};">{{ vi.kindLabel }}</span>
+                <span style="font-family:var(--font-mono);font-size:10px;letter-spacing:0.08em;color:var(--color-neutral-500);margin-left:auto;">{{ vi.size }}</span>
+              </div>
+              <div style="font-family:var(--font-heading);font-size:16px;font-weight:600;letter-spacing:-0.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ vi.title }}</div>
+              <div style="font-size:13px;line-height:20px;color:var(--color-neutral-300);flex:1;overflow:hidden;">{{ vi.preview }}</div>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:var(--space-2);">
+                <span style="font-family:var(--font-mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;padding:4px 8px;border-radius:2px;background:var(--color-neutral-800);color:var(--color-neutral-200);">{{ vi.license }}</span>
+                <div style="display:flex;gap:6px;">
+                  <sc-if value="{{ vi.canPlay }}" hint-placeholder-val="{{ true }}">
+                    <button title="Hear it before you use it" style-hover="border-color:var(--color-accent);color:var(--color-accent);" style="border:1px solid var(--color-neutral-700);background:transparent;color:{{ vi.playColor }};font-family:var(--font-mono);font-size:11px;font-weight:600;padding:8px 10px;border-radius:2px;cursor:pointer;" data-id="{{ vi.id }}" onClick="{{ playVault }}">{{ vi.playLabel }}</button>
+                  </sc-if>
+                  <button title="Remove from the library" style-hover="border-color:var(--color-hot);color:var(--color-hot);" style="border:1px solid var(--color-neutral-700);background:transparent;color:var(--color-neutral-500);font-family:var(--font-mono);font-size:11px;font-weight:600;padding:8px 10px;border-radius:2px;cursor:pointer;" data-id="{{ vi.id }}" onClick="{{ dropVault }}">×</button>
+                  <button style-hover="border-color:var(--color-accent);color:var(--color-accent);" style="border:1px solid var(--color-neutral-600);background:transparent;color:var(--color-neutral-200);font-family:var(--font-mono);font-size:12px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;padding:8px 14px;border-radius:2px;cursor:pointer;white-space:nowrap;" data-id="{{ vi.id }}" onClick="{{ useVault }}">{{ vi.action }}</button>
+                </div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
       <span style="display: block; font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-accent); margin-bottom: 12px;">Library</span>
       <h2 style="font-size: 32px; margin: 0 0 8px;">Starter grooves</h2>
       <p style="color: var(--color-neutral-300); margin: 0 0 32px; max-width: 58ch;">Every preset loads straight into the studio — patterns, synth settings and tempo. Use them as-is or as a first draft.</p>
@@ -1653,9 +1748,37 @@ function genreBuilder(SC) {
   return { GENRES, HOOKS, pick, chance };
 }
 
+/**
+ * Titles arriving from DataCore are filenames, and a filename is often a content
+ * hash — "31f4158bea5e45ced6fd356fe9f4f2…" tells nobody anything. Fall back to
+ * the folder the file sat in, which is usually the release or track name.
+ */
+function readableTitle(v) {
+  const raw = (v.title || '').trim();
+  const looksHashed = /^[0-9a-f]{16,}(\.\w+)?$/i.test(raw.replace(/\.\w+$/, ''));
+  if (raw && !looksHashed) return decodeURIComponent(raw).replace(/_/g, ' ');
+  try {
+    const parts = new URL(v.url).pathname.split('/').filter(Boolean);
+    const folder = parts[parts.length - 2];
+    if (folder) return decodeURIComponent(folder).replace(/[-_]/g, ' ');
+  } catch { /* not a URL we can read */ }
+  return raw || 'untitled';
+}
+
+/** Where it came from, in a form a person can read — no %20, no query string. */
+function prettySource(url) {
+  try {
+    const u = new URL(url);
+    return decodeURIComponent(u.hostname + u.pathname).slice(0, 90);
+  } catch {
+    return (url || '').replace(/^https?:\/\//, '').slice(0, 90);
+  }
+}
+
 class Component extends DCLogic {
   state = {
     view: 'home', tab: 'drums', playing: false, playStep: -1,
+    vaultPlayId: null, vaultErr: '',
     tempo: 128, master: 0.9, stepCount: 16,
     tracks: defaultTracks(), selTrack: null, addInst: 'kick',
     drums: emptyDrums(), notes: {},
@@ -1670,7 +1793,7 @@ class Component extends DCLogic {
     songMode: false, curSection: 0, scenes: [], prog: ['i', 'VI', 'III', 'VII'],
     rack: RACK_DEFS.reduce((o, r) => { o[r.id] = { on: r.id !== 'sat', ...r.params.reduce((p, x) => { p[x.id] = x.def; return p; }, {}) }; return o; }, {}),
     autoCurve: new Array(32).fill(0.5), autoTarget: 'cutoff', autoOn: false,
-    target: 'spotify', lyrics: '', browserQ: '', browserTab: 'Presets', versions: [], genPrompt: '', patchPrompt: '', genre: '',
+    target: 'spotify', lyrics: '', browserQ: '', browserTab: 'Presets', versions: [], genPrompt: '', patchPrompt: '', genre: '', vaultItems: [],
     account: { username: 'Late-night you', email: '', phone: '', password: '', twofaEnabled: false, address: '', city: '', region: '', country: '' },
     acctSaveMsg: '', shareOpen: false, shareCaption: '', myShares: [], commentThreads: {}, commentDrafts: {}, authed: false,
     hasAccount: false, showLoginForm: false, loginUser: '', loginPass: '', loginErr: '',
@@ -1681,6 +1804,83 @@ class Component extends DCLogic {
   };
   laserRef = React.createRef(); waveRef = React.createRef(); fileRef = React.createRef(); deskRef = React.createRef(); voiceFileRef = React.createRef();
   padBuffers = {}; nextPadSlot = 0;
+
+  /** Material DataCore collected, out of the shared IndexedDB vault. */
+  async loadVault() {
+    if (!window.LyrxVault) return;
+    try {
+      this.setState({ vaultItems: await window.LyrxVault.list(), vaultErr: '' });
+    } catch (err) {
+      // Silence here would read as "DataCore sent you nothing", which is a very
+      // different problem from the one the person actually has.
+      this.setState({ vaultItems: [], vaultErr: err.message || 'The vault could not be opened.' });
+    }
+  }
+
+  /** Text → the Lyrics window. Sample → the next pad, decoded on the way in. */
+  async useVaultItem(id) {
+    if (!window.LyrxVault) return;
+    const item = await window.LyrxVault.get(id);
+    if (!item) return;
+    if (item.kind === 'text') {
+      const body = (item.text || '').trim();
+      this.setState({ view: 'studio', lyrics: body });
+      this.openWin('lyrics');
+      this.toastMsg(`“${item.title}” loaded into Lyrics — ${item.license}.`);
+      return;
+    }
+    try {
+      this.ensureAudio();
+      const buf = await this.ac.decodeAudioData(await item.blob.arrayBuffer());
+      const slot = this.nextPadSlot;
+      this.padBuffers[slot] = buf;
+      this.nextPadSlot = (slot + 1) % 8;
+      this.setState(st => ({
+        view: 'studio',
+        padNames: st.padNames.map((p, i) => i === slot
+          ? { name: item.title.replace(/\.[^.]+$/, '').slice(0, 14), sub: 'from DataCore' } : p),
+      }));
+      this.openWin('pads');
+      this.toastMsg(`“${item.title}” on pad ${slot + 1} — ${item.license}. Tap it.`);
+    } catch (err) {
+      this.toastMsg('Couldn’t decode that sample.');
+    }
+  }
+
+  /** Audition a vault sample in place. Pressing it again, or playing another, stops it. */
+  async previewVaultItem(id) {
+    if (this._vaultSrc) {
+      try { this._vaultSrc.onended = null; this._vaultSrc.stop(); } catch (e) { /* already done */ }
+      this._vaultSrc = null;
+    }
+    if (this.state.vaultPlayId === id) { this.setState({ vaultPlayId: null }); return; }
+
+    const item = window.LyrxVault && await window.LyrxVault.get(id);
+    if (!item || !item.blob) { this.toastMsg('Nothing to play on that one.'); return; }
+    try {
+      this.ensureAudio();
+      const buf = await this.ac.decodeAudioData(await item.blob.arrayBuffer());
+      const src = this.ac.createBufferSource();
+      src.buffer = buf;
+      src.connect(this.ac.destination);
+      src.onended = () => {
+        if (this._vaultSrc === src) { this._vaultSrc = null; this.setState({ vaultPlayId: null }); }
+      };
+      src.start();
+      this._vaultSrc = src;
+      this.setState({ vaultPlayId: id });
+    } catch (err) {
+      this.setState({ vaultPlayId: null });
+      this.toastMsg('That file would not decode — the format may be unsupported.');
+    }
+  }
+
+  async dropVaultItem(id) {
+    if (!window.LyrxVault) return;
+    if (this.state.vaultPlayId === id) await this.previewVaultItem(id);   // stop before it vanishes
+    await window.LyrxVault.remove(id);
+    this.loadVault();
+  }
 
   componentDidMount() {
     window.addEventListener('resize', this.onResize);
@@ -1721,6 +1921,12 @@ class Component extends DCLogic {
         this.setState({ ...saved, wins: { ...DEFAULT_WINS(), ...(saved.wins || {}) }, view: 'home', playing: false, playStep: -1, aiBusy: false, toast: null, rendering: false });
       } else if (this.props.defaultTempo) this.setState({ tempo: this.props.defaultTempo });
     } catch (e) {}
+    // Deep links from DataCore: #studio, #library, #community, #profile
+    try {
+      const hv = (location.hash || '').replace(/^#\/?/, '').toLowerCase();
+      if (['studio', 'library', 'community', 'profile'].includes(hv)) this.setState({ view: hv });
+    } catch (e) {}
+    this.loadVault();
     this.rafLoop();
   }
   componentWillUnmount() {
@@ -3190,6 +3396,37 @@ Use 4-9 tracks. Make it genuinely musical and idiomatic for the requested style.
       })),
       // library / community / profile
       presetsView: PRESETS.map((p, i) => ({ ...p, i })),
+
+      // material imported from DataCore (shared IndexedDB vault)
+      hasVault: (s.vaultItems || []).length > 0,
+      vaultErr: s.vaultErr || '',
+      hasVaultErr: !!s.vaultErr,
+      vaultNote: (() => {
+        const items = s.vaultItems || [];
+        const samples = items.filter(v => v.kind === 'sample').length;
+        return items.length - samples + ' text · ' + samples + ' samples';
+      })(),
+      vaultRows: (s.vaultItems || []).map(v => {
+        const playing = s.vaultPlayId === v.id;
+        return {
+          id: v.id,
+          title: readableTitle(v),
+          license: v.license || 'unknown',
+          kindLabel: v.kind === 'sample' ? 'Sample' : 'Words',
+          accent: v.kind === 'sample' ? 'var(--color-cyan)' : '#2CFF05',
+          action: v.kind === 'sample' ? 'To pad' : 'To lyrics',
+          size: v.bytes > 999999 ? (v.bytes / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(v.bytes / 1024)) + ' KB',
+          preview: v.kind === 'sample' ? prettySource(v.url) : (v.preview || '').slice(0, 150),
+          // Hearing it before committing it to a pad saves a load-listen-undo lap.
+          canPlay: v.kind === 'sample',
+          playLabel: playing ? '■' : '▶',
+          playColor: playing ? 'var(--color-accent)' : 'var(--color-neutral-500)',
+        };
+      }),
+      playVault: e => this.previewVaultItem(e.currentTarget.dataset.id),
+      useVault: e => this.useVaultItem(e.currentTarget.dataset.id),
+      dropVault: e => this.dropVaultItem(e.currentTarget.dataset.id),
+      refreshVault: () => this.loadVault(),
       loadPreset: e => {
         const i = +e.currentTarget.dataset.i;
         const merged = [...s.myShares, ...FEED];

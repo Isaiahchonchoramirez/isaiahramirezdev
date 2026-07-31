@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Runs one collection pass every day at 03:00, then rebuilds dataset/.
+
+  No GPU is involved and nothing here touches the training machine — this is
+  plain Node on whatever Mac it is installed on. The 4080 only matters later,
+  for a training run, against the dataset this produces.
+
+  500MB of audio per night is the cap. A host that says "too many requests" is
+  backed off rather than hammered, so a night can finish under the cap; whatever
+  is left is picked up tomorrow.
+
+  Install:
+    cp server/dev.datacore.collect.plist ~/Library/LaunchAgents/
+    launchctl load ~/Library/LaunchAgents/dev.datacore.collect.plist
+
+  Run it once, now, without waiting for 03:00:
+    launchctl start dev.datacore.collect
+
+  Watch it:
+    tail -f .crawl-store/collect.log
+
+  Stop it:
+    launchctl unload ~/Library/LaunchAgents/dev.datacore.collect.plist
+
+  It runs through `zsh -lc` rather than calling node directly, because node here
+  comes from nvm — its path has the version number in it and would stop
+  resolving the next time node is upgraded. A login shell sources the profile
+  that puts nvm's node on PATH, whichever version that happens to be.
+
+  If the machine is asleep at 03:00, launchd runs the job at the next wake
+  rather than skipping the day.
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>dev.datacore.collect</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/zsh</string>
+    <string>-lc</string>
+    <string>cd /Users/irmac/Developer/isaiahramirezdev &amp;&amp; npm run collect -- --pages 40 --depth 2 --rate 2 --audio-cap 500 &amp;&amp; npm run dataset</string>
+  </array>
+
+  <key>WorkingDirectory</key>
+  <string>/Users/irmac/Developer/isaiahramirezdev</string>
+
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Hour</key><integer>3</integer>
+    <key>Minute</key><integer>0</integer>
+  </dict>
+
+  <key>RunAtLoad</key>
+  <false/>
+
+  <key>StandardOutPath</key>
+  <string>/Users/irmac/Developer/isaiahramirezdev/.crawl-store/collect.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/irmac/Developer/isaiahramirezdev/.crawl-store/collect.log</string>
+</dict>
+</plist>

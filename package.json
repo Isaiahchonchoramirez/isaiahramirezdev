@@ -6,13 +6,16 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "crawler": "node server/crawler.mjs",
+    "collect": "node server/collect.mjs",
     "build": "vite build",
     "build:github": "GITHUB_PAGES=true vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "preview:github": "GITHUB_PAGES=true vite build && vite preview",
     "predeploy": "npm run build:github",
-    "deploy": "gh-pages -d dist"
+    "deploy": "gh-pages -d dist",
+    "dataset": "node server/dataset.mjs"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
@@ -39,6 +42,7 @@
     "@types/react-dom": "^19.0.4",
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.21",
+    "cheerio": "^1.2.0",
     "eslint": "^9.21.0",
     "eslint-plugin-react-hooks": "^5.1.0",
     "eslint-plugin-react-refresh": "^0.4.19",
