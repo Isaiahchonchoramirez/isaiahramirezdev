@@ -18,10 +18,11 @@ const projects = [
     cta: "Open the dashboard",
     stack: ["Python", "FastAPI", "React", "pandas", "Technical Analysis"],
     related: {
-      id: "trade-assistant-source",
-      title: "Source on GitHub",
-      blurb: "the signal engine, backtest and API behind the demo",
-      href: "https://github.com/Isaiahchonchoramirez/ai-trade-assistant",
+      id: "trade-assistant-download",
+      title: "Free download",
+      blurb:
+        "run the full app on your own machine with live market data — source and releases on GitHub",
+      href: "https://github.com/Isaiahchonchoramirez/ai-trade-assistant/releases/latest",
     },
     description:
       "A market dashboard that scores a stock the way an analyst would, then proves the scoring out on history. Seven technical factors each read the tape independently and combine by weight into one number from −100 to +100, which becomes an action with a real entry, stop and target. The same scoring code is then replayed bar by bar over years of history to show what following it would actually have returned — against simply buying and holding.",
@@ -33,6 +34,7 @@ const projects = [
       "Colour is never the only signal — the green/red convention fails a colourblind check at ΔE 4.1, so every value also carries a sign, an arrow and a label, and one toggle swaps in a validated blue/orange pair at ΔE 24.7",
       "Charts flip to a log scale automatically once the span demands it, so forty-five years of price history stays readable instead of collapsing onto the baseline",
       "Assistant answers from the computed indicators rather than from memory, so it cannot invent a number — with an optional Claude upgrade for open-ended questions",
+      "Free to download and run locally against live market data — one double-click, Python and nothing else, no API keys or account",
     ],
   },
   {
