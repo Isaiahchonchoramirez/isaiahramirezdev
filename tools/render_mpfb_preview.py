@@ -20,6 +20,11 @@ if selections:
         slot, variant = obj.get("slot"), obj.get("variant")
         if slot and slot in selections:
             obj.hide_render = variant != selections[slot]
+        if obj.type == "MESH" and obj.data.shape_keys:
+            for name, value in selections.items():
+                key = obj.data.shape_keys.key_blocks.get(name)
+                if key:
+                    key.value = float(value)
 
 for obj in list(bpy.data.objects):
     if obj.type in {"CAMERA", "LIGHT"}:

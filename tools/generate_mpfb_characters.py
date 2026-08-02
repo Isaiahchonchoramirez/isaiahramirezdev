@@ -233,6 +233,26 @@ def create_mantle(spec, body_height, cloth, rig):
     mantle["variant"] = "shoulder-mantle"
     bind_to_rig(mantle, rig, single_bone="spine_03")
 
+    # A broken fringe gives the hide a readable fur edge even after glTF has
+    # flattened Blender's procedural shading. These are sparse guard-hair
+    # clumps, not a costly particle system.
+    for index in range(15):
+        u = index / 14
+        angle = math.radians(28 + 124 * u)
+        radius = 0.242 * body_height
+        z = (0.605 + math.sin(u * math.pi * 6) * 0.008) * body_height
+        bpy.ops.mesh.primitive_cone_add(
+            vertices=5, radius1=0.007 * body_height, radius2=0,
+            depth=(0.025 + 0.012 * ((index * 7) % 5) / 4) * body_height,
+            location=(math.cos(angle) * radius, math.sin(angle) * radius, z))
+        tuft = bpy.context.object
+        tuft.name = f'{spec["id"]}-mantle-fur-tuft-{index + 1}'
+        tuft.data.materials.append(cloth)
+        tuft["role"] = "garment"
+        tuft["slot"] = "mantle"
+        tuft["variant"] = "shoulder-mantle"
+        bind_to_rig(tuft, rig, single_bone="spine_03")
+
 
 def create_fur_boots(spec, body_height, cloth, rig):
     """Soft calf wraps with generous clearance for deformation."""
@@ -465,6 +485,39 @@ def bake_pose_as_rest(rig):
         len(meshes)))
 
 
+def create_face_morphs(human):
+    """Author a compact, game-safe facial morph set after the rest-pose bake."""
+    height = max(v.co.z for v in human.data.vertices)
+    human.shape_key_add(name="Basis")
+    definitions = {
+        "headWidth": lambda co: co.z > 0.84 * height and abs(co.x) < 0.105 * height,
+        "jawWidth": lambda co: 0.82 * height < co.z < 0.88 * height and abs(co.x) < 0.10 * height,
+        "chinLength": lambda co: 0.80 * height < co.z < 0.845 * height and abs(co.x) < 0.085 * height,
+        "noseSize": lambda co: abs(co.x) < 0.055 * height and 0.835 * height < co.z < 0.91 * height and co.y < 0,
+        "cheekbones": lambda co: 0.845 * height < co.z < 0.91 * height and abs(co.x) < 0.13 * height,
+        "mouthWidth": lambda co: 0.815 * height < co.z < 0.855 * height and abs(co.x) < 0.09 * height and co.y < 0,
+    }
+    for name, include in definitions.items():
+        key = human.shape_key_add(name=name)
+        key.slider_min, key.slider_max = -1.0, 1.0
+        for index, vertex in enumerate(human.data.vertices):
+            co = vertex.co
+            if not include(co):
+                continue
+            if name == "headWidth":
+                key.data[index].co.x += co.x * 0.12
+            elif name == "jawWidth":
+                key.data[index].co.x += co.x * 0.18
+            elif name == "chinLength":
+                key.data[index].co.z -= 0.025 * height
+            elif name == "noseSize":
+                key.data[index].co.y += co.y * 0.14
+            elif name == "cheekbones":
+                key.data[index].co.x += co.x * 0.10
+            elif name == "mouthWidth":
+                key.data[index].co.x += co.x * 0.12
+
+
 def limit_skin_weights(obj, limit=4):
     """Fit the weighting to what glTF can actually carry.
 
@@ -549,7 +602,9 @@ def add_period_clothing(spec, human, rig):
     # body surfaced through the weave — the nipples appearing to swell and
     # shrink was the body punching through a garment with no air in it.
     bm.normal_update()
-    lift = 0.020 * body_height
+    # The game export masks the hidden skin, so the fitted layer can rest close
+    # to the flesh without punch-through.
+    lift = 0.009 * body_height
     for vert in bm.verts:
         # A broad diagonal bias breaks the vacuum-sealed look without noisy,
         # evenly spaced corrugation. It is strongest near the free waist and
@@ -595,8 +650,8 @@ def add_period_clothing(spec, human, rig):
     armor.data.materials.append(hide)
     for polygon in armor.data.polygons:
         polygon.material_index = 0
-    armor.scale.x = 1.045
-    armor.scale.y = 1.055
+    armor.scale.x = 1.018
+    armor.scale.y = 1.025
     armor["role"] = "garment"
     armor["slot"] = "torso"
     armor["variant"] = "hide-armor"
@@ -658,6 +713,7 @@ def export_character(spec):
     # in rather than against MPFB's splayed rigging pose.
     relax_arms(rig)
     bake_pose_as_rest(rig)
+    create_face_morphs(human)
 
     # Each part carries a `role`, exported as glTF extras and read back as
     # `userData.role`. The creator recolours by role, so it never has to guess
@@ -665,14 +721,16 @@ def export_character(spec):
     human["role"] = "skin"
 
     attachments = [
-        ("eyes", "low-poly.mhclo", "Eyes", "eyes"),
-        ("eyebrows", "eyebrow001.mhclo", "Eyebrows", "hair"),
-        ("eyelashes", "eyelashes01.mhclo", "Eyelashes", "hair"),
-        ("teeth", "teeth_base.mhclo", "Teeth", "mouth"),
-        ("tongue", "tongue01.mhclo", "Tongue", "mouth"),
-        ("hair", spec["hair_asset"], "Hair", "hair"),
+        ("eyes", "low-poly.mhclo", "Eyes", "eyes", None),
+        ("eyebrows", "eyebrow001.mhclo", "Eyebrows", "hair", None),
+        ("eyelashes", "eyelashes01.mhclo", "Eyelashes", "hair", None),
+        ("teeth", "teeth_base.mhclo", "Teeth", "mouth", None),
+        ("tongue", "tongue01.mhclo", "Tongue", "mouth", None),
+        ("hair", "short04.mhclo", "Hair", "hair", "cropped"),
+        ("hair", "braid01.mhclo", "Hair", "hair", "long-braid"),
+        ("hair", "afro01.mhclo", "Hair", "hair", "coiled-crown"),
     ]
-    for subdir, filename, asset_type, role in attachments:
+    for subdir, filename, asset_type, role, variant in attachments:
         path = AssetService.find_asset_absolute_path(filename, asset_subdir=subdir)
         if not path:
             print(f"MISSING {subdir}/{filename}")
@@ -683,12 +741,16 @@ def export_character(spec):
             material_type="GAMEENGINE", set_up_rigging=True)
         for added in set(bpy.context.scene.objects) - existing:
             added["role"] = role
+            if variant:
+                added["slot"] = "hair"
+                added["variant"] = variant
 
     add_period_clothing(spec, human, rig)
 
     # Keep the editable scene readable: render the default outfit while all
     # alternative slot meshes remain present and exportable.
-    defaults = {"torso": "tunic", "lower": "wrap", "mantle": "none", "feet": "bare"}
+    defaults = {"torso": "tunic", "lower": "wrap", "mantle": "none",
+                "feet": "bare", "hair": "cropped"}
     for obj in bpy.context.scene.objects:
         slot, variant = obj.get("slot"), obj.get("variant")
         if slot and variant != defaults.get(slot):
@@ -733,7 +795,9 @@ def export_character(spec):
         filepath=glb_path,
         export_format="GLB",
         use_selection=True,
-        export_apply=True,
+        # Applying modifiers here strips shape keys from glTF. Garment
+        # modifiers are evaluated by the exporter; keep the body morph set.
+        export_apply=False,
         export_skins=True,
         export_animations=False,
         export_morph=True,

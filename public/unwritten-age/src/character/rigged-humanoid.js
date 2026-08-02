@@ -82,7 +82,9 @@ export class RiggedHumanoid {
     this.totalHeight = appearance.height ?? 1.74;
     this.headHeight = this.totalHeight * 0.93;
     this.capsule = { radius: 0.32, height: this.totalHeight };
-    const modelId = appearance.bodyBase ?? (appearance.culture === "aurean" ? "aurean-keeper" : "veyr-hunter");
+    const sexModels = { male: "veyr-hunter", female: "aurean-keeper", androgynous: "ember-elder" };
+    const modelId = sexModels[appearance.bodySex] ?? appearance.bodyBase
+      ?? (appearance.culture === "aurean" ? "aurean-keeper" : "veyr-hunter");
 
     if (modelId === this.currentModel) {
       // Same body, new measurements — apply what the loaded mesh can honour
@@ -90,6 +92,7 @@ export class RiggedHumanoid {
       this.applyHeight();
       this.applySurface(appearance);
       this.applyProportions(appearance);
+      this.applyFaceMorphs(appearance);
       this.applyEquipment(appearance);
       return;
     }
@@ -124,10 +127,13 @@ export class RiggedHumanoid {
           this.restPose[node.name] = node.quaternion.clone();
         }
         if (node.userData?.role === "garment-flow") {
+          node.geometry = node.geometry.clone();
+          const position = node.geometry.attributes.position;
           this.clothPieces.push({
             node,
             rest: node.quaternion.clone(),
             flow: Number(node.userData.flow) || 0.04,
+            basePositions: new Float32Array(position.array),
           });
         }
         if (node.userData?.slot && node.userData?.variant) {
@@ -143,6 +149,7 @@ export class RiggedHumanoid {
       this.applyHeight();
       this.applySurface(this.appearance);
       this.applyProportions(this.appearance);
+      this.applyFaceMorphs(this.appearance);
       this.applyEquipment(this.appearance);
       this.root.add(this.model);
       this.fallback.root.visible = false;
@@ -194,10 +201,31 @@ export class RiggedHumanoid {
       lower: appearance.lowerGarment ?? "wrap",
       mantle: appearance.mantle ?? "none",
       feet: appearance.footwear ?? "bare",
+      hair: appearance.hairStyle ?? "cropped",
     };
     for (const piece of this.equipmentPieces) {
       piece.visible = selected[piece.userData.slot] === piece.userData.variant;
     }
+  }
+
+  /** Drive the facial shape keys authored after MPFB's relaxed pose is baked. */
+  applyFaceMorphs(appearance) {
+    if (!this.model) return;
+    const controls = {
+      headWidth: appearance.headWidth,
+      jawWidth: appearance.jawWidth,
+      chinLength: appearance.chinLength,
+      noseSize: appearance.noseSize,
+      cheekbones: appearance.cheekbones,
+      mouthWidth: appearance.mouthWidth,
+    };
+    this.model.traverse((node) => {
+      if (!node.isMesh || !node.morphTargetDictionary || !node.morphTargetInfluences) return;
+      for (const [name, value] of Object.entries(controls)) {
+        const index = node.morphTargetDictionary[name];
+        if (index !== undefined) node.morphTargetInfluences[index] = ((value ?? 0.5) - 0.5) * 2;
+      }
+    });
   }
 
   /**
@@ -353,6 +381,24 @@ export class RiggedHumanoid {
       WANTED_Q.setFromEuler(new THREE.Euler(targetX, 0, targetZ));
       WANTED_Q.premultiply(cloth.rest);
       cloth.node.quaternion.slerp(WANTED_Q, 1 - Math.pow(0.0015, dt));
+
+      // Bend the loose mesh itself. Fixed waist/shoulder vertices barely move;
+      // displacement grows toward the free hem, producing folds rather than a
+      // rigid object rocking around its origin.
+      const position = cloth.node.geometry.attributes.position;
+      const array = position.array;
+      const base = cloth.basePositions;
+      const bounds = cloth.node.geometry.boundingBox
+        ?? (cloth.node.geometry.computeBoundingBox(), cloth.node.geometry.boundingBox);
+      const span = Math.max(0.001, bounds.max.y - bounds.min.y);
+      for (let i = 0; i < array.length; i += 3) {
+        const free = THREE.MathUtils.clamp((bounds.max.y - base[i + 1]) / span, 0, 1);
+        const wave = Math.sin(this.windPhase * 2.0 + base[i] * 9 + base[i + 1] * 5);
+        array[i] = base[i] + wave * cloth.flow * 0.10 * free;
+        array[i + 2] = base[i + 2] + (wind + stride * 0.6) * cloth.flow * free
+          + wave * cloth.flow * 0.18 * free;
+      }
+      position.needsUpdate = true;
     }
 
     // The body rises over each supporting leg — twice a cycle, not once.
