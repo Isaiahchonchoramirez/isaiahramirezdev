@@ -768,6 +768,8 @@ const creator = new CharacterCreator(document.getElementById("creator"), (chosen
   enterWorld();
 });
 
+if (window.__dev) window.__dev.creator = creator;
+
 async function enterWorld() {
   await ui.banner(OPENING, { duration: 9000, className: "opening" });
   const archetype = CLASSES[appearance.archetype];

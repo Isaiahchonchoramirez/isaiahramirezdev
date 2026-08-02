@@ -3,15 +3,19 @@
  *
  * Every control declares what it actually drives via `affects`:
  *
- *   "body"    — changes the procedural humanoid you can see right now
- *   "surface" — changes colour/material on the humanoid right now
+ *   "body"     — moves the body you can see right now
+ *   "deferred" — saved with the character, but does not move it yet
  *
- * There is deliberately no third category. Because the body is rebuilt from
- * primitives rather than driven by morph targets, any facial dimension we can
- * name we can also construct, so every slider here moves the mesh. If a future
- * control genuinely cannot be honoured, it belongs behind an `affects` value
- * that the creator renders as disabled — never as a live slider that does
- * nothing.
+ * The avatar used to be rebuilt from primitives, so every dimension we could
+ * name we could also construct and every slider here moved the mesh. It is now
+ * a rigged MPFB human exported from Blender, and a skinned glTF only bends
+ * where it has been given somewhere to bend. Overall height is honoured by
+ * scaling; everything below is authored in the .blend and needs morph targets
+ * exported before it can be driven from here.
+ *
+ * The rule that survived the swap is the one that matters: a control that
+ * cannot be honoured is marked "deferred" and rendered in its own labelled
+ * group — never as a live slider that does nothing.
  */
 
 /** Skin tones spanning realistic global variation, dark → light, ordered. */
@@ -92,8 +96,9 @@ export const SCARS = [
 ];
 
 /**
- * Slider definitions. `affects: "body"` sliders are wired to the humanoid
- * builder and move the mesh immediately.
+ * Slider definitions. `affects: "body"` sliders move the mesh immediately;
+ * `affects: "deferred"` sliders are stored on the character and wait for morph
+ * targets to be exported from the .blend sources.
  */
 export const BODY_SLIDERS = [
   { key: "height", name: "Height", min: 1.5, max: 2.0, step: 0.01, affects: "body", unit: "m" },
@@ -114,23 +119,23 @@ export const BODY_SLIDERS = [
 
 export const HEAD_SLIDERS = [
   { key: "headSize", name: "Head size", min: 0, max: 1, step: 0.01, affects: "body" },
-  { key: "headWidth", name: "Head width", min: 0, max: 1, step: 0.01, affects: "body" },
-  { key: "jawWidth", name: "Jaw width", min: 0, max: 1, step: 0.01, affects: "body" },
-  { key: "chinLength", name: "Chin length", min: 0, max: 1, step: 0.01, affects: "body" },
-  { key: "browRidge", name: "Brow ridge", min: 0, max: 1, step: 0.01, affects: "body" },
-  { key: "noseSize", name: "Nose", min: 0, max: 1, step: 0.01, affects: "body" },
-  { key: "cheekbones", name: "Cheekbones", min: 0, max: 1, step: 0.01, affects: "body" },
-  { key: "earSize", name: "Ears", min: 0, max: 1, step: 0.01, affects: "body" },
-  { key: "eyeSpacing", name: "Eye spacing", min: 0, max: 1, step: 0.01, affects: "body" },
-  { key: "eyeHeight", name: "Eye position", min: 0, max: 1, step: 0.01, affects: "body" },
-  { key: "eyeDepth", name: "Eye depth", min: 0, max: 1, step: 0.01, affects: "body" },
-  { key: "mouthWidth", name: "Mouth width", min: 0, max: 1, step: 0.01, affects: "body" },
-  { key: "lipFullness", name: "Lip fullness", min: 0, max: 1, step: 0.01, affects: "body" },
-  { key: "noseBridge", name: "Nose bridge", min: 0, max: 1, step: 0.01, affects: "body" },
-  { key: "noseHeight", name: "Nose position", min: 0, max: 1, step: 0.01, affects: "body" },
-  { key: "mouthHeight", name: "Mouth position", min: 0, max: 1, step: 0.01, affects: "body" },
-  { key: "eyeSize", name: "Eye size", min: 0, max: 1, step: 0.01, affects: "body" },
-  { key: "age", name: "Age", min: 0, max: 1, step: 0.01, affects: "surface" },
+  { key: "headWidth", name: "Head width", min: 0, max: 1, step: 0.01, affects: "deferred" },
+  { key: "jawWidth", name: "Jaw width", min: 0, max: 1, step: 0.01, affects: "deferred" },
+  { key: "chinLength", name: "Chin length", min: 0, max: 1, step: 0.01, affects: "deferred" },
+  { key: "browRidge", name: "Brow ridge", min: 0, max: 1, step: 0.01, affects: "deferred" },
+  { key: "noseSize", name: "Nose", min: 0, max: 1, step: 0.01, affects: "deferred" },
+  { key: "cheekbones", name: "Cheekbones", min: 0, max: 1, step: 0.01, affects: "deferred" },
+  { key: "earSize", name: "Ears", min: 0, max: 1, step: 0.01, affects: "deferred" },
+  { key: "eyeSpacing", name: "Eye spacing", min: 0, max: 1, step: 0.01, affects: "deferred" },
+  { key: "eyeHeight", name: "Eye position", min: 0, max: 1, step: 0.01, affects: "deferred" },
+  { key: "eyeDepth", name: "Eye depth", min: 0, max: 1, step: 0.01, affects: "deferred" },
+  { key: "mouthWidth", name: "Mouth width", min: 0, max: 1, step: 0.01, affects: "deferred" },
+  { key: "lipFullness", name: "Lip fullness", min: 0, max: 1, step: 0.01, affects: "deferred" },
+  { key: "noseBridge", name: "Nose bridge", min: 0, max: 1, step: 0.01, affects: "deferred" },
+  { key: "noseHeight", name: "Nose position", min: 0, max: 1, step: 0.01, affects: "deferred" },
+  { key: "mouthHeight", name: "Mouth position", min: 0, max: 1, step: 0.01, affects: "deferred" },
+  { key: "eyeSize", name: "Eye size", min: 0, max: 1, step: 0.01, affects: "deferred" },
+  { key: "age", name: "Age", min: 0, max: 1, step: 0.01, affects: "deferred" },
 ];
 
 export function defaultAppearance() {

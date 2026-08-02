@@ -63,7 +63,7 @@ export class Player {
     window.addEventListener("keydown", (e) => {
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       this.keys.add(e.code);
-      if (["KeyW", "KeyA", "KeyS", "KeyD", "Space"].includes(e.code)) e.preventDefault();
+      if (["KeyW", "KeyA", "KeyS", "KeyD", "KeyQ", "KeyE", "Space"].includes(e.code)) e.preventDefault();
     });
     window.addEventListener("keyup", (e) => this.keys.delete(e.code));
     window.addEventListener("blur", () => this.keys.clear());
@@ -92,13 +92,15 @@ export class Player {
 
   update(dt) {
     const forward = new THREE.Vector3(-Math.sin(this.yaw), 0, -Math.cos(this.yaw));
-    const right = new THREE.Vector3().crossVectors(forward, UP).negate();
+    // Facing -Z with +Y up, forward × up is already the player's right hand.
+    // The old negate here is what made strafing come out mirrored.
+    const right = new THREE.Vector3().crossVectors(forward, UP);
 
     const move = new THREE.Vector3();
     if (this.keys.has("KeyW")) move.add(forward);
     if (this.keys.has("KeyS")) move.sub(forward);
-    if (this.keys.has("KeyD")) move.add(right);
-    if (this.keys.has("KeyA")) move.sub(right);
+    if (this.keys.has("KeyD") || this.keys.has("KeyE")) move.add(right);
+    if (this.keys.has("KeyA") || this.keys.has("KeyQ")) move.sub(right);
 
     const running = this.keys.has("ShiftLeft") || this.keys.has("ShiftRight");
     const moving = move.lengthSq() > 0;
