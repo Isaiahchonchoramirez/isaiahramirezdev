@@ -19,6 +19,139 @@ section {
   width: 100dvw;
 }
 
+/* The rule above is meant for the full-bleed page sections, but it also hits
+   any nested <section>, which then bursts out of whatever column it sits in.
+   A Tailwind w-full cannot undo it — utilities live in @layer utilities, and
+   unlayered rules outrank every layer no matter the specificity — so the
+   escape hatch has to be unlayered too. */
+section.section-inline {
+  width: 100%;
+}
+
+.featured-project {
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 1.5rem;
+  background: linear-gradient(150deg, rgba(19,31,48,.92), rgba(6,13,24,.96));
+  transition: transform .35s ease, border-color .35s ease;
+}
+.featured-project:hover { transform: translateY(-6px); border-color: rgba(107,229,255,.5); }
+.featured-project-media { position: relative; aspect-ratio: 16/10; overflow: hidden; background: #050a11; }
+.featured-project-media img { width: 100%; height: 100%; object-fit: cover; object-position: top; transition: transform .6s ease; }
+.featured-project:hover .featured-project-media img { transform: scale(1.035); }
+.featured-project-media > span { position: absolute; top: 1rem; left: 1rem; padding: .35rem .55rem; border-radius: 999px; background: rgba(3,9,17,.82); font-size: .7rem; letter-spacing: .15em; }
+.featured-project-body { padding: 1.5rem; }
+.featured-project-body h3 { margin-top: .5rem; font-size: clamp(1.7rem, 3vw, 2.35rem); font-weight: 700; }
+.featured-project-kicker { color: #78e8ff; font-size: .72rem; text-transform: uppercase; letter-spacing: .14em; }
+.featured-project-outcome { margin-top: .8rem; color: #d6dde8; line-height: 1.65; }
+.featured-link { color: #fff; transition: color .2s ease; }
+.featured-link:hover { color: #78e8ff; }
+.featured-link.muted { color: #aab5c4; }
+.project-pill-link { display: inline-flex; align-items: center; justify-content: center; min-height: 3rem; padding: .7rem 1.15rem; border: 1px solid rgba(120,232,255,.55); border-radius: 999px; background: rgba(15,39,57,.75); color: #fff; transition: background .2s ease, transform .2s ease; }
+.project-pill-link:hover { background: rgba(40,102,128,.72); transform: translateY(-2px); }
+.project-pill-link--quiet { border-color: rgba(255,255,255,.18); background: transparent; }
+.hero-secondary-action { min-height: 3rem; padding: .7rem 1rem; border: 1px solid rgba(120,232,255,.4); border-radius: 999px; color: #fff; }
+.hero-text-link { color: #b8c5d5; font-size: .9rem; }
+
+.explore-current-card { width: min(1200px, calc(100% - 2.5rem)); margin: 0 auto; padding: clamp(1.5rem, 4vw, 3rem); display: flex; align-items: center; justify-content: space-between; gap: 2rem; border: 1px solid rgba(119,230,255,.25); border-radius: 2rem; background: radial-gradient(circle at 80% 20%, rgba(111,49,189,.2), transparent 35%), linear-gradient(135deg, rgba(8,35,50,.92), rgba(4,11,22,.96)); }
+.explore-current-card h2, .current-panel h2 { margin-top: .45rem; font-size: clamp(2rem, 5vw, 4rem); font-weight: 700; }
+.explore-current-card > div > p:last-child { margin-top: .75rem; color: #bdc8d5; }
+.current-overlay { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 1rem; overflow-y: auto; background: rgba(1,5,12,.9); backdrop-filter: blur(18px); }
+.current-panel { position: relative; width: min(1000px, 100%); padding: clamp(1.5rem, 4vw, 3rem); border: 1px solid rgba(120,232,255,.28); border-radius: 2rem; background: linear-gradient(145deg, #081828, #070b18); }
+.current-close { position: absolute; top: 1rem; right: 1.25rem; font-size: 2rem; color: #b7c5d4; }
+.current-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-top: 2rem; }
+.current-orb { min-height: 240px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .7rem; padding: 1rem; border: 1px solid rgba(255,255,255,.12); border-radius: 50% 50% 42% 58% / 53% 42% 58% 47%; background: radial-gradient(circle, rgba(81,207,238,.2), rgba(44,25,96,.17) 55%, transparent 72%); transition: transform .25s ease, box-shadow .25s ease; }
+.current-orb:hover, .current-orb:focus-visible { transform: translateY(-6px) scale(1.02); box-shadow: 0 0 35px rgba(105,222,255,.23); }
+.current-orb.is-found { border-color: #78e8ff; box-shadow: inset 0 0 34px rgba(105,222,255,.15); }
+.current-symbol { font-size: 2.2rem; color: #78e8ff; }
+.current-orb small { max-width: 12rem; color: #aebaca; line-height: 1.4; }
+.current-view { color: #fff; font-size: .78rem; text-transform: uppercase; letter-spacing: .1em; }
+.current-complete { margin-top: 1.5rem; display: flex; justify-content: space-between; gap: 1rem; padding: 1rem 1.25rem; border-radius: 1rem; background: rgba(74,195,222,.12); color: #fff; }
+.current-complete button { color: #78e8ff; }
+.current-skip { display: block; margin: 1.5rem auto 0; color: #aab5c4; text-decoration: underline; text-underline-offset: .25rem; }
+
+.project-filters { position: sticky; top: 5.5rem; z-index: 20; display: flex; flex-wrap: wrap; justify-content: center; gap: .55rem; width: fit-content; max-width: 100%; margin: 2.5rem auto 0; padding: .65rem; border: 1px solid rgba(255,255,255,.12); border-radius: 999px; background: rgba(5,12,23,.82); backdrop-filter: blur(14px); }
+.project-filters button { padding: .55rem .9rem; border-radius: 999px; color: #aeb9c8; font-size: .84rem; transition: color .2s ease, background .2s ease; }
+.project-filters button.is-active { color: #06101a; background: #78e8ff; }
+.project-evidence-grid { display: grid; gap: .8rem; margin-top: 1.5rem; }
+.project-evidence-grid > div { padding: 1rem; border-left: 2px solid rgba(120,232,255,.45); background: rgba(255,255,255,.035); }
+.project-evidence-grid dt { color: #78e8ff; font-size: .7rem; text-transform: uppercase; letter-spacing: .12em; }
+.project-evidence-grid dd { margin-top: .35rem; color: #d4dce7; font-size: .92rem; line-height: 1.55; }
+
+.data-preview { position: relative; min-height: 390px; display: flex; flex-direction: column; justify-content: space-between; padding: 1.5rem; overflow: hidden; border: 1px solid rgba(255,255,255,.12); border-radius: 1rem; background: radial-gradient(circle at 75% 15%, rgba(94,227,255,.15), transparent 34%), linear-gradient(145deg, #071521, #090c17); box-shadow: 0 24px 60px -35px rgba(0,0,0,.9); }
+.data-preview::before { content: ""; position: absolute; inset: 0; opacity: .24; background-image: linear-gradient(rgba(255,255,255,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.06) 1px, transparent 1px); background-size: 32px 32px; mask-image: linear-gradient(to bottom, #000, transparent 88%); }
+.data-preview > * { position: relative; z-index: 1; }
+.data-preview-topline { display: flex; justify-content: space-between; gap: 1rem; color: #9eacbd; font-size: .68rem; text-transform: uppercase; letter-spacing: .12em; }
+.data-preview-topline span:last-child { color: #78e8ff; }
+.data-preview-plot { height: 180px; display: flex; align-items: flex-end; gap: clamp(.35rem, 1.5vw, .75rem); padding-top: 1.5rem; border-bottom: 1px solid rgba(255,255,255,.15); }
+.data-preview-plot i { flex: 1; height: var(--value); min-width: .35rem; border-radius: .3rem .3rem 0 0; background: linear-gradient(to top, rgba(68,105,224,.35), #76e7ff); box-shadow: 0 0 18px rgba(103,226,255,.18); animation: dataBar .7s cubic-bezier(.22,1,.36,1) var(--delay) both; transform-origin: bottom; }
+.data-preview--space .data-preview-plot i { border-radius: 999px 999px 0 0; background: linear-gradient(to top, #3d257c, #bd7cff); }
+.data-preview--crop .data-preview-plot i { background: linear-gradient(to top, #315c56, #7cf0b0); }
+.data-preview--network .data-preview-plot i { width: 14px; flex: none; border-radius: 999px; background: linear-gradient(to top, #5b3194, #ff8adb); }
+.data-preview strong { display: block; font-size: clamp(1.4rem, 3vw, 2rem); }
+.data-preview p { margin-top: .4rem; color: #aeb9c7; font-size: .85rem; }
+@keyframes dataBar { from { transform: scaleY(0); opacity: 0; } to { transform: scaleY(1); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .data-preview-plot i { animation: none; } }
+
+.evidence-story { margin-top: 4rem; padding: clamp(1.25rem, 3vw, 2.25rem); border: 1px solid rgba(255,255,255,.12); border-radius: 1.5rem; background: linear-gradient(145deg, rgba(12,26,40,.94), rgba(7,11,20,.95)); }
+.evidence-story-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 2rem; }
+.evidence-story-head h3 { margin-top: .45rem; font-size: clamp(1.7rem, 4vw, 2.7rem); font-weight: 700; }
+.evidence-story-head > div > p:last-child { max-width: 52rem; margin-top: .6rem; color: #aeb9c8; }
+.evidence-sample { flex: 0 0 12rem; padding: 1rem; border-radius: 1rem; background: rgba(120,232,255,.07); }
+.evidence-sample span, .evidence-metrics dt { display: block; color: #8fa0b3; font-size: .68rem; text-transform: uppercase; letter-spacing: .12em; }
+.evidence-sample strong { display: block; margin-top: .35rem; color: #fff; line-height: 1.35; }
+.evidence-metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: .75rem; margin-top: 1.5rem; }
+.evidence-metrics > div { padding: 1rem; border: 1px solid rgba(255,255,255,.09); border-radius: 1rem; background: rgba(255,255,255,.025); }
+.evidence-metrics dd { margin-top: .25rem; font-size: clamp(1.5rem, 4vw, 2.25rem); font-weight: 700; }
+.evidence-chart-grid { display: grid; gap: 1rem; margin-top: 1rem; }
+.evidence-chart { padding: clamp(1rem, 2vw, 1.5rem); border: 1px solid rgba(255,255,255,.09); border-radius: 1rem; background: rgba(4,9,17,.58); }
+.evidence-chart figcaption h4, .evidence-findings h4 { font-size: 1.15rem; font-weight: 700; }
+.evidence-chart figcaption p { margin-top: .25rem; color: #9eabba; font-size: .85rem; }
+.evidence-legend { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem; color: #b8c2cf; font-size: .75rem; }
+.evidence-legend span { display: inline-flex; align-items: center; gap: .4rem; }
+.evidence-legend i { width: .75rem; height: .75rem; border-radius: .2rem; }
+.evidence-bars { display: grid; gap: .7rem; margin-top: 1.25rem; }
+.evidence-row { display: grid; grid-template-columns: minmax(8rem, 15rem) 1fr; align-items: center; gap: 1rem; min-height: 2rem; }
+.evidence-row-label { color: #d5dde7; font-size: .78rem; text-align: right; line-height: 1.25; }
+.evidence-track { position: relative; min-height: 1.45rem; display: flex; flex-direction: column; justify-content: center; gap: .2rem; border-left: 1px solid rgba(255,255,255,.25); background-image: linear-gradient(90deg, rgba(255,255,255,.055) 1px, transparent 1px); background-size: 25% 100%; }
+.evidence-bars.has-negative .evidence-track { margin-left: 50%; border-left-color: rgba(255,255,255,.4); }
+.evidence-bar { position: relative; min-width: 2px; min-height: .75rem; border-radius: 0 .25rem .25rem 0; background: #71dcf4; }
+.evidence-bar.series-2, .evidence-legend .series-2 { background: #c181ff; }
+.evidence-legend .series-1 { background: #71dcf4; }
+.evidence-bar.is-negative { align-self: flex-end; transform: translateX(-100%); border-radius: .25rem 0 0 .25rem; background: #ff9c79; }
+.evidence-bar span { position: absolute; left: calc(100% + .45rem); top: 50%; transform: translateY(-50%); color: #fff; font-size: .7rem; white-space: nowrap; }
+.evidence-bar.is-negative span { left: auto; right: calc(100% + .45rem); }
+.evidence-axis { display: grid; grid-template-columns: auto 1fr auto; gap: 1rem; margin: .8rem 0 0 min(16rem, 35%); color: #7f8d9f; font-size: .65rem; }
+.evidence-axis strong { text-align: center; font-weight: 500; }
+.evidence-findings { margin-top: 1rem; padding: 1.25rem; border-radius: 1rem; background: rgba(120,232,255,.06); }
+.evidence-findings ul { display: grid; gap: .55rem; margin-top: .75rem; }
+.evidence-findings li { display: flex; gap: .7rem; color: #d2dbe5; line-height: 1.5; }
+.evidence-findings li::before { content: ""; flex: none; width: .4rem; height: .4rem; margin-top: .55rem; border-radius: 50%; background: #78e8ff; }
+.evidence-provenance { margin-top: 1rem; color: #748398; font-size: .72rem; }
+.evidence-loading { height: 20rem; margin-top: 4rem; border-radius: 1.5rem; background: linear-gradient(100deg, rgba(255,255,255,.03), rgba(255,255,255,.08), rgba(255,255,255,.03)); background-size: 200% 100%; animation: evidenceLoad 1.2s infinite; }
+@keyframes evidenceLoad { to { background-position: -200% 0; } }
+
+@media (max-width: 700px) {
+  .evidence-story-head { flex-direction: column; }
+  .evidence-sample { flex-basis: auto; width: 100%; }
+  .evidence-metrics { grid-template-columns: 1fr; }
+  .evidence-row { grid-template-columns: 6.5rem 1fr; gap: .6rem; }
+  .evidence-row-label { font-size: .7rem; }
+  .evidence-axis { margin-left: 7.1rem; }
+}
+
+@media (max-width: 900px) {
+  .explore-current-card { align-items: flex-start; flex-direction: column; }
+  .current-grid { grid-template-columns: repeat(2, 1fr); }
+  .current-orb { min-height: 190px; }
+}
+@media (max-width: 520px) {
+  .current-grid { grid-template-columns: 1fr; }
+  .current-orb { min-height: 150px; border-radius: 1.5rem; }
+  .project-filters { top: 4.5rem; border-radius: 1.25rem; }
+  .current-complete { flex-direction: column; }
+}
+
 @theme {
   --font-sans: "Mona Sans", sans-serif;
   --color-white-50: #d9ecff;
@@ -93,6 +226,27 @@ section {
     @apply relative z-10 xl:mt-20 mt-32 md:h-dvh h-[80vh] flex xl:items-center items-start justify-center;
   }
 
+  /* The headline reveal is CSS, not GSAP.
+     It used to be a gsap.fromTo that set opacity:0 immediately and then, if
+     the tween never advanced, left the main heading permanently invisible —
+     which is exactly what was happening in production. A keyframe animation
+     cannot strand it: even if animations are disabled the end state is the
+     default, so the words are always readable. */
+  .hero-text h1 {
+    animation: heroRise 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .hero-text h1:nth-child(2) { animation-delay: 0.12s; }
+  .hero-text h1:nth-child(3) { animation-delay: 0.24s; }
+
+  @keyframes heroRise {
+    from { opacity: 0; transform: translateY(40px); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-text h1 { animation: none; }
+  }
+
   .hero-text {
     @apply flex flex-col justify-center md:text-[60px] text-[30px] font-semibold relative z-10 pointer-events-none;
     img {
@@ -163,53 +317,6 @@ section {
     }
   }
 
-  .app-showcase {
-    @apply w-full mt-20 px-5 md:px-20 py-10 md:py-20 flex items-center justify-center;
-
-    .showcaselayout {
-      @apply flex xl:flex-row flex-col gap-10 justify-between;
-    }
-
-    .first-project-wrapper {
-      @apply h-full flex flex-col justify-between xl:w-[60%];
-
-      .image-wrapper {
-        @apply xl:h-[70vh] md:h-[50vh] h-96 relative;
-
-        img {
-          @apply w-full h-full object-cover rounded-xl absolute inset-0;
-        }
-      }
-
-      .text-content {
-        @apply space-y-5 mt-5;
-
-        .badges {
-          @apply flex gap-2 mb-4;
-        }
-
-        h2 {
-          @apply text-2xl md:text-3xl lg:text-4xl font-bold;
-        }
-      }
-    }
-
-    .project-list-wrapper {
-      @apply flex md:flex-row flex-col xl:flex-col gap-10 xl:w-[40%];
-
-      .image-wrapper {
-        @apply xl:h-[37vh] md:h-52 lg:h-72 h-64 relative rounded-xl xl:px-5 2xl:px-12 py-0;
-      }
-
-      img {
-        @apply w-full h-full object-contain rounded-xl;
-      }
-
-      h2 {
-        @apply text-lg md:text-xl lg:text-2xl font-semibold mt-5;
-      }
-    }
-  }
 
   .cta-wrapper {
     @apply relative z-20 cursor-pointer;
@@ -230,17 +337,228 @@ section {
     }
 
     .arrow-wrapper {
-      @apply group-hover:bg-white-50 size-10 rounded-full absolute right-10 top-1/2 
+      @apply group-hover:bg-white-50 size-10 rounded-full absolute right-10 top-1/2
         -translate-y-1/2 flex justify-center items-center overflow-hidden;
 
+      /* The arrow used to park 8rem above this wrapper on xl and only slide in
+         on hover — but the wrapper clips, so at rest the button just looked
+         like it was missing its icon. It now sits in place and the motion is
+         the accent rather than the reveal. */
       img {
-        @apply size-5 xl:-translate-y-32 translate-y-0 animate-bounce group-hover:translate-y-0 transition-all duration-500;
+        @apply size-5 translate-y-0 animate-bounce transition-transform duration-500;
       }
+    }
+
+    /* Buttons that navigate somewhere, as opposed to scrolling down the page.
+       The arrow points where you're going and nudges instead of bouncing. */
+    .arrow-wrapper--nav img {
+      @apply animate-none group-hover:translate-x-1;
     }
   }
 
   .card-border {
     @apply border border-black-50 bg-black-100;
+  }
+
+  /* Glass panels for the aquatic theme. Glow is reserved — it appears on
+     hover and focus only, so it stays meaningful rather than ambient. */
+  .contact-panel {
+    @apply border border-black-50 flex flex-col justify-center;
+    background:
+      radial-gradient(120% 90% at 15% 0%, rgba(56, 189, 248, 0.12), transparent 60%),
+      linear-gradient(180deg, rgba(19, 22, 33, 0.9), rgba(12, 14, 22, 0.9));
+    backdrop-filter: blur(6px);
+  }
+
+  .avatar-initials {
+    @apply grid place-items-center rounded-full text-sm font-bold flex-none;
+    width: 44px;
+    height: 44px;
+    color: #7dd3fc;
+    background: rgba(56, 189, 248, 0.1);
+    border: 1px solid rgba(56, 189, 248, 0.22);
+  }
+
+
+  /* ---- Design work ------------------------------------------------------
+     Three across. The card width is chosen so the source files are never
+     upscaled — see the note in ShowcaseSection.jsx. */
+  .design-card {
+    @apply flex flex-col overflow-hidden rounded-2xl border border-black-50;
+    background: linear-gradient(180deg, rgba(19, 22, 33, 0.85), rgba(12, 14, 22, 0.85));
+    transition: border-color 0.4s ease, box-shadow 0.4s ease, transform 0.4s ease;
+  }
+  .design-card:hover {
+    border-color: rgba(56, 189, 248, 0.35);
+    box-shadow: 0 22px 60px -32px rgba(56, 189, 248, 0.5);
+    transform: translateY(-3px);
+  }
+
+  .design-card-head {
+    @apply p-5 pb-4;
+  }
+
+  .design-index-sm {
+    @apply text-xs font-bold tracking-widest;
+    color: rgba(125, 211, 252, 0.65);
+  }
+
+  .design-format {
+    @apply rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.1em];
+    color: #7dd3fc;
+    background: rgba(56, 189, 248, 0.1);
+    border: 1px solid rgba(56, 189, 248, 0.22);
+  }
+
+  .design-tool {
+    @apply rounded-full border border-black-50 px-2.5 py-1 text-[11px];
+    color: #d9ecff;
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  /* Fixed 4:3 window onto the top of each comp. Consistent card heights, and
+     the full piece is one click away. */
+  .design-thumb {
+    @apply relative mt-auto block w-full overflow-hidden border-t border-black-50;
+    aspect-ratio: 4 / 3;
+    cursor: zoom-in;
+  }
+  .design-thumb img {
+    @apply block h-full w-full object-cover object-top;
+    transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .design-thumb:hover img {
+    transform: scale(1.03);
+  }
+
+  /* Banner ad units keep their exact pixel size, scaled down only if the card
+     is narrower than the creative. */
+  .design-thumb--native {
+    @apply flex flex-col items-center justify-center gap-3 p-5;
+    background:
+      radial-gradient(60% 60% at 50% 40%, rgba(56, 189, 248, 0.07), transparent 70%),
+      rgba(8, 10, 16, 0.6);
+  }
+  .design-thumb--native img {
+    @apply h-auto w-auto max-w-full rounded-md object-contain;
+    box-shadow: 0 14px 40px -18px rgba(0, 0, 0, 0.9);
+  }
+  .design-thumb--native:hover img {
+    transform: none;
+  }
+
+  .design-zoom {
+    @apply pointer-events-none absolute bottom-4 left-1/2 rounded-full px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.1em] opacity-0 transition-all duration-300;
+    color: #0b0f16;
+    background: #d9ecff;
+    transform: translate(-50%, 8px);
+  }
+  .design-thumb:hover .design-zoom,
+  .design-thumb:focus-visible .design-zoom {
+    @apply opacity-100;
+    transform: translate(-50%, 0);
+  }
+
+  .design-lightbox {
+    @apply fixed inset-0 z-[200] overflow-auto p-4 md:p-10;
+    background: rgba(4, 6, 11, 0.95);
+    backdrop-filter: blur(10px);
+    animation: fadeIn 0.25s ease both;
+  }
+  .design-lightbox-inner {
+    @apply mx-auto flex max-w-4xl flex-col gap-5;
+  }
+  .design-lightbox-head {
+    @apply rounded-2xl border border-black-50 p-6;
+    background: rgba(14, 14, 16, 0.7);
+  }
+  .design-lightbox-inner img {
+    @apply w-full rounded-xl;
+  }
+  .design-lightbox-close {
+    @apply fixed right-5 top-5 z-10 grid size-11 place-items-center rounded-full text-lg;
+    color: #d9ecff;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+  }
+  .design-lightbox-close:hover {
+    background: rgba(255, 255, 255, 0.16);
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* Timeline entries: a single hairline rail with a node per role. */
+  .exp-entry {
+    @apply relative pl-8 md:pl-10;
+  }
+  .exp-entry::before {
+    content: "";
+    @apply absolute left-[5px] top-3 bottom-[-2.5rem] w-px;
+    background: linear-gradient(180deg, rgba(56, 189, 248, 0.45), rgba(56, 189, 248, 0.05));
+  }
+  .exp-entry:last-child::before {
+    @apply hidden;
+  }
+  .exp-dot {
+    @apply absolute left-0 top-2 size-[11px] rounded-full;
+    background: #0e0e10;
+    border: 2px solid #38bdf8;
+    box-shadow: 0 0 12px -2px rgba(56, 189, 248, 0.8);
+  }
+  /* Same surface as .card-border — spelled out because Tailwind v4 will not
+     @apply another component class. */
+  .exp-body {
+    @apply border border-black-50 bg-black-100 rounded-2xl p-5 md:p-6;
+  }
+
+  /* Scroll reveal. Visible is the default; JS only adds the hidden state,
+     so a failure shows content rather than hiding it. */
+  [data-reveal="pending"] {
+    opacity: 0;
+    transform: translateY(34px);
+  }
+  [data-reveal="in"] {
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms),
+      transform 0.65s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    [data-reveal] {
+      opacity: 1 !important;
+      transform: none !important;
+      transition: none !important;
+    }
+  }
+
+  /* Skills marks. Glow appears on hover only, so it stays meaningful. */
+  .tech-mark {
+    @apply grid place-items-center rounded-2xl transition-all duration-500;
+    width: 96px;
+    height: 96px;
+    color: #7dd3fc;
+    background: rgba(56, 189, 248, 0.07);
+    border: 1px solid rgba(56, 189, 248, 0.16);
+  }
+  .group:hover .tech-mark {
+    color: #a5b4fc;
+    background: rgba(129, 140, 248, 0.12);
+    border-color: rgba(129, 140, 248, 0.4);
+    box-shadow: 0 0 28px -6px rgba(129, 140, 248, 0.5);
+  }
+
+  .contact-link {
+    @apply border border-black-50 transition-all duration-300;
+    background: rgba(255, 255, 255, 0.03);
+  }
+  .contact-link:hover,
+  .contact-link:focus-visible {
+    border-color: rgba(56, 189, 248, 0.5);
+    background: rgba(56, 189, 248, 0.08);
   }
 
   .marquee-item {
@@ -267,16 +585,34 @@ section {
     @apply w-36 h-full absolute bottom-0 z-20;
   }
 
+  /* The hover wash is absolutely positioned, so the card has to be its
+     containing block. Without this it resolved against a distant ancestor,
+     making `h-full` the height of the entire document — five grey panels
+     7,600px tall that covered the footer and everything near it. And because
+     the containing block sat outside the card, the card's `overflow-hidden`
+     did not clip them. */
+  .tech-card {
+    @apply relative overflow-hidden;
+  }
+
   .tech-card-animated-bg {
     @apply absolute left-0 bottom-[-100%] w-full h-full bg-[#2D3240] group-hover:bottom-0 transition-all duration-700;
   }
 
+  /* Height was pinned to 50vh to fit a spinning 3D model. The cards now hold
+     an SVG mark and two lines of text, so they size to their content. */
   .tech-card-content {
-    @apply flex flex-col md:justify-center items-center xl:gap-5 xl:h-[50vh] overflow-hidden relative z-10 group-hover:cursor-grab;
+    @apply flex flex-col items-center justify-center gap-2 pb-8 overflow-hidden relative z-10;
 
     & p {
-      @apply text-lg 2xl:text-2xl pb-5 xl:pb-0 font-semibold text-white-50 text-center;
+      @apply text-lg font-semibold text-white-50 text-center;
     }
+  }
+
+  /* Centres the SVG placeholder inside the same box the canvas occupies. */
+  .tech-mark-static {
+    @apply grid h-full w-full place-items-center;
+    color: #7dd3fc;
   }
 
   .tech-grid {

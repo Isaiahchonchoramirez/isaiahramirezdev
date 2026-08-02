@@ -1,100 +1,145 @@
-import { useRef } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
 
+import TitleHeader from "../components/TitleHeader";
+import useReveal from "../hooks/useReveal";
+import { designWork } from "../constants";
 import { getAssetPath } from "../utils/assetPath";
 
-gsap.registerPlugin(ScrollTrigger);
+/**
+ * Design work, three across.
+ *
+ * The layout is driven by the source files rather than taste. These comps are
+ * small — the Xbox page is 650px wide, Lafayette 1024, Hemingway 1073 — so a
+ * full-width presentation upscaled them roughly 2x in CSS pixels and 4x on a
+ * retina display, which is why they looked soft. At three columns each card is
+ * about 424px, so four of the five render pixel-perfect on retina and none of
+ * them upscale.
+ *
+ * Cards carry the summary; the full write-up sits in the lightbox beside the
+ * artwork at full size, which is where someone actually wants to read it.
+ */
+const DesignShowcase = () => {
+  const scopeRef = useReveal({ selector: ".design-card", stagger: 55 });
+  const [lightbox, setLightbox] = useState(null);
+  const close = useCallback(() => setLightbox(null), []);
 
-const AppShowcase = () => {
-  const sectionRef = useRef(null);
-  const rydeRef = useRef(null);
-  const libraryRef = useRef(null);
-  const ycDirectoryRef = useRef(null);
-
-  useGSAP(() => {
-    // Animation for the main section
-    gsap.fromTo(
-      sectionRef.current,
-      { opacity: 0 },
-      { opacity: 1, duration: 1.5 }
-    );
-
-    // Animations for each app showcase
-    const cards = [rydeRef.current, libraryRef.current, ycDirectoryRef.current];
-
-    cards.forEach((card, index) => {
-      gsap.fromTo(
-        card,
-        {
-          y: 50,
-          opacity: 0,
-        },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 1,
-          delay: 0.3 * (index + 1),
-          scrollTrigger: {
-            trigger: card,
-            start: "top bottom-=100",
-          },
-        }
-      );
-    });
-  }, []);
+  useEffect(() => {
+    if (!lightbox) return;
+    const onKey = (e) => e.key === "Escape" && close();
+    document.addEventListener("keydown", onKey);
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = previous;
+    };
+  }, [lightbox, close]);
 
   return (
-    <div id="work" ref={sectionRef} className="app-showcase">
-      <div className="w-full">
-        <div className="showcaselayout">
-          <div ref={rydeRef} className="first-project-wrapper">
-            <div className="image-wrapper scrollable-image">
-              <img src={getAssetPath("/images/Xbox_website.png")} alt="Xbox Ad" /> 
-            </div>
-            <div className="text-content">
-              <h2>
-                Xbox Ad
-              </h2>
-              <p className="text-white-50 md:text-xl">
-                Xbox Ad creation.
-              </p>
-            </div>
-          </div>
+    <div id="work" ref={scopeRef} className="section-padding">
+      <div className="mx-auto w-full max-w-[1400px] px-5 md:px-10">
+        <TitleHeader title="Design Work" sub="🎨 Composited, drawn and set by hand" />
 
-          <div className="project-list-wrapper overflow-hidden">
-            <div className="project" ref={libraryRef}>
-              <div className="image-wrapper bg-[#FFEFDB]">
+        <p className="text-white-50 mx-auto mt-10 max-w-3xl text-center text-lg leading-relaxed md:text-xl">
+          Every piece below was built in{" "}
+          <span className="text-white font-semibold">Photoshop</span>, with the wider Adobe
+          toolset for type and vector work. Where a piece needed ornament or illustration I
+          generated vectors with <span className="text-white font-semibold">AI</span> and then
+          redrew them by hand — using the output as a starting sketch, not a finished asset, so
+          the curves and weights actually fit the layout they sit in.
+        </p>
+
+        <div className="mt-16 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+          {designWork.map((piece, i) => (
+            <article key={piece.id} className="design-card">
+              {/* Caption above the artwork, as before — just scaled to a card. */}
+              <div className="design-card-head">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="design-index-sm">{String(i + 1).padStart(2, "0")}</span>
+                  <span className="design-format">{piece.format}</span>
+                  <span className="text-white-50 text-xs">{piece.year}</span>
+                </div>
+                <h3 className="mt-3 text-xl font-bold leading-tight md:text-2xl">
+                  {piece.title}
+                </h3>
+                <p className="text-white-50 mt-2 text-sm leading-relaxed">{piece.summary}</p>
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                  {piece.tools.map((tool) => (
+                    <span key={tool} className="design-tool">
+                      {tool}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setLightbox(piece)}
+                className={`design-thumb group ${
+                  piece.display === "native" ? "design-thumb--native" : ""
+                }`}
+                aria-label={`View ${piece.title} full size`}
+              >
                 <img
-                  src={getAssetPath("/images/rockport_flyfishing.png")}
-                  alt="Rockport Flyfishing App"
+                  src={piece.image}
+                  alt={`${piece.title} — ${piece.format}`}
+                  loading="lazy"
+                  decoding="async"
                 />
-              </div>
-              <h2>Rockport Fly Fishing Website</h2>
-            </div>
+                {piece.imageAlt && (
+                  <img src={piece.imageAlt} alt="" loading="lazy" decoding="async" />
+                )}
+                <span className="design-zoom" aria-hidden="true">
+                  View full size
+                </span>
+              </button>
+            </article>
+          ))}
+        </div>
 
-            <div className="project" ref={ycDirectoryRef}>
-              <div className="image-wrapper bg-[#FFE7EB]">
-                <img src={getAssetPath("/images/teapigs.png")} alt="YC Directory App" />
-              </div>
-              <h2>Tea Pigs Website</h2>
-
-              <div className="mt-6 flex justify-center">
-                <Link to="/projects" className="cta-wrapper md:w-60 md:h-14 w-48 h-12">
-                  <div className="cta-button group">
-                    <div className="bg-circle" />
-                    <p className="text">See More</p>
-                  </div>
-                </Link>
+        <div className="mt-20 flex justify-center">
+          <Link to="/projects" className="cta-wrapper md:w-60 md:h-14 w-48 h-12">
+            <div className="cta-button group">
+              <div className="bg-circle" />
+              <p className="text">See More</p>
+              {/* This wrapper was missing, which is why the arrow never showed. */}
+              <div className="arrow-wrapper arrow-wrapper--nav">
+                <img src={getAssetPath("/images/arrow-right.svg")} alt="" />
               </div>
             </div>
-          </div>
+          </Link>
         </div>
       </div>
+
+      {lightbox && (
+        <div
+          className="design-lightbox"
+          role="dialog"
+          aria-modal="true"
+          aria-label={`${lightbox.title}, full size`}
+          onClick={close}
+        >
+          <button type="button" className="design-lightbox-close" onClick={close} aria-label="Close">
+            ✕
+          </button>
+          <div className="design-lightbox-inner" onClick={(e) => e.stopPropagation()}>
+            <header className="design-lightbox-head">
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="design-format">{lightbox.format}</span>
+                <span className="text-white-50 text-sm">{lightbox.year}</span>
+              </div>
+              <h3 className="mt-3 text-3xl font-bold md:text-4xl">{lightbox.title}</h3>
+              <p className="text-white-50 mt-3 leading-relaxed">{lightbox.detail}</p>
+            </header>
+
+            <img src={lightbox.image} alt={`${lightbox.title} — ${lightbox.format}`} />
+            {lightbox.imageAlt && <img src={lightbox.imageAlt} alt="" />}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
-export default AppShowcase;
+export default DesignShowcase;

@@ -2,7 +2,8 @@ import { getAssetPath } from "../utils/assetPath";
 
 const Button = ({ text, className, id }) => {
   return (
-    <a
+    <button
+      type="button"
       onClick={(e) => {
         e.preventDefault();
 
@@ -21,10 +22,10 @@ const Button = ({ text, className, id }) => {
         <div className="bg-circle" />
         <p className="text">{text}</p>
         <div className="arrow-wrapper">
-          <img src={getAssetPath("/images/arrow-down.svg")} alt="arrow" />
+          <img src={getAssetPath("/images/arrow-down.svg")} alt="" />
         </div>
       </div>
-    </a>
+    </button>
   );
 };
 

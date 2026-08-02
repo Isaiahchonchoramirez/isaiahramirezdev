@@ -1,5 +1,5 @@
-import { Canvas } from "@react-three/fiber";
-import { Suspense, useEffect } from "react";
+import { Canvas, useThree } from "@react-three/fiber";
+import { Suspense, useEffect, useState } from "react";
 import Jellyfish from "./Models/HeroModels/Jellyfish";
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
@@ -137,43 +137,74 @@ const FollowingColoredSpot = ({ jellyfishRef, color, offset, intensity }) => {
   );
 };
 
+/**
+ * The jellyfish that drifts behind the whole site.
+ *
+ * It is the signature of the portfolio, but it is also a 1.8 MB model and a
+ * live WebGL context, so it is deliberately not part of the first paint:
+ *
+ *  - mounting waits for the browser to go idle, so text and projects render first
+ *  - it never mounts at all for `prefers-reduced-motion`, or on a device
+ *    reporting very few cores, where it would cost more than it adds
+ *  - rendering stops while the tab is hidden, rather than burning battery in
+ *    a background tab
+ */
 const FloatingJelly = () => {
   const containerRef = useRef();
   const jellyfishRef = useRef();
+  const [mounted, setMounted] = useState(false);
+
+  const wanted =
+    typeof window !== "undefined" &&
+    !window.matchMedia("(prefers-reduced-motion: reduce)").matches &&
+    (navigator.hardwareConcurrency ?? 8) > 2;
 
   useEffect(() => {
+    if (!wanted) return;
+    // Idle callback keeps the model off the critical path; the timeout is the
+    // fallback for Safari, which still lacks requestIdleCallback.
+    const schedule = window.requestIdleCallback || ((fn) => setTimeout(fn, 900));
+    const cancel = window.cancelIdleCallback || clearTimeout;
+    const handle = schedule(() => setMounted(true), { timeout: 2500 });
+    return () => cancel(handle);
+  }, [wanted]);
+
+  useEffect(() => {
+    if (!mounted) return;
     const handleMouseMove = (e) => {
       if (containerRef.current) {
-        containerRef.current.dataset.mouseX = e.clientX / window.innerWidth * 2 - 1;
-        containerRef.current.dataset.mouseY = -(e.clientY / window.innerHeight * 2 - 1);
+        containerRef.current.dataset.mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+        containerRef.current.dataset.mouseY = -((e.clientY / window.innerHeight) * 2 - 1);
       }
     };
+    window.addEventListener("mousemove", handleMouseMove, { passive: true });
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, [mounted]);
 
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
+  if (!wanted || !mounted) return null;
 
   return (
-    <div 
+    <div
       ref={containerRef}
-      className="fixed top-0 left-0 w-full h-full pointer-events-none" 
+      className="fixed top-0 left-0 w-full h-full pointer-events-none"
       style={{ zIndex: 9 }}
     >
-      <Canvas 
+      <Canvas
         camera={{ position: [0, 0, 15], fov: 45 }}
-        gl={{ alpha: true, antialias: true }}
-        style={{ background: 'transparent' }}
+        gl={{ alpha: true, antialias: false, powerPreference: "low-power" }}
+        dpr={[1, 1.75]}
+        frameloop="demand"
+        style={{ background: "transparent" }}
       >
-        {/* Stronger ambient light */}
         <ambientLight intensity={0.8} color="#2196f3" />
-        
+
         <FlickerAmbient />
         <PulsingLight />
         <CausticEffect />
-        
-        {/* Add the following spotlight with much higher intensity */}
         <FollowSpotlight jellyfishRef={jellyfishRef} />
-        
+
+        <RenderWhileVisible />
+
         <Suspense fallback={null}>
           <Jellyfish containerRef={containerRef} ref={jellyfishRef} />
         </Suspense>
@@ -181,5 +212,35 @@ const FloatingJelly = () => {
     </div>
   );
 };
+
+/**
+ * Drives the render loop only while the tab is visible.
+ *
+ * The canvas runs on `frameloop="demand"`, so without this it would paint once
+ * and freeze; with it, a hidden tab costs nothing at all.
+ */
+function RenderWhileVisible() {
+  const { invalidate } = useThree();
+
+  useEffect(() => {
+    let raf;
+    const tick = () => {
+      invalidate();
+      raf = requestAnimationFrame(tick);
+    };
+    const start = () => {
+      cancelAnimationFrame(raf);
+      if (document.visibilityState === "visible") raf = requestAnimationFrame(tick);
+    };
+    start();
+    document.addEventListener("visibilitychange", start);
+    return () => {
+      cancelAnimationFrame(raf);
+      document.removeEventListener("visibilitychange", start);
+    };
+  }, [invalidate]);
+
+  return null;
+}
 
 export default FloatingJelly;

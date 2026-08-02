@@ -1,21 +1,18 @@
-import { useGSAP } from "@gsap/react";
-import gsap from "gsap";
 
 import AnimatedCounter from "../components/AnimatedCounter";
 import Button from "../components/Button";
 import { words } from "../constants";
-import HeroExperience from "../components/Models/HeroModels/HeroExperience";
+import { Suspense, lazy } from "react";
+import { Link } from "react-router-dom";
+
+// Ambient particles are decoration; they must not block the headline.
+const HeroExperience = lazy(() =>
+  import("../components/Models/HeroModels/HeroExperience")
+);
 import { getAssetPath } from "../utils/assetPath";
 
 // Hero Section Component
 const Hero = () => {
-  useGSAP(() => {
-    gsap.fromTo(
-      ".hero-text h1",
-      { y: 50, opacity: 0 },
-      { y: 0, opacity: 1, stagger: 0.2, duration: 1, ease: "power2.inOut" }
-    );
-  });
 
   return (
     <section id="hero" className="relative overflow-hidden">
@@ -47,25 +44,34 @@ const Hero = () => {
                 </span>
               </h1>
               <h1>to life through pixels.</h1>
-              <h1>Built for users, not ego.</h1>
+              <h1>Data, design, code—and curiosity.</h1>
             </div>
 
             <p className="text-white-50 md:text-xl relative z-10 pointer-events-none">
-              Hi, I'm Isaiah, coding the future, one line at a time.
+              University of Michigan information analysis student building AI tools,
+              data applications, interactive websites, and human-centered experiences.
             </p>
 
-            <Button
-              text="See My Work"
-              className="md:w-80 md:h-16 w-60 h-12"
-              id="counter"
-            />
+            <div className="flex flex-wrap items-center gap-3">
+              <Button text="View Featured Work" className="md:w-72 md:h-16 w-60 h-12" id="featured-work" />
+              <button
+                type="button"
+                className="hero-secondary-action"
+                onClick={() => window.dispatchEvent(new Event("open-explore-current"))}
+              >
+                Explore with the jellyfish
+              </button>
+              <Link to="/projects" className="hero-text-link">All projects →</Link>
+            </div>
           </div>
         </header>
 
         {/* Right: Hero 3D (Optional visual element) */}
         <figure>
           <div className="hero-3d-layout">
-            <HeroExperience />
+            <Suspense fallback={null}>
+              <HeroExperience />
+            </Suspense>
           </div>
         </figure>
       </div>

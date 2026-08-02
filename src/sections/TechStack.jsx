@@ -1,43 +1,17 @@
 
-import { useGSAP } from "@gsap/react";
-import gsap from "gsap";
 
 import TitleHeader from "../components/TitleHeader";
+import useReveal from "../hooks/useReveal";
+import TechMark from "../components/TechMark";
 import TechIconCardExperience from "../components/Models/TechLogos/TechIcon";
 import { techStackIcons } from "../constants";
 // import { techStackImgs } from "../constants";
 
 const TechStack = () => {
-  // Animate the tech cards in the skills section
-  useGSAP(() => {
-    // This animation is triggered when the user scrolls to the #skills wrapper
-    // The animation starts when the top of the wrapper is at the center of the screen
-    // The animation is staggered, meaning each card will animate in sequence
-    // The animation ease is set to "power2.inOut", which is a slow-in fast-out ease
-    gsap.fromTo(
-      ".tech-card",
-      {
-        // Initial values
-        y: 50, // Move the cards down by 50px
-        opacity: 0, // Set the opacity to 0
-      },
-      {
-        // Final values
-        y: 0, // Move the cards back to the top
-        opacity: 1, // Set the opacity to 1
-        duration: 1, // Duration of the animation
-        ease: "power2.inOut", // Ease of the animation
-        stagger: 0.2, // Stagger the animation by 0.2 seconds
-        scrollTrigger: {
-          trigger: "#skills", // Trigger the animation when the user scrolls to the #skills wrapper
-          start: "top center", // Start the animation when the top of the wrapper is at the center of the screen
-        },
-      }
-    );
-  });
+  const scopeRef = useReveal({ selector: ".tech-card", stagger: 80 });
 
   return (
-    <div id="skills" className="flex-center section-padding">
+    <div id="skills" ref={scopeRef} className="flex-center section-padding">
       <div className="w-full h-full md:px-10 px-5">
         <TitleHeader
           title="How I Can Contribute & My Key Skills"
@@ -48,25 +22,28 @@ const TechStack = () => {
               The key is set to the name of the tech stack icon, and the classnames are set to 
               card-border, tech-card, overflow-hidden, and group. The xl:rounded-full and rounded-lg 
               classes are only applied on larger screens. */}
-          {techStackIcons.map((techStackIcon) => (
+          {techStackIcons.map((tech) => (
             <div
-              key={techStackIcon.name}
-              className="card-border tech-card overflow-hidden group xl:rounded-full rounded-lg"
+              key={tech.name}
+              className="card-border tech-card overflow-hidden group rounded-2xl"
             >
-              {/* The tech-card-animated-bg div is used to create a background animation when the 
-                  component is hovered. */}
               <div className="tech-card-animated-bg" />
               <div className="tech-card-content">
-                {/* The tech-icon-wrapper div contains the TechIconCardExperience component, 
-                    which renders the 3D model of the tech stack icon. */}
+                {/* The SVG mark holds the space until the model scrolls into
+                    view, and stands in permanently for reduced motion. */}
                 <div className="tech-icon-wrapper">
-                  <TechIconCardExperience model={techStackIcon} />
+                  <TechIconCardExperience
+                    model={tech}
+                    fallback={
+                      <div className="tech-mark-static">
+                        <TechMark mark={tech.mark} size={64} />
+                      </div>
+                    }
+                  />
                 </div>
-                {/* The padding-x and w-full classes are used to add horizontal padding to the 
-                    text and make it take up the full width of the component. */}
-                <div className="padding-x w-full">
-                  {/* The p tag contains the name of the tech stack icon. */}
-                  <p>{techStackIcon.name}</p>
+                <div className="padding-x w-full text-center">
+                  <p className="font-semibold">{tech.label}</p>
+                  <p className="text-white-50 mt-1.5 text-sm leading-snug">{tech.blurb}</p>
                 </div>
               </div>
             </div>

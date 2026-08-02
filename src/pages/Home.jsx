@@ -1,5 +1,7 @@
 import Hero from "../sections/Hero";
+import FeaturedWork from "../sections/FeaturedWork";
 import ShowcaseSection from "../sections/ShowcaseSection";
+import ExploreCurrent from "../sections/ExploreCurrent";
 import LogoSection from "../sections/LogoSection";
 import FeatureCards from "../sections/FeatureCards";
 import Experience from "../sections/ExperienceSection";
@@ -11,6 +13,8 @@ const Home = () => {
   return (
     <>
       <Hero />
+      <FeaturedWork />
+      <ExploreCurrent />
       <ShowcaseSection />
       <LogoSection />
       <FeatureCards />

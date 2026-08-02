@@ -2,7 +2,6 @@ import { useRef, useState } from "react";
 import emailjs from "@emailjs/browser";
 
 import TitleHeader from "../components/TitleHeader";
-import ContactExperience from "../components/Models/Contact/ContactExperience";
 import { getAssetPath } from "../utils/assetPath";
 
 const Contact = () => {
@@ -100,17 +99,52 @@ const Contact = () => {
                     <p className="text">
                       {loading ? "Sending..." : "Send Message"}
                     </p>
-                    <div className="arrow-wrapper">
-                      <img src={getAssetPath("/images/arrow-down.svg")} alt="arrow" />
+                    <div className="arrow-wrapper arrow-wrapper--nav">
+                      <img src={getAssetPath("/images/arrow-right.svg")} alt="" />
                     </div>
                   </div>
                 </button>
               </form>
             </div>
           </div>
+          {/* A glass panel rather than a second WebGL scene: the computer GLB
+              cost ~500 KB and an orange box that fought the ocean palette. */}
           <div className="xl:col-span-7 min-h-96">
-            <div className="bg-[#cd7c2e] w-full h-full hover:cursor-grab rounded-3xl overflow-hidden">
-              <ContactExperience />
+            <div className="contact-panel h-full w-full rounded-3xl p-8 md:p-10">
+              <p className="text-white-50 text-lg leading-relaxed">
+                I'm a University of Michigan information analysis student building AI tools,
+                data applications and interactive web experiences. I'm looking for internships
+                and freelance work in data, full-stack development and UX.
+              </p>
+
+              <div className="mt-8 flex flex-col gap-3">
+                {[
+                  { label: "Email", value: "Isaiahramirez37@gmail.com", href: "mailto:Isaiahramirez37@gmail.com" },
+                  { label: "GitHub", value: "@Isaiahchonchoramirez", href: "https://github.com/Isaiahchonchoramirez" },
+                ].map((item) => (
+                  <a
+                    key={item.label}
+                    href={item.href}
+                    target={item.href.startsWith("http") ? "_blank" : undefined}
+                    rel="noreferrer"
+                    className="contact-link group flex items-center justify-between gap-4 rounded-xl px-5 py-4"
+                  >
+                    <span>
+                      <span className="block text-xs uppercase tracking-[0.14em] text-white-50">
+                        {item.label}
+                      </span>
+                      <span className="mt-1 block text-white">{item.value}</span>
+                    </span>
+                    <span className="text-white-50 transition-transform duration-300 group-hover:translate-x-1">
+                      →
+                    </span>
+                  </a>
+                ))}
+              </div>
+
+              <p className="text-white-50 mt-8 text-sm">
+                Usually replies within a day.
+              </p>
             </div>
           </div>
         </div>

@@ -1,11 +1,15 @@
-import { useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 
 import TitleHeader from "../components/TitleHeader";
+import ProjectGallery from "../components/ProjectGallery";
+import ProjectVideo from "../components/ProjectVideo";
+import DataCaseStudy from "../components/DataCaseStudy";
 import projects from "../constants/projects";
+import { getAssetPath } from "../utils/assetPath";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -40,6 +44,24 @@ const ProjectPreview = ({ src, alt }) => {
   );
 };
 
+const DataPreview = ({ preview, title }) => (
+  <div className={`data-preview data-preview--${preview.variant}`} role="img" aria-label={preview.alt}>
+    <div className="data-preview-topline">
+      <span>{preview.eyebrow}</span>
+      <span>{preview.metric}</span>
+    </div>
+    <div className="data-preview-plot" aria-hidden="true">
+      {preview.values.map((value, index) => (
+        <i key={`${value}-${index}`} style={{ "--value": `${value}%`, "--delay": `${index * 70}ms` }} />
+      ))}
+    </div>
+    <div>
+      <strong>{title}</strong>
+      <p>{preview.caption}</p>
+    </div>
+  </div>
+);
+
 const ProjectRow = ({ project, index }) => {
   const rowRef = useRef(null);
   const flipped = index % 2 === 1;
@@ -64,20 +86,36 @@ const ProjectRow = ({ project, index }) => {
     { scope: rowRef }
   );
 
+  // Not every project has somewhere to go — the Maya work is media, not a
+  // site — so the anchors collapse to plain elements when there is no href.
+  const hasLink = Boolean(project.href);
   const linkProps = project.external
     ? { href: project.href, target: "_blank", rel: "noreferrer" }
     : { href: project.href };
+  const Wrap = hasLink ? "a" : "div";
+  const wrapProps = hasLink ? linkProps : {};
 
   return (
     <div
+      id={project.id}
       ref={rowRef}
       className="group md:py-20 py-12 border-t border-black-50 first:border-t-0"
     >
       <div className="grid xl:grid-cols-2 grid-cols-1 gap-10 xl:gap-16 items-center">
         <div className={flipped ? "xl:order-2" : ""}>
-          <a {...linkProps} className="block" aria-label={`Open ${project.title}`}>
-            <ProjectPreview src={project.image} alt={`${project.title} preview`} />
-          </a>
+          {project.video ? (
+            <ProjectVideo {...project.video} />
+          ) : project.preview ? (
+            <DataPreview preview={project.preview} title={project.title} />
+          ) : (
+            <Wrap
+              {...wrapProps}
+              className="block"
+              {...(hasLink ? { "aria-label": `Open ${project.title}` } : {})}
+            >
+              <ProjectPreview src={project.image} alt={`${project.title} preview`} />
+            </Wrap>
+          )}
         </div>
 
         <div className={flipped ? "xl:order-1" : ""}>
@@ -88,15 +126,23 @@ const ProjectRow = ({ project, index }) => {
             <p className="text-white-50 text-sm">{project.year}</p>
           </div>
 
-          <a {...linkProps} className="block w-fit">
+          <Wrap {...wrapProps} className="block w-fit">
             <h2 className="md:text-5xl text-3xl font-semibold mt-6 group-hover:text-white-50 transition-colors duration-300">
               {project.title}
             </h2>
-          </a>
+          </Wrap>
 
           <p className="text-white-50 md:text-lg mt-5 leading-relaxed">
             {project.description}
           </p>
+
+          {(project.problem || project.outcome) && (
+            <dl className="project-evidence-grid">
+              <div><dt>The problem</dt><dd>{project.problem}</dd></div>
+              <div><dt>The result</dt><dd>{project.outcome}</dd></div>
+              <div><dt>My role</dt><dd>{project.role}</dd></div>
+            </dl>
+          )}
 
           {project.highlights?.length > 0 && (
             <ul className="mt-6 space-y-3">
@@ -122,15 +168,17 @@ const ProjectRow = ({ project, index }) => {
             </div>
           )}
 
-          <a
-            {...linkProps}
-            className="mt-8 inline-flex items-center gap-2 uppercase text-sm tracking-wide"
-          >
-            {project.cta ?? "Visit site"}
-            <span className="transition-transform duration-300 group-hover:translate-x-1">
-              →
-            </span>
-          </a>
+          {hasLink && (
+            <a
+              {...linkProps}
+              className="mt-8 inline-flex items-center gap-2 uppercase text-sm tracking-wide"
+            >
+              {project.cta ?? "Visit site"}
+              <span className="transition-transform duration-300 group-hover:translate-x-1">
+                →
+              </span>
+            </a>
+          )}
 
           {project.related && (
             <a
@@ -153,21 +201,55 @@ const ProjectRow = ({ project, index }) => {
           )}
         </div>
       </div>
+
+      {project.gallery && <ProjectGallery groups={project.gallery} />}
+      {project.dataFile && <DataCaseStudy file={project.dataFile} />}
     </div>
   );
 };
 
 const Projects = () => {
+  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const categories = ["All", "AI", "Data", "Web", "UX", "Design", "3D"];
+  const requested = searchParams.get("category") || "All";
+  const active = categories.includes(requested) ? requested : "All";
+  const visible = active === "All"
+    ? projects
+    : projects.filter((project) => project.categories?.includes(active));
+
+  useEffect(() => {
+    if (!location.hash) return;
+    const id = location.hash.slice(1);
+    requestAnimationFrame(() =>
+      document.getElementById(id)?.scrollIntoView({ block: "start" })
+    );
+  }, [location.hash]);
+
   return (
     <section id="projects-page" className="section-padding min-h-screen">
       <div className="w-full md:px-20 px-5">
         <TitleHeader
-          title="More Projects"
-          sub="A growing collection of work I've shipped."
+          title="Projects & Case Studies"
+          sub="The problem, my role, the process, and what shipped."
         />
 
+        <div className="project-filters" aria-label="Filter projects">
+          {categories.map((category) => (
+            <button
+              key={category}
+              type="button"
+              className={active === category ? "is-active" : ""}
+              aria-pressed={active === category}
+              onClick={() => setSearchParams(category === "All" ? {} : { category })}
+            >
+              {category}
+            </button>
+          ))}
+        </div>
+
         <div className="mt-16 md:mt-24">
-          {projects.map((project, index) => (
+          {visible.map((project, index) => (
             <ProjectRow key={project.id} project={project} index={index} />
           ))}
         </div>
@@ -177,6 +259,9 @@ const Projects = () => {
             <div className="cta-button group">
               <div className="bg-circle" />
               <p className="text">Back to Home</p>
+              <div className="arrow-wrapper arrow-wrapper--nav">
+                <img src={getAssetPath("/images/arrow-right.svg")} alt="" />
+              </div>
             </div>
           </Link>
         </div>

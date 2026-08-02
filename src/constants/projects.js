@@ -3,12 +3,20 @@ import { getAssetPath } from "../utils/assetPath";
 // Add a project by dropping another object in this array.
 // image  -> put the screenshot in public/images/projects/
 // href   -> getAssetPath("/folder/") for sites living in public/, or a full URL
+//           omit it entirely for work that has no site to visit
 // external -> true opens in a new tab, false navigates in place
 // cta    -> optional link label; defaults to "Visit site"
 // related -> optional sibling project; renders a "Pairs with" link on the card
+// video  -> optional rendered clip; replaces the browser-framed screenshot
+// gallery -> optional grouped stills, rendered under the row with a lightbox
 const projects = [
   {
     id: "trade-assistant",
+    featured: true,
+    categories: ["AI", "Data", "Web", "UX"],
+    role: "Product design · Full-stack engineering · Data science",
+    problem: "Market tools often produce opaque calls without showing whether the same logic survived historical testing.",
+    outcome: "A transparent market dashboard that explains every signal and tests it without lookahead bias.",
     title: "AI Trade Assistant",
     year: "2025 — 2026",
     tagline: "When money goes in, and when it comes out",
@@ -39,6 +47,11 @@ const projects = [
   },
   {
     id: "lyrx",
+    featured: true,
+    categories: ["AI", "Web", "UX"],
+    role: "Product design · Audio engineering · Frontend development",
+    problem: "Powerful music tools are often expensive, installation-heavy, and intimidating to new producers.",
+    outcome: "A browser-based studio with 26 tools, 85 instruments, local saving, and WAV export.",
     title: "Lyrx",
     year: "2026",
     tagline: "A full music studio in one tab",
@@ -64,6 +77,11 @@ const projects = [
   },
   {
     id: "datacore",
+    featured: true,
+    categories: ["AI", "Data", "Web", "UX"],
+    role: "Systems design · Data governance · Frontend development",
+    problem: "Training pipelines often hide where data came from and whether its use was actually authorized.",
+    outcome: "A seven-stage, rights-aware data pipeline with consent gates and a complete removal audit.",
     title: "DataCore",
     year: "2026",
     tagline: "Governed AI training data",
@@ -87,6 +105,278 @@ const projects = [
       title: "Lyrx",
       blurb: "the studio this data trains for",
       href: getAssetPath("/lyrx/index.html"),
+    },
+  },
+  {
+    id: "maya-3d",
+    categories: ["3D", "Design"],
+    role: "3D modeling · Materials · Lighting · Animation",
+    problem: "Build a complete scene that demonstrates the full path from modeled assets through a finished animated render.",
+    outcome: "A rendered workstation environment plus a documented progression of character and environment studies.",
+    title: "3D Modeling & Animation",
+    year: "2024",
+    tagline: "Characters, environments, materials, and motion built in Maya",
+    image: getAssetPath("/images/projects/maya/workstation-desk-setup.webp"),
+    stack: [
+      "Autodesk Maya",
+      "3D Modeling",
+      "UV Mapping",
+      "Texturing",
+      "Lighting",
+      "Animation",
+    ],
+    description:
+      "A collection of character, environment, hard-surface, UV, texturing, lighting and animation work created in Autodesk Maya. The final project combines a custom computer workstation, animated cooling fans, lighting, materials and a complete indoor environment. Earlier studies explore stylized characters and outdoor scene construction.",
+    highlights: [
+      "Modeled and assembled a complete indoor computer-workstation environment — desk, monitors, tower, mic arm and the room around them",
+      "Created custom UV layouts and painted material maps for the desk, monitors, computer tower, cooling system and environmental elements",
+      "Animated a turntable and six individual cooling fans",
+      "Designed stylized characters and outdoor environments during earlier modeling studies",
+      "Developed the work from modeling and materials through lighting, animation and final rendering",
+    ],
+    video: {
+      src: getAssetPath("/video/maya-workstation-animation.mp4"),
+      poster: getAssetPath("/images/projects/maya/workstation-animation-poster.webp"),
+      width: 514,
+      height: 432,
+      label: "Rendered camera move through the Maya workstation scene",
+      caption:
+        "The final render — a camera move through the room that comes to rest on the tower, with the six cooling fans turning throughout. 37 seconds, no audio.",
+    },
+    gallery: [
+      {
+        id: "final-environment",
+        title: "Final environment",
+        blurb: "The workstation build, shot from the finished scene",
+        items: [
+          {
+            src: getAssetPath("/images/projects/maya/workstation-tower-cooling-gpu.webp"),
+            title: "Tower, cooling and GPU",
+            alt: "Open computer tower showing seven RGB cooling fans, a modeled motherboard I/O panel, a graphics card and an illustrated side panel",
+            caption:
+              "The hardest surface in the scene: fan blades, the I/O plate, the graphics card shroud and the case panels were each modeled and UV'd separately before the materials went on.",
+          },
+          {
+            src: getAssetPath("/images/projects/maya/workstation-dual-monitors.webp"),
+            title: "Dual monitors",
+            alt: "Two modeled monitors on a wooden desk against a brick wall, each displaying artwork",
+            caption:
+              "Two screens on the desk, each with its own display material, mounted over the mic arm and the brick wall behind.",
+          },
+          {
+            src: getAssetPath("/images/projects/maya/workstation-desk-setup.webp"),
+            title: "Desk and floor",
+            alt: "Modeled standing desk with monitors and a lamp, on a patterned carpet in front of a brick wall",
+            caption:
+              "The desk from the front, showing the wood-grain map on the surface, the height-adjust legs and the woven carpet material below.",
+          },
+          {
+            src: getAssetPath("/images/projects/maya/workstation-room-wide.webp"),
+            title: "The room",
+            alt: "Wide view of the indoor scene: brick corner walls, a wooden floor platform and the desk with monitors and tower",
+            caption:
+              "The full environment the workstation sits in — brick corner walls, a wooden floor platform and the lighting that ties them together.",
+          },
+        ],
+      },
+      {
+        id: "earlier-studies",
+        title: "Earlier 3D studies",
+        blurb: "Modeling, character design and environment work from before the final build",
+        items: [
+          {
+            src: getAssetPath("/images/projects/maya/study-outdoor-scene-complete.webp"),
+            title: "Outdoor scene",
+            alt: "Wide view of a modeled outdoor terrain with a taco truck, two characters and a tree",
+            caption:
+              "The assembled outdoor scene — sculpted terrain with the truck, the characters and the tree placed into it.",
+          },
+          {
+            src: getAssetPath("/images/projects/maya/study-character-pizza-pete.webp"),
+            title: "Pizza Pete",
+            alt: "Stylized character modeled as a pepperoni pizza slice with eyes, gloved hands and shoes",
+            caption:
+              "A stylized character built from a pizza slice, with a hand-painted crust and topping map and separately modeled hands and shoes.",
+          },
+          {
+            src: getAssetPath("/images/projects/maya/study-character-master-moist.webp"),
+            title: "Master Moist",
+            alt: "Stylized character modeled as a soft-serve cup with a face, thin arms and orange shoes",
+            caption:
+              "A soft-serve cup character. The swirl was built with a twist deformer and a lattice; the cup pattern is a vector texture drawn to fit the UVs.",
+          },
+          {
+            src: getAssetPath("/images/projects/maya/study-trippy-tree.webp"),
+            title: "Trippy Tree",
+            alt: "Stylized tree with a slim trunk and a dense speckled spherical canopy",
+            caption:
+              "A stylized tree — the canopy is a single sphere carrying a speckled material rather than modeled foliage, to keep the scene light.",
+          },
+          {
+            src: getAssetPath("/images/projects/maya/study-taco-truck.webp"),
+            title: "Taco truck",
+            alt: "Modeled taco truck shown from the side, untextured apart from a ribbed body material",
+            caption:
+              "The truck that anchors the outdoor scene, shown mid-build — body, window cutouts and separately modeled wheels with tread.",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "michigan-lead-risk",
+    dataFile: "michigan-lead-risk",
+    title: "Michigan Lead-Risk Analysis",
+    year: "2025",
+    tagline: "Public-health indicators joined across all 83 counties",
+    categories: ["Data"],
+    role: "Data cleaning · Statistical analysis · Visualization",
+    problem:
+      "Housing age, childhood blood-lead surveillance, and public-water measurements live in separate datasets with inconsistent geographic labels.",
+    outcome:
+      "A reproducible 83-county dataset and six analytical views for comparing environmental and housing risk indicators.",
+    stack: ["Python", "pandas", "NumPy", "Matplotlib", "Public Health Data"],
+    description:
+      "An information-analysis project combining three Michigan datasets: pre-1950 housing counts, elevated blood-lead levels among tested children under six, and public-water-system 90th-percentile lead measurements. I normalized county names, reconciled Detroit and Wayne County records, aggregated each source to a common unit, and used correlations and standardized scores to compare risk signals without implying that correlation proves causation.",
+    highlights: [
+      "Cleaned and joined all three sources into one row per Michigan county, retaining all 83 counties",
+      "Calculated elevated-blood-lead rates from tested-child totals rather than comparing raw counts",
+      "Standardized housing, water, and childhood measures with z-scores for cross-indicator comparison",
+      "Produced six views covering rankings, pairwise relationships, and the correlation structure",
+      "Kept source limitations visible: testing coverage, aggregation, and ecological correlation constrain interpretation",
+    ],
+    preview: {
+      variant: "lead",
+      eyebrow: "County-level public health",
+      metric: "83 counties",
+      values: [38, 55, 29, 68, 46, 81, 60, 42, 73, 51],
+      caption: "Housing age · childhood EBLL · public-water lead",
+      alt: "Abstract county comparison chart representing three joined Michigan lead-risk indicators",
+    },
+  },
+  {
+    id: "occupy-space",
+    dataFile: "occupy-space",
+    title: "Occupy Space",
+    year: "2025",
+    tagline: "A normalized NASA asteroid-data pipeline",
+    categories: ["Data", "Web"],
+    role: "NEO API collector · Database design · Collaborative analysis",
+    problem:
+      "NASA's near-Earth-object feed is nested, repeated, and time-based, making it difficult to accumulate clean observations without duplicating asteroids or approach dates.",
+    outcome:
+      "A normalized SQLite pipeline containing 100 asteroids and 100 approaches, paired with four analytical visualizations.",
+    stack: ["Python", "NASA APIs", "SQLite", "pandas", "Matplotlib", "Seaborn"],
+    description:
+      "A collaborative information-analysis project with Sajjad Majeed. I built the near-Earth-object collector and normalized storage path; the final analysis was shared. The database separates asteroids, approach dates, approaches, orbiting bodies, and orbital elements so repeated API runs can add new observations without collecting the same object twice.",
+    highlights: [
+      "Designed the NEO collector and normalized multi-table SQLite schema",
+      "Used unique identifiers and insert-or-ignore logic to prevent duplicate records across incremental runs",
+      "Analyzed 100 approaches: 9 were NASA-classified as potentially hazardous",
+      "Measured a modest positive velocity-versus-miss-distance correlation of 0.337 in this sample",
+      "Built four views spanning approaches over time, velocity and distance, APOD content, and size versus hazard status",
+      "Collaborative credit preserved: NEO collection by Isaiah Ramirez; APOD collection by Sajjad Majeed; analysis by both",
+    ],
+    preview: {
+      variant: "space",
+      eyebrow: "NASA NEO + APOD",
+      metric: "200 records",
+      values: [35, 52, 76, 28, 45, 58, 49, 43],
+      caption: "100 asteroids · 100 APOD entries · normalized SQLite",
+      alt: "Abstract timeline chart representing NASA near-Earth-object approaches",
+    },
+  },
+  {
+    id: "crop-yield",
+    dataFile: "crop-yield",
+    title: "Crop-Yield Efficiency Study",
+    year: "2025",
+    tagline: "From raw agricultural data to tested findings",
+    categories: ["Data"],
+    role: "Data exploration · Feature engineering · Visualization · Testing",
+    problem:
+      "Raw yield alone obscures the effects of rainfall, soil, weather, irrigation, and fertilizer across regions and crops.",
+    outcome:
+      "A tested analysis pipeline with derived efficiency measures, grouped comparisons, and crop-relative z-scores.",
+    stack: ["Python", "pandas", "NumPy", "Seaborn", "pytest"],
+    description:
+      "An exploratory agricultural analysis that engineers yield-per-millimeter and crop-relative z-score features, then compares performance across regions, soil types, weather conditions, and treatment combinations. The notebook concludes with ten automated tests covering the calculations and exported results.",
+    highlights: [
+      "Engineered yield-per-millimeter to compare output against rainfall rather than treating volume alone as efficiency",
+      "Found the East region led yield per millimeter while North had the highest average rainfall in the dataset",
+      "Compared every irrigation and fertilizer combination; using both produced the highest mean yield at roughly 6.0 tons per hectare",
+      "Standardized crop performance within each crop before comparing soil types",
+      "Exported five cleaned summary datasets and passed ten automated checks",
+    ],
+    preview: {
+      variant: "crop",
+      eyebrow: "Agricultural analysis",
+      metric: "10 tests passed",
+      values: [42, 61, 54, 78, 66, 92],
+      caption: "Region · crop · soil · weather · treatment",
+      alt: "Abstract bar chart representing crop-yield comparisons",
+    },
+  },
+  {
+    id: "network-polarization",
+    dataFile: "network-polarization",
+    title: "Networks, Homophily & Polarization",
+    year: "2026",
+    tagline: "Testing how network structure shapes social separation",
+    categories: ["Data"],
+    role: "Network analysis · Simulation · Statistical interpretation",
+    problem:
+      "A network can look clustered without establishing whether cross-group ties occur less often than its group proportions predict.",
+    outcome:
+      "A quantitative homophily test applied to three real networks, followed by 1,000-node simulations of polarization mechanisms.",
+    stack: ["Python", "NetworkX", "pandas", "Seaborn", "Simulation"],
+    description:
+      "A social-information-processing analysis that measures observed cross-type edges against the expected fraction in email, political-Wikipedia, and congressional networks. I then examined how triadic, membership, and focal closure alter political sorting across 750 simulated time steps in a synthetic network of 1,000 people.",
+    highlights: [
+      "Implemented a NetworkX homophily test using graph structure rather than hard-coded answers",
+      "Compared an email network, political Wikipedia links, and congressional interactions",
+      "Distinguished inverse homophily from weak and strong homophily using observed-versus-expected cross-group edges",
+      "Simulated focal, triadic, and membership closure mechanisms over 750 time steps",
+      "Connected quantitative trajectories to network snapshots rather than relying on visual intuition alone",
+    ],
+    preview: {
+      variant: "network",
+      eyebrow: "Social network analysis",
+      metric: "1,000 nodes",
+      values: [24, 29, 35, 42, 53, 66, 79, 88],
+      caption: "Three closure mechanisms · 750 simulated steps",
+      alt: "Abstract rising line-like chart representing changing network homophily",
+    },
+  },
+  {
+    id: "lansing-redlining",
+    dataFile: "lansing-redlining",
+    title: "Mapping Lansing's HOLC Grades",
+    year: "2025",
+    tagline: "A careful spatial audit of historical redlining boundaries",
+    categories: ["Data"],
+    role: "Geospatial analysis · Data validation · Visualization",
+    problem:
+      "Historical HOLC boundaries are geographic records, so raw polygon counts can misrepresent how much of a city received each grade.",
+    outcome:
+      "A reproducible area-weighted summary of Lansing's historical grades using a locally appropriate projected coordinate system.",
+    stack: ["Python", "GeoPandas", "GIS", "pandas", "Spatial Data"],
+    description:
+      "A geospatial analysis of Mapping Inequality's historical HOLC polygons for Lansing. I filtered the national layer to the city, projected the boundaries into a metric coordinate system, calculated polygon areas, and summarized the share assigned to grades A through D. The published story deliberately stops at what the source supports instead of treating historical grades as proof of present-day outcomes.",
+    highlights: [
+      "Filtered 10,000-plus national polygons down to the Lansing survey areas",
+      "Reprojected latitude/longitude geometry before measuring area",
+      "Compared area share rather than raw polygon counts",
+      "Separated the historical classification finding from claims about modern demographics",
+      "Documents source, unit, sample, and interpretation limits directly beside the chart",
+    ],
+    preview: {
+      variant: "lead",
+      eyebrow: "Historical spatial analysis",
+      metric: "HOLC A-D",
+      values: [22, 47, 78, 91],
+      caption: "Projected polygons · area-weighted grade distribution",
+      alt: "Abstract four-bar chart representing historical HOLC grade areas",
     },
   },
 ];

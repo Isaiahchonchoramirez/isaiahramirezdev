@@ -1,0 +1,77 @@
+{
+  "source": "NASA NeoWs and Astronomy Picture of the Day APIs",
+  "sample": "100 NEO approaches and 100 APOD entries",
+  "updated": "2025 collaborative analysis",
+  "metrics": [
+    {
+      "label": "NEO approaches",
+      "value": "100"
+    },
+    {
+      "label": "Potentially hazardous",
+      "value": "9"
+    },
+    {
+      "label": "Velocity-distance r",
+      "value": "0.337"
+    }
+  ],
+  "charts": [
+    {
+      "type": "groupedBar",
+      "title": "Asteroid size and hazard classification",
+      "subtitle": "NASA hazard flag counts within maximum estimated-diameter categories",
+      "xLabel": "Number of approaches",
+      "yLabel": "Maximum estimated diameter",
+      "series": [
+        {
+          "name": "All approaches",
+          "values": [
+            {
+              "label": "Tiny (<0.1 km)",
+              "value": 46
+            },
+            {
+              "label": "Small (0.1-0.5 km)",
+              "value": 46
+            },
+            {
+              "label": "Medium (0.5-1 km)",
+              "value": 6
+            },
+            {
+              "label": "Large (>1 km)",
+              "value": 2
+            }
+          ]
+        },
+        {
+          "name": "Potentially hazardous",
+          "values": [
+            {
+              "label": "Tiny (<0.1 km)",
+              "value": 0
+            },
+            {
+              "label": "Small (0.1-0.5 km)",
+              "value": 5
+            },
+            {
+              "label": "Medium (0.5-1 km)",
+              "value": 2
+            },
+            {
+              "label": "Large (>1 km)",
+              "value": 2
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "findings": [
+    "NASA classified 9 of 100 sampled approaches as potentially hazardous.",
+    "Velocity and miss distance had a modest positive sample correlation (r = 0.337).",
+    "Potentially hazardous is a NASA classification based on orbital criteria; it does not mean an impact is predicted."
+  ]
+}
