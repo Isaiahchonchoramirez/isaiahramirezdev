@@ -77,6 +77,27 @@ export const BODY_BASES = [
   { id: "ember-elder", name: "Ember elder" },
 ];
 
+export const TORSO_GARMENTS = [
+  { id: "tunic", name: "Woven tunic" },
+  { id: "hide-armor", name: "Layered hide armor" },
+];
+
+export const LOWER_GARMENTS = [
+  { id: "wrap", name: "Pleated wrap" },
+  { id: "loincloth", name: "Split loincloth" },
+  { id: "robe", name: "Long ritual robe" },
+];
+
+export const MANTLES = [
+  { id: "none", name: "None" },
+  { id: "shoulder-mantle", name: "Shoulder mantle" },
+];
+
+export const FOOTWEAR = [
+  { id: "bare", name: "Barefoot" },
+  { id: "fur-boots", name: "Fur calf wraps" },
+];
+
 export const MARKINGS = [
   { id: "none", name: "None" },
   { id: "ochre-bands", name: "Ochre bands", colour: "#b5502f" },
@@ -193,7 +214,10 @@ export function defaultAppearance() {
     eyeColour: 0,
     marking: "ochre-bands",
     scar: "none",
-    garment: "auto",
+    torsoGarment: "tunic",
+    lowerGarment: "wrap",
+    mantle: "none",
+    footwear: "bare",
   };
 }
 
