@@ -9,6 +9,10 @@ const MODEL_FILES = {
   "aurean-keeper": "aurean-keeper.glb",
   "ember-elder": "ember-elder.glb",
 };
+// GitHub Pages gives immutable-looking asset URLs a browser cache lifetime.
+// Bump this whenever the generated GLBs change so body/sex switches cannot
+// silently reuse an older character file from a previous deployment.
+const MODEL_REVISION = "2026-08-02-hair-library";
 
 const cache = new Map();
 const loader = new GLTFLoader();
@@ -39,7 +43,9 @@ function forceOpaque(material) {
 function loadModel(id) {
   if (!cache.has(id)) {
     const file = MODEL_FILES[id] ?? MODEL_FILES["veyr-hunter"];
-    const url = new URL(`../../assets/characters/${file}`, import.meta.url).href;
+    const asset = new URL(`../../assets/characters/${file}`, import.meta.url);
+    asset.searchParams.set("v", MODEL_REVISION);
+    const url = asset.href;
     cache.set(id, loader.loadAsync(url));
   }
   return cache.get(id);
@@ -153,7 +159,10 @@ export class RiggedHumanoid {
       this.applyFaceMorphs(this.appearance);
       this.applyEquipment(this.appearance);
       this.root.add(this.model);
-      this.fallback.root.visible = false;
+      // The primitive stand-in has its own synthetic hair. Removing it rather
+      // than merely hiding it guarantees it can never layer over MPFB hair.
+      this.fallback?.root.removeFromParent();
+      this.fallback = null;
       this.onModelChange?.(modelId);
     }).catch((error) => console.warn(`Could not load MPFB body ${modelId}`, error));
   }

@@ -35,9 +35,17 @@ export const EYE_COLOURS = [
 ];
 
 export const HAIR_STYLES = [
+  { id: "bald", name: "Bald / shaved" },
+  { id: "close-crop", name: "Close crop" },
   { id: "cropped", name: "Cropped" },
+  { id: "short-swept", name: "Short swept" },
+  { id: "short-tousled", name: "Short tousled" },
+  { id: "bob", name: "Jaw-length bob" },
+  { id: "layered-bob", name: "Layered bob" },
+  { id: "ponytail", name: "Ponytail" },
   { id: "long-braid", name: "Long braid" },
   { id: "coiled-crown", name: "Coiled crown" },
+  { id: "long-loose", name: "Long loose" },
 ];
 
 export const BODY_SEXES = [
