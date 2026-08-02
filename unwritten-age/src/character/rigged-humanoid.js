@@ -65,8 +65,10 @@ export class RiggedHumanoid {
     this.model = null;
     this.bones = {};
     this.restPose = {};
+    this.clothPieces = [];
     this.bodyQuat = new THREE.Quaternion();
     this.phase = 0;
+    this.windPhase = Math.random() * Math.PI * 2;
     this.currentModel = null;
     this.sourceHeight = 0;
     this.sourceFloor = 0;
@@ -96,6 +98,7 @@ export class RiggedHumanoid {
       if (requestId !== this.currentModel) return;
       this.model?.removeFromParent();
       this.bones = {};
+      this.clothPieces = [];
       this.model = cloneSkeleton(gltf.scene);
       this.model.name = `${modelId}-instance`;
       this.model.traverse((node) => {
@@ -116,6 +119,13 @@ export class RiggedHumanoid {
           // absolute rotation and "standing still" means "every bone at zero",
           // which is not the rest pose of an MPFB rig.
           this.restPose[node.name] = node.quaternion.clone();
+        }
+        if (node.userData?.role === "garment-flow") {
+          this.clothPieces.push({
+            node,
+            rest: node.quaternion.clone(),
+            flow: Number(node.userData.flow) || 0.04,
+          });
         }
       });
       // MPFB exports at metre scale. Measure the bind pose once, then match the
@@ -193,16 +203,18 @@ export class RiggedHumanoid {
     const legLength = from(appearance.legLength, 0.26);
     const torso = from(appearance.torsoLength, 0.22);
     const neck = from(appearance.neckLength, 0.4);
-    const shoulders = from(appearance.shoulderWidth, 0.34);
+    const shoulders = from(appearance.shoulderWidth, 0.34)
+      * from(appearance.muscularity, 0.28);
 
     // Girth: overall build nudges everything, then the specific sliders on top.
     // These multiply, so the individual spreads stay narrow — four sliders at
     // full compounding into a 1.75x limb is a caricature, not a heavy build.
-    const build = from(appearance.build, 0.18) * from(appearance.bodyFat, 0.16);
+    const muscle = from(appearance.muscularity, 0.56);
+    const build = from(appearance.build, 0.24) * from(appearance.bodyFat, 0.16);
     const armGirth = build * from(appearance.armThickness, 0.28)
-      * from(appearance.muscularity, 0.16);
+      * muscle;
     const legGirth = build * from(appearance.legThickness, 0.28)
-      * from(appearance.muscularity, 0.14);
+      * from(appearance.muscularity, 0.46);
 
     ["l", "r"].forEach((side) => {
       set(`clavicle_${side}`, shoulders);
@@ -216,12 +228,17 @@ export class RiggedHumanoid {
     });
 
     set("pelvis", 1, build * from(appearance.hipWidth, 0.34));
-    set("spine_01", torso, build * from(appearance.waistWidth, 0.34));
+    // A sculpted build widens the back and chest while keeping the waist from
+    // swelling at the same rate. This creates an athletic V rather than a
+    // uniformly inflated character.
+    const waistMuscle = from(appearance.muscularity, 0.10);
+    const chestMuscle = from(appearance.muscularity, 0.48);
+    set("spine_01", torso, build * waistMuscle * from(appearance.waistWidth, 0.34));
     set("spine_02", 1, 1);
-    set("spine_03", 1, from(appearance.chestWidth, 0.3));
+    set("spine_03", 1, chestMuscle * from(appearance.chestWidth, 0.3));
     // Everything above the chest undoes the torso's stretch, so a long back
     // does not also give the character a long neck and a big head.
-    set("neck_01", neck / torso, 1 / from(appearance.chestWidth, 0.3));
+    set("neck_01", neck / torso, 1 / (chestMuscle * from(appearance.chestWidth, 0.3)));
     set("head", from(appearance.headSize, 0.28) / (neck / torso) / torso,
       from(appearance.headSize, 0.28));
   }
@@ -269,6 +286,7 @@ export class RiggedHumanoid {
       return;
     }
     this.phase += dt * (2.4 + gait * 5.2);
+    this.windPhase += dt;
     const t = this.phase;
     const g = gait;
 
@@ -301,6 +319,21 @@ export class RiggedHumanoid {
 
     // Breath when still, a little counter-rotation when moving.
     this.swing("spine_03", Math.sin(t * 0.22) * 0.02 * (1 - g) - hipL * 0.05 * g);
+
+    // Browser-friendly secondary cloth motion. The garment remains skinned to
+    // the pelvis for locomotion; this adds a damped lag from stride plus two
+    // off-frequency wind notes so it never rocks like a rigid pendulum.
+    for (const cloth of this.clothPieces) {
+      const wind = Math.sin(this.windPhase * 1.17) * 0.55
+        + Math.sin(this.windPhase * 2.31 + 1.4) * 0.22;
+      const stride = Math.sin(t - 0.55) * g;
+      const side = Math.sin(t * 0.5 + 0.8) * g;
+      const targetX = (wind * 0.35 + stride) * cloth.flow;
+      const targetZ = side * cloth.flow * 0.42;
+      WANTED_Q.setFromEuler(new THREE.Euler(targetX, 0, targetZ));
+      WANTED_Q.premultiply(cloth.rest);
+      cloth.node.quaternion.slerp(WANTED_Q, 1 - Math.pow(0.0015, dt));
+    }
 
     // The body rises over each supporting leg — twice a cycle, not once.
     this.root.position.y = Math.abs(Math.sin(t)) * 0.035 * g;
@@ -338,6 +371,7 @@ export class RiggedHumanoid {
     this.model?.removeFromParent();
     this.model = null;
     this.bones = {};
+    this.clothPieces = [];
     this.currentModel = null;
     this.sourceHeight = 0;
     this.fallback?.dispose();
