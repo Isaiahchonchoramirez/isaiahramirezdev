@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { Humanoid } from "./humanoid.js";
+import { RiggedHumanoid } from "./rigged-humanoid.js";
 import { CULTURES, CULTURE_IDS } from "./cultures.js";
 import { CLASSES, CLASS_IDS } from "./classes.js";
 import {
@@ -18,11 +18,15 @@ import {
  *
  * Runs its own small renderer against its own scene, so it neither disturbs
  * nor is disturbed by the world renderer. It edits one plain object (the
- * appearance record) and rebuilds the `Humanoid` on change — the humanoid is
- * cheap enough to rebuild at interactive rates, which is why sliders can be
- * live rather than applied on release.
+ * appearance record) and pushes it into a `RiggedHumanoid` — the same class the
+ * player controller uses — so the figure on the turntable is literally the body
+ * that walks into the valley, not a stand-in that resembles it.
  *
- * Controls whose `affects` is "future" are rendered in a separate, clearly
+ * Because the avatar is a shared glTF rather than a pile of primitives, it is
+ * updated in place rather than rebuilt: the model is downloaded once, cached at
+ * module level, and reused by both this preview and the world.
+ *
+ * Controls whose `affects` is "deferred" are rendered in a separate, clearly
  * labelled group. They save and load, but they will not move the mesh until a
  * morph-target rig exists. Showing them as working sliders would be a lie.
  */
@@ -33,8 +37,9 @@ export class CharacterCreator {
     this.gmRules = loadGmRules();
     this.appearance = appearanceFromGmDefaults(defaultAppearance(), this.gmRules);
     this.orbit = 0.0;
-    this.camDistance = 3.0;
-    this.camHeight = 0.62;   // 0..1 up the body
+    // Framed head-to-toe on a 1.74 m body. The View slider walks up to the face.
+    this.camDistance = 3.2;
+    this.camHeight = 0.5;    // 0..1 up the body
     this.lightAngle = 0.7;
     this.dragging = false;
 
@@ -71,11 +76,12 @@ export class CharacterCreator {
           <canvas id="ccCanvas"></canvas>
           <div class="cc-stage-controls">
             <label>Turn<input type="range" id="ccOrbit" min="0" max="6.28" step="0.01" value="0"></label>
-            <label>Zoom<input type="range" id="ccZoom" min="1.1" max="6" step="0.02" value="3.0"></label>
-            <label>View<input type="range" id="ccHeight" min="0.15" max="1" step="0.01" value="0.62"></label>
+            <label>Zoom<input type="range" id="ccZoom" min="1.1" max="6" step="0.02" value="3.2"></label>
+            <label>View<input type="range" id="ccHeight" min="0.15" max="1" step="0.01" value="0.5"></label>
             <label>Light<input type="range" id="ccLight" min="0" max="6.28" step="0.01" value="0.7"></label>
           </div>
           <p class="cc-hint">Drag the figure to turn · scroll to zoom</p>
+          <p class="cc-body-status" id="ccBodyStatus" hidden></p>
         </div>
 
         <aside class="cc-col cc-right">
@@ -168,6 +174,13 @@ export class CharacterCreator {
     const deferred = playerSliders([...BODY_SLIDERS, ...HEAD_SLIDERS], this.gmRules)
       .filter((s) => s.affects === "deferred");
 
+    // Colour is live — it tints the body's own maps. Shape is not: hair style,
+    // facial hair and markings are modelled into the export, so those stay
+    // recorded-but-not-shown until they are authored as swappable pieces.
+    const shapeNote = `<p class="cc-disclosure">Saved with your character. The
+      body's own hair is modelled into it, so the shape of it does not change
+      here yet — the colour does.</p>`;
+
     this.$("ccControls").innerHTML = `
       <section class="cc-block">
         <h3>Frame</h3>
@@ -175,10 +188,11 @@ export class CharacterCreator {
         ${bodyLive.map((s) => this.slider(s)).join("")}
       </section>
 
+      ${headLive.length ? `
       <section class="cc-block">
         <h3>Face</h3>
         ${headLive.map((s) => this.slider(s)).join("")}
-      </section>
+      </section>` : ""}
 
       <section class="cc-block">
         <h3>Skin</h3>
@@ -187,11 +201,12 @@ export class CharacterCreator {
 
       <section class="cc-block">
         <h3>Hair</h3>
+        ${this.swatches("hairColour", HAIR_COLOURS)}
+        ${shapeNote}
         <label class="cc-row"><span>Style</span>${this.options("hairStyle", HAIR_STYLES)}</label>
         <label class="cc-row"><span>Texture</span>${this.options("hairTexture", HAIR_TEXTURES)}</label>
         <label class="cc-row"><span>Facial hair</span>${this.options("facialHair", FACIAL_HAIR)}</label>
-        ${this.slider({ key: "hairLength", name: "Length", min: 0, max: 1, step: 0.01, affects: "body" })}
-        ${this.swatches("hairColour", HAIR_COLOURS)}
+        ${this.slider({ key: "hairLength", name: "Length", min: 0, max: 1, step: 0.01, affects: "deferred" })}
       </section>
 
       <section class="cc-block">
@@ -199,8 +214,10 @@ export class CharacterCreator {
         ${this.swatches("eyeColour", EYE_COLOURS)}
       </section>
 
-      <section class="cc-block">
+      <section class="cc-block cc-block--future">
         <h3>Markings</h3>
+        <p class="cc-disclosure">Saved with your character. These are painted on
+          in the export, so they are not swappable here yet.</p>
         <label class="cc-row"><span>Paint / ash / ochre</span>${this.options("marking", MARKINGS)}</label>
         <label class="cc-row"><span>Scars</span>${this.options("scar", SCARS)}</label>
       </section>
@@ -214,7 +231,9 @@ export class CharacterCreator {
       <section class="cc-block cc-block--future">
         <h3>Stored, not yet shown</h3>
         <p class="cc-disclosure">
-          These save with your character but do not move the model yet.
+          These save and load with your character, and the Game Master can still
+          bound them. They will not move the body until morph targets are
+          exported from its .blend source.
         </p>
         ${deferred.map((s) => this.slider(s)).join("")}
       </section>` : ""}`;
@@ -524,14 +543,33 @@ export class CharacterCreator {
     this.syncChoices();
   }
 
+  /**
+   * Push the current appearance into the avatar. The rigged body is created
+   * once and updated in place — recreating it per slider tick would clone a
+   * skinned mesh on every frame of a drag.
+   */
   rebuildBodyOnly() {
-    if (this.humanoid) {
-      this.humanoid.dispose();
-      this.avatarHolder.remove(this.humanoid.root);
+    if (!this.humanoid) {
+      this.humanoid = new RiggedHumanoid(this.appearance, {
+        onModelChange: () => this.bodyStatus(""),
+      });
+      // The stand-in shown while the glTF downloads is built from primitives
+      // and has no shadow flags of its own.
+      this.humanoid.fallback.root.traverse((o) => { if (o.isMesh) o.castShadow = true; });
+      this.avatarHolder.add(this.humanoid.root);
+      this.bodyStatus("Waking the body…");
+      return;
     }
-    this.humanoid = new Humanoid(this.appearance);
-    this.humanoid.root.traverse((o) => { if (o.isMesh) o.castShadow = true; });
-    this.avatarHolder.add(this.humanoid.root);
+    const previousBody = this.humanoid.currentModel;
+    this.humanoid.setAppearance(this.appearance);
+    if (this.humanoid.currentModel !== previousBody) this.bodyStatus("Waking the body…");
+  }
+
+  /** Say plainly that the figure on the plinth is still the stand-in. */
+  bodyStatus(text) {
+    const el = this.$("ccBodyStatus");
+    el.textContent = text;
+    el.hidden = !text;
   }
 
   syncChoices() {
@@ -580,11 +618,14 @@ export class CharacterCreator {
 
       this.resize();
       const H = this.humanoid?.totalHeight ?? 1.74;
-      this.avatarHolder.rotation.y = this.orbit + Math.PI;
+      // The body declares which way it is built; see RiggedHumanoid.previewFacing.
+      this.avatarHolder.rotation.y = this.orbit + (this.humanoid?.previewFacing ?? Math.PI);
       this.humanoid?.poseForPreview();
 
+      // Keep the tilt shallow: the steeper the camera looks down, the sooner the
+      // feet leave the bottom of the frame.
       const focusY = H * this.camHeight;
-      this.camera.position.set(0, focusY + this.camDistance * 0.16, this.camDistance);
+      this.camera.position.set(0, focusY + this.camDistance * 0.10, this.camDistance);
       this.camera.lookAt(0, focusY, 0);
 
       this.renderer.render(this.scene, this.camera);

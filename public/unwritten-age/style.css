@@ -503,6 +503,14 @@ input[type=range]::-moz-range-thumb {
 .cc-swatches button:hover { transform: translateY(-2px); }
 .cc-swatches button.is-on { box-shadow: 0 0 0 2px var(--bronze); }
 
+/* Shown while the rigged glTF downloads and the stand-in is on the plinth. */
+.cc-body-status {
+  position: absolute; left: 50%; bottom: 3.1rem; transform: translateX(-50%);
+  font-size: .7rem; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--bronze); opacity: .85; pointer-events: none;
+}
+.cc-body-status[hidden] { display: none; }
+
 /* Controls that are stored but not yet driving the mesh. */
 .cc-block--future { opacity: .72; border-top: 1px dashed var(--edge); padding-top: 1rem; }
 .cc-block--future h3 { color: #8a7a5c; }
