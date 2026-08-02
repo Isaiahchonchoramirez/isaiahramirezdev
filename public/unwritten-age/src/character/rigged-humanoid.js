@@ -133,6 +133,7 @@ export class RiggedHumanoid {
             node,
             rest: node.quaternion.clone(),
             flow: Number(node.userData.flow) || 0.04,
+            anchor: Number(node.userData.cloth_anchor) || 0.18,
             basePositions: new Float32Array(position.array),
           });
         }
@@ -376,11 +377,10 @@ export class RiggedHumanoid {
         + Math.sin(this.windPhase * 2.31 + 1.4) * 0.22;
       const stride = Math.sin(t - 0.55) * g;
       const side = Math.sin(t * 0.5 + 0.8) * g;
-      const targetX = (wind * 0.35 + stride) * cloth.flow;
-      const targetZ = side * cloth.flow * 0.42;
-      WANTED_Q.setFromEuler(new THREE.Euler(targetX, 0, targetZ));
-      WANTED_Q.premultiply(cloth.rest);
-      cloth.node.quaternion.slerp(WANTED_Q, 1 - Math.pow(0.0015, dt));
+      // Never rotate the entire garment: that moves the supposedly fixed
+      // waistband around the object's origin. Keep its authored/skinned
+      // transform and put all secondary motion below the pinned band.
+      cloth.node.quaternion.slerp(cloth.rest, 1 - Math.pow(0.0001, dt));
 
       // Bend the loose mesh itself. Fixed waist/shoulder vertices barely move;
       // displacement grows toward the free hem, producing folds rather than a
@@ -392,7 +392,8 @@ export class RiggedHumanoid {
         ?? (cloth.node.geometry.computeBoundingBox(), cloth.node.geometry.boundingBox);
       const span = Math.max(0.001, bounds.max.y - bounds.min.y);
       for (let i = 0; i < array.length; i += 3) {
-        const free = THREE.MathUtils.clamp((bounds.max.y - base[i + 1]) / span, 0, 1);
+        const descent = THREE.MathUtils.clamp((bounds.max.y - base[i + 1]) / span, 0, 1);
+        const free = THREE.MathUtils.smoothstep(descent, cloth.anchor, 1);
         const wave = Math.sin(this.windPhase * 2.0 + base[i] * 9 + base[i + 1] * 5);
         array[i] = base[i] + wave * cloth.flow * 0.10 * free;
         array[i + 2] = base[i + 2] + (wind + stride * 0.6) * cloth.flow * free

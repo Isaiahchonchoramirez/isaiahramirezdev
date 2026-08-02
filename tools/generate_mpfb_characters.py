@@ -121,20 +121,30 @@ def create_flowing_lower_wrap(spec, body_height, cloth, rig, *,
     """
     sides, rings = 72, 11
     top_z, bottom_z = 0.565 * body_height, bottom_ratio * body_height
-    top_radius, bottom_radius = 0.145 * body_height, bottom_radius_ratio * body_height
+    # A human waist is elliptical, not circular. The old circular ring used
+    # the side-to-side radius at the front and back too, leaving the skirt
+    # visibly floating several centimetres away from the abdomen and seat.
+    # These proportions tuck the top underneath the matching elliptical belt,
+    # then gradually open into a rounder free hem.
+    top_x, top_y = 0.126 * body_height, 0.098 * body_height
+    bottom_x = bottom_radius_ratio * body_height
+    bottom_y = bottom_x * 0.86
     verts, faces = [], []
     for row in range(rings):
         t = row / (rings - 1)
         z = top_z + (bottom_z - top_z) * t
-        base = top_radius + (bottom_radius - top_radius) * (t ** 0.72)
+        ease = t ** 0.72
+        base_x = top_x + (bottom_x - top_x) * ease
+        base_y = top_y + (bottom_y - top_y) * ease
         for col in range(sides):
             angle = math.tau * col / sides
             # Eight broad folds, plus a smaller travelling wrinkle. Both grow
             # toward the free hem and vanish at the belted waist.
             fold = math.sin(angle * 8.0) * (0.004 + 0.015 * t) * body_height
             ripple = math.sin(angle * 4.0 + t * math.pi * 1.5) * 0.004 * t * body_height
-            radius = base + fold + ripple
-            verts.append((math.cos(angle) * radius, math.sin(angle) * radius, z))
+            detail = fold + ripple
+            verts.append((math.cos(angle) * (base_x + detail),
+                          math.sin(angle) * (base_y + detail * 0.82), z))
     for row in range(rings - 1):
         for col in range(sides):
             nxt = (col + 1) % sides
@@ -157,6 +167,7 @@ def create_flowing_lower_wrap(spec, body_height, cloth, rig, *,
     bevel.segments = 2
     skirt["role"] = "garment-flow"
     skirt["flow"] = flow
+    skirt["cloth_anchor"] = 0.20
     skirt["slot"] = "lower"
     skirt["variant"] = variant
     bind_to_rig(skirt, rig, single_bone="pelvis")
@@ -196,6 +207,7 @@ def create_loincloth(spec, body_height, cloth, rig):
         solidify.thickness = 0.004 * body_height
         panel["role"] = "garment-flow"
         panel["flow"] = 0.085 if side == "front" else 0.065
+        panel["cloth_anchor"] = 0.16
         panel["slot"] = "lower"
         panel["variant"] = "loincloth"
         bind_to_rig(panel, rig, single_bone="pelvis")
@@ -666,7 +678,7 @@ def add_period_clothing(spec, human, rig):
     create_fur_boots(spec, body_height, hide, rig)
 
     bpy.ops.mesh.primitive_torus_add(
-        major_radius=0.158 * body_height, minor_radius=0.0105 * body_height,
+        major_radius=0.134 * body_height, minor_radius=0.0085 * body_height,
         major_segments=64, minor_segments=12,
         location=(0, 0, 0.557 * body_height))
     belt = bpy.context.object
