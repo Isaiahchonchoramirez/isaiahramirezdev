@@ -1,0 +1,56 @@
+{
+  "source": "Mapping Inequality historical HOLC neighborhood polygons",
+  "sample": "5 Lansing graded areas",
+  "updated": "Historical spatial-data audit",
+  "metrics": [
+    {
+      "label": "Graded areas",
+      "value": "5"
+    },
+    {
+      "label": "HOLC grades",
+      "value": "4"
+    },
+    {
+      "label": "Mapped area",
+      "value": "71.5 km\u00b2"
+    }
+  ],
+  "charts": [
+    {
+      "type": "bar",
+      "title": "Share of mapped Lansing area by HOLC grade",
+      "subtitle": "Polygon area calculated after projecting the historical boundaries into a local metric CRS",
+      "xLabel": "Percent of total graded area",
+      "yLabel": "HOLC grade",
+      "series": [
+        {
+          "name": "Mapped area share",
+          "values": [
+            {
+              "label": "Grade A",
+              "value": 4.3
+            },
+            {
+              "label": "Grade B",
+              "value": 14.7
+            },
+            {
+              "label": "Grade C",
+              "value": 75.3
+            },
+            {
+              "label": "Grade D",
+              "value": 5.7
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "findings": [
+    "Grade D polygons account for 5.7% of the historical graded area in this file.",
+    "Grades A and B together account for 19.0% of mapped area.",
+    "The chart describes historical HOLC classifications; it does not by itself measure present-day outcomes."
+  ]
+}

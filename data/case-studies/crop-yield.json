@@ -1,0 +1,86 @@
+{
+  "source": "Synthetic agricultural crop-yield dataset analyzed in SI 201",
+  "sample": "1,000,000 observations",
+  "updated": "2025 analysis",
+  "metrics": [
+    {
+      "label": "Rows analyzed",
+      "value": "1.0M"
+    },
+    {
+      "label": "Crops",
+      "value": "6"
+    },
+    {
+      "label": "Tests passed",
+      "value": "10/10"
+    }
+  ],
+  "charts": [
+    {
+      "type": "bar",
+      "title": "Average yield by treatment combination",
+      "subtitle": "Irrigation and fertilizer are compared across the complete dataset",
+      "xLabel": "Mean yield (tons per hectare)",
+      "yLabel": "Treatment",
+      "series": [
+        {
+          "name": "Mean yield",
+          "values": [
+            {
+              "label": "No irrigation + no fertilizer",
+              "value": 3.3
+            },
+            {
+              "label": "No irrigation + fertilizer",
+              "value": 4.8
+            },
+            {
+              "label": "Irrigation + no fertilizer",
+              "value": 4.5
+            },
+            {
+              "label": "Irrigation + fertilizer",
+              "value": 6.0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "bar",
+      "title": "Regional rainfall efficiency",
+      "subtitle": "Yield divided by rainfall for every observation, then averaged by region",
+      "xLabel": "Mean tons per hectare per mm rainfall",
+      "yLabel": "Region",
+      "series": [
+        {
+          "name": "Yield per mm",
+          "values": [
+            {
+              "label": "East",
+              "value": 0.009879
+            },
+            {
+              "label": "North",
+              "value": 0.009865
+            },
+            {
+              "label": "South",
+              "value": 0.009862
+            },
+            {
+              "label": "West",
+              "value": 0.009859
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "findings": [
+    "Using irrigation and fertilizer together produced the highest mean yield: about 6.00 tons per hectare.",
+    "The East region had the highest mean yield per millimeter of rainfall in this dataset.",
+    "The dataset is synthetic, so findings demonstrate analytical technique rather than agricultural policy evidence."
+  ]
+}

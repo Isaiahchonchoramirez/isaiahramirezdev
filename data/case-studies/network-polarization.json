@@ -1,0 +1,52 @@
+{
+  "source": "Real-world email, Wikipedia, and Congress networks supplied for SI 315",
+  "sample": "Three networks; 2,173 typed nodes and 8,987 listed edges",
+  "updated": "2026 analysis",
+  "metrics": [
+    {
+      "label": "Networks",
+      "value": "3"
+    },
+    {
+      "label": "Typed nodes",
+      "value": "2,173"
+    },
+    {
+      "label": "Simulation size",
+      "value": "1,000 nodes"
+    }
+  ],
+  "charts": [
+    {
+      "type": "bar",
+      "title": "Observed homophily by network",
+      "subtitle": "Expected minus observed cross-type edge fraction; positive values indicate homophily",
+      "xLabel": "Homophily score (2pq - cross-type edge fraction)",
+      "yLabel": "Network",
+      "series": [
+        {
+          "name": "Homophily score",
+          "values": [
+            {
+              "label": "Department email",
+              "value": -0.065
+            },
+            {
+              "label": "Political Wikipedia",
+              "value": 0.162
+            },
+            {
+              "label": "Congress Twitter",
+              "value": 0.328
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "findings": [
+    "Congress showed the strongest homophily of the three networks.",
+    "The department email network showed inverse homophily: more cross-type edges than its group proportions predict.",
+    "The follow-up simulation tested how focal, triadic, and membership closure can change polarization over 750 steps."
+  ]
+}

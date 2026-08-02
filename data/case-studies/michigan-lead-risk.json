@@ -1,0 +1,80 @@
+{
+  "source": "Michigan public health, housing, and public-water datasets; county-level aggregation",
+  "sample": "83 Michigan counties",
+  "updated": "2025 analysis",
+  "metrics": [
+    {
+      "label": "Counties joined",
+      "value": "83"
+    },
+    {
+      "label": "Median EBLL rate",
+      "value": "0.55%"
+    },
+    {
+      "label": "Median water lead",
+      "value": "1.71 ppb"
+    }
+  ],
+  "charts": [
+    {
+      "type": "bar",
+      "title": "Highest combined lead-risk index",
+      "subtitle": "Mean of standardized pre-1950 housing, water-lead, and childhood EBLL indicators",
+      "xLabel": "Combined risk index (z-score average)",
+      "yLabel": "County",
+      "series": [
+        {
+          "name": "Risk index",
+          "values": [
+            {
+              "label": "Wayne",
+              "value": 3.86
+            },
+            {
+              "label": "Arenac",
+              "value": 2.6
+            },
+            {
+              "label": "Calhoun",
+              "value": 0.94
+            },
+            {
+              "label": "Kent",
+              "value": 0.83
+            },
+            {
+              "label": "Berrien",
+              "value": 0.81
+            },
+            {
+              "label": "Branch",
+              "value": 0.77
+            },
+            {
+              "label": "Lenawee",
+              "value": 0.71
+            },
+            {
+              "label": "St. Joseph",
+              "value": 0.62
+            },
+            {
+              "label": "Oakland",
+              "value": 0.59
+            },
+            {
+              "label": "Cass",
+              "value": 0.5
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "findings": [
+    "Pre-1950 housing and childhood EBLL rate correlation: r = 0.44.",
+    "Mean water lead and childhood EBLL rate correlation: r = -0.08.",
+    "County-level relationships are descriptive and do not establish individual exposure or causation."
+  ]
+}
