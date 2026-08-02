@@ -132,7 +132,9 @@ export class Humanoid {
     // starved: `*Span` is a full width across the body; `*R` is a radius fed to
     // a sphere/cylinder scale. Never mix them.
     const shoulderSpan = H * lerp(0.205, 0.275, a.shoulderWidth) * build; // ~0.42 m
-    const hipSpan = H * lerp(0.165, 0.205, a.bodyFat) * build;            // ~0.32 m
+    const hipSpan = H * lerp(0.15, 0.23, a.hipWidth ?? 0.5) * build;
+    const chestShape = lerp(0.82, 1.2, a.chestWidth ?? 0.5);
+    const waistShape = lerp(0.78, 1.18, a.waistWidth ?? 0.5);
     const shoulderW = shoulderSpan; // kept for adornment sizing below
     const hipW = hipSpan * 0.5;     // radius, for the pelvis ellipsoid
 
@@ -188,7 +190,7 @@ export class Humanoid {
     this.joints.spine = spine;
 
     const abdomen = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 12), skin);
-    abdomen.scale.set(hipSpan * 0.47 * girth, torsoLen * 0.34, hipSpan * 0.31 * girth);
+    abdomen.scale.set(hipSpan * 0.47 * girth * waistShape, torsoLen * 0.34, hipSpan * 0.31 * girth);
     abdomen.position.y = torsoLen * 0.26;
     abdomen.castShadow = true;
     spine.add(abdomen);
@@ -200,7 +202,7 @@ export class Humanoid {
     this.joints.chest = chest;
 
     const ribcage = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 12), skin);
-    ribcage.scale.set(shoulderSpan * 0.39, torsoLen * 0.42, hipSpan * 0.36 * lerp(0.95, 1.15, a.muscularity));
+    ribcage.scale.set(shoulderSpan * 0.39 * chestShape, torsoLen * 0.42, hipSpan * 0.36 * chestShape * lerp(0.95, 1.15, a.muscularity));
     ribcage.position.y = torsoLen * 0.18;
     ribcage.castShadow = true;
     chest.add(ribcage);
@@ -222,7 +224,7 @@ export class Humanoid {
       new THREE.Vector2(shoulderSpan * 0.20, torsoLen * 0.44),  // neck opening
       new THREE.Vector2(shoulderSpan * 0.42, torsoLen * 0.36),  // over the shoulder
       new THREE.Vector2(shoulderSpan * 0.40, torsoLen * 0.16),  // chest
-      new THREE.Vector2(hipSpan * 0.50, -torsoLen * 0.06),      // waist, nipped by the belt
+      new THREE.Vector2(hipSpan * 0.50 * waistShape, -torsoLen * 0.06),
       new THREE.Vector2(hipSpan * 0.63, -torsoLen * 0.24),      // hip
       new THREE.Vector2(hipSpan * 0.72, hemY),                  // hem, flared
     ];
@@ -284,7 +286,7 @@ export class Humanoid {
     /* ---- arms */
     const upperArmLen = torsoLen * lerp(0.62, 0.78, a.armLength);
     const foreArmLen = torsoLen * lerp(0.54, 0.68, a.armLength);
-    const armR = headUnit * 0.205 * muscle * build;   // ~0.048 m radius
+    const armR = headUnit * 0.205 * muscle * build * lerp(0.72, 1.32, a.armThickness ?? 0.5);
 
     [-1, 1].forEach((side) => {
       const tag = side < 0 ? "L" : "R";
@@ -366,7 +368,7 @@ export class Humanoid {
     /* ---- legs */
     const thighLen = hipY - H * CANON.knee * lerp(0.96, 1.04, a.legLength);
     const calfLen = H * CANON.knee * lerp(0.96, 1.04, a.legLength) - H * CANON.ankle;
-    const legR = headUnit * 0.335 * muscle * build;   // ~0.078 m radius
+    const legR = headUnit * 0.335 * muscle * build * lerp(0.72, 1.32, a.legThickness ?? 0.5);
 
     [-1, 1].forEach((side) => {
       const tag = side < 0 ? "L" : "R";
@@ -470,7 +472,8 @@ export class Humanoid {
       headH * lerp(0.1, 0.17, a.noseSize),
     );
     nose.rotation.x = Math.PI * 0.62;
-    nose.position.set(0, headH * 0.0, -d * 0.78);
+    const noseY = headH * lerp(-0.065, 0.07, a.noseHeight ?? 0.5);
+    nose.position.set(0, noseY, -d * 0.78);
     head.add(nose);
 
     /* Eyes: sclera, iris and an upper lid.
@@ -482,30 +485,31 @@ export class Humanoid {
     const pupilMaterial = eyeMaterials.pupil();
     const catchlightMaterial = eyeMaterials.catchlight();
     const spacing = w * lerp(0.3, 0.44, a.eyeSpacing);
+    const eyeY = headH * lerp(-0.005, 0.085, a.eyeHeight ?? 0.5);
     const eyeR = headH * lerp(0.036, 0.056, a.eyeSize);
     const setBack = -d * lerp(0.70, 0.54, a.eyeDepth);
 
     this.eyelids = [];
     [-1, 1].forEach((side) => {
       const eye = new THREE.Mesh(new THREE.SphereGeometry(eyeR, 12, 9), sclera);
-      eye.position.set(side * spacing, headH * 0.035, setBack);
+      eye.position.set(side * spacing, eyeY, setBack);
       head.add(eye);
 
       const irisMesh = new THREE.Mesh(new THREE.SphereGeometry(eyeR * 0.58, 9, 7), iris);
-      irisMesh.position.set(side * spacing, headH * 0.035, setBack - eyeR * 0.72);
+      irisMesh.position.set(side * spacing, eyeY, setBack - eyeR * 0.72);
       head.add(irisMesh);
 
       const pupil = new THREE.Mesh(new THREE.SphereGeometry(eyeR * 0.26, 8, 6), pupilMaterial);
-      pupil.position.set(side * spacing, headH * 0.035, setBack - eyeR * 1.08);
+      pupil.position.set(side * spacing, eyeY, setBack - eyeR * 1.08);
       head.add(pupil);
 
       const catchlight = new THREE.Mesh(new THREE.SphereGeometry(eyeR * 0.095, 6, 5), catchlightMaterial);
-      catchlight.position.set(side * spacing - eyeR * 0.16, headH * 0.05, setBack - eyeR * 1.29);
+      catchlight.position.set(side * spacing - eyeR * 0.16, eyeY + eyeR * 0.27, setBack - eyeR * 1.29);
       head.add(catchlight);
 
       // Upper lid: a skin cap over the eye, rotated down to blink.
       const lidPivot = new THREE.Object3D();
-      lidPivot.position.set(side * spacing, headH * 0.035, setBack);
+      lidPivot.position.set(side * spacing, eyeY, setBack);
       head.add(lidPivot);
       const lid = new THREE.Mesh(
         new THREE.SphereGeometry(eyeR * 1.08, 12, 8, 0, Math.PI * 2, 0, Math.PI * 0.5),
@@ -540,7 +544,7 @@ export class Humanoid {
     const mouthW = w * lerp(0.30, 0.56, a.mouthWidth);
     const lipT = headH * lerp(0.012, 0.036, a.lipFullness);
     const lipMat = skinMaterials.lip;
-    const mouthY = -headH * 0.155;
+    const mouthY = headH * lerp(-0.21, -0.105, a.mouthHeight ?? 0.5);
     const mouthZ = -d * 0.70;
 
     const gap = new THREE.Mesh(
