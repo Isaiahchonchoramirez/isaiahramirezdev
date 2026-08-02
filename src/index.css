@@ -69,6 +69,40 @@ section.section-inline {
 .current-complete { margin-top: 1.5rem; display: flex; justify-content: space-between; gap: 1rem; padding: 1rem 1.25rem; border-radius: 1rem; background: rgba(74,195,222,.12); color: #fff; }
 .current-complete button { color: #78e8ff; }
 .current-skip { display: block; margin: 1.5rem auto 0; color: #aab5c4; text-decoration: underline; text-underline-offset: .25rem; }
+.current-game-panel { width: min(1180px, 100%); }
+.current-game-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 1.5rem; padding-right: 2.5rem; }
+.current-controls { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .6rem; color: #95a5b8; font-size: .72rem; }
+.current-controls span { padding: .4rem .65rem; border: 1px solid rgba(255,255,255,.1); border-radius: 999px; background: rgba(255,255,255,.035); }
+.current-controls kbd { color: #fff; font-family: inherit; }
+.current-field { position: relative; height: min(52vh, 520px); min-height: 360px; margin-top: 1.25rem; overflow: hidden; border: 1px solid rgba(117,230,255,.18); border-radius: 1.5rem; touch-action: none; cursor: grab; background: radial-gradient(circle at 50% 110%, rgba(40,117,115,.35), transparent 38%), radial-gradient(circle at 15% 25%, rgba(47,80,154,.23), transparent 31%), linear-gradient(#07172a, #07101d 65%, #071b22); }
+.current-field.is-dragging { cursor: grabbing; }
+.current-field::after { content: ""; position: absolute; inset: auto 0 0; height: 16%; pointer-events: none; background: radial-gradient(ellipse at 10% 100%, #173d3c 0 14%, transparent 15%), radial-gradient(ellipse at 35% 110%, #174c46 0 19%, transparent 20%), radial-gradient(ellipse at 68% 105%, #163c3b 0 17%, transparent 18%), radial-gradient(ellipse at 92% 110%, #15433e 0 20%, transparent 21%); opacity: .8; }
+.current-rays { position: absolute; inset: -30% 0 0; pointer-events: none; background: conic-gradient(from 165deg at 50% 0%, transparent 0 8deg, rgba(121,226,255,.07) 10deg 17deg, transparent 19deg 27deg, rgba(121,226,255,.045) 29deg 34deg, transparent 36deg); filter: blur(5px); }
+.current-bubbles i { position: absolute; width: .45rem; height: .45rem; border: 1px solid rgba(152,237,255,.35); border-radius: 50%; animation: currentBubble 7s linear infinite; }
+.current-bubbles i:nth-child(1) { left: 9%; bottom: -5%; animation-delay: -2s; }
+.current-bubbles i:nth-child(2) { left: 38%; bottom: -8%; animation-delay: -5s; transform: scale(1.6); }
+.current-bubbles i:nth-child(3) { left: 62%; bottom: -4%; animation-delay: -1s; }
+.current-bubbles i:nth-child(4) { left: 86%; bottom: -7%; animation-delay: -4s; transform: scale(.7); }
+.current-bubbles i:nth-child(5) { left: 73%; bottom: -5%; animation-delay: -6s; transform: scale(1.25); }
+@keyframes currentBubble { to { translate: 0 -520px; opacity: 0; } }
+.current-jelly { position: absolute; z-index: 5; width: clamp(3.8rem, 8vw, 5.5rem); transform: translate(-50%, -50%); pointer-events: none; filter: drop-shadow(0 0 18px rgba(102,229,255,.55)); transition: left .12s linear, top .12s linear; }
+.current-jelly svg { display: block; width: 100%; overflow: visible; animation: jellyPulse 1.8s ease-in-out infinite; }
+@keyframes jellyPulse { 50% { transform: scale(.94, 1.04); } }
+.current-collectible { position: absolute; z-index: 4; width: clamp(4.2rem, 9vw, 6.5rem); aspect-ratio: 1; display: grid; place-content: center; gap: .15rem; transform: translate(-50%, -50%); border: 1px solid rgba(142,236,255,.45); border-radius: 50%; background: radial-gradient(circle, rgba(120,231,255,.22), rgba(111,62,187,.14) 55%, transparent 72%); box-shadow: 0 0 26px rgba(106,225,255,.16); color: #fff; animation: collectibleDrift 3s ease-in-out infinite; }
+.current-collectible:nth-of-type(even) { animation-delay: -1.3s; }
+.current-collectible span { color: #8deeff; font-size: clamp(1rem, 2vw, 1.45rem); }
+.current-collectible strong { font-size: .67rem; text-transform: uppercase; letter-spacing: .1em; }
+.current-collectible.is-found { border-style: dashed; opacity: .48; box-shadow: none; animation: none; }
+.current-collectible.is-found::after { content: "✓"; position: absolute; top: -.15rem; right: -.15rem; display: grid; place-items: center; width: 1.4rem; height: 1.4rem; border-radius: 50%; background: #78e8ff; color: #06111d; font-weight: 800; }
+@keyframes collectibleDrift { 50% { transform: translate(-50%, calc(-50% - 7px)); } }
+.current-discovery { position: absolute; z-index: 8; left: 50%; bottom: 1rem; width: min(32rem, calc(100% - 2rem)); display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: .8rem; padding: .8rem 1rem; transform: translateX(-50%); border: 1px solid rgba(120,232,255,.32); border-radius: 1rem; background: rgba(3,12,23,.88); backdrop-filter: blur(12px); box-shadow: 0 16px 40px rgba(0,0,0,.35); }
+.current-discovery strong { color: #78e8ff; }
+.current-discovery span { color: #c1ccd8; font-size: .78rem; }
+.current-discovery button { color: #fff; font-size: .74rem; white-space: nowrap; }
+.current-game-footer { min-height: 3rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: .8rem; color: #8f9caf; font-size: .75rem; }
+.current-game-footer > div:last-child { display: flex; align-items: center; gap: 1rem; }
+.current-game-footer .current-complete { flex: 1; margin-top: 0; }
+.current-game-footer .current-skip { display: inline; margin: 0; }
 
 .project-filters { position: sticky; top: 5.5rem; z-index: 20; display: flex; flex-wrap: wrap; justify-content: center; gap: .55rem; width: fit-content; max-width: 100%; margin: 2.5rem auto 0; padding: .65rem; border: 1px solid rgba(255,255,255,.12); border-radius: 999px; background: rgba(5,12,23,.82); backdrop-filter: blur(14px); }
 .project-filters button { padding: .55rem .9rem; border-radius: 999px; color: #aeb9c8; font-size: .84rem; transition: color .2s ease, background .2s ease; }
@@ -144,12 +178,27 @@ section.section-inline {
   .explore-current-card { align-items: flex-start; flex-direction: column; }
   .current-grid { grid-template-columns: repeat(2, 1fr); }
   .current-orb { min-height: 190px; }
+  .current-game-head { align-items: flex-start; flex-direction: column; gap: .75rem; }
+  .current-controls { justify-content: flex-start; }
+  .current-field { height: 52vh; min-height: 390px; }
 }
 @media (max-width: 520px) {
   .current-grid { grid-template-columns: 1fr; }
   .current-orb { min-height: 150px; border-radius: 1.5rem; }
   .project-filters { top: 4.5rem; border-radius: 1.25rem; }
   .current-complete { flex-direction: column; }
+  .current-overlay { padding: .5rem; }
+  .current-panel { padding: 1rem; border-radius: 1.25rem; }
+  .current-game-head h2 { font-size: 1.8rem; }
+  .current-controls span:first-child { display: none; }
+  .current-field { min-height: 430px; border-radius: 1rem; }
+  .current-discovery { grid-template-columns: 1fr auto; }
+  .current-discovery span { display: none; }
+  .current-game-footer { align-items: flex-start; flex-direction: column; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .current-bubbles i, .current-jelly svg, .current-collectible { animation: none; }
+  .current-jelly { transition: none; }
 }
 
 @theme {
