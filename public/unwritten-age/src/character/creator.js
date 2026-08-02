@@ -4,7 +4,7 @@ import { CULTURES, CULTURE_IDS } from "./cultures.js";
 import { CLASSES, CLASS_IDS } from "./classes.js";
 import {
   BODY_SLIDERS, HEAD_SLIDERS, SKIN_TONES, HAIR_COLOURS, EYE_COLOURS,
-  HAIR_STYLES, HAIR_TEXTURES, FACIAL_HAIR, VOICES, MARKINGS, SCARS, BODY_BASES, BODY_SEXES,
+  HAIR_STYLES, VOICES, MARKINGS, SCARS, BODY_SEXES,
   TORSO_GARMENTS, LOWER_GARMENTS, MANTLES, FOOTWEAR,
   defaultAppearance, randomAppearance, savePreset, loadPresets, deletePreset,
 } from "./appearance.js";
@@ -175,12 +175,8 @@ export class CharacterCreator {
     const deferred = playerSliders([...BODY_SLIDERS, ...HEAD_SLIDERS], this.gmRules)
       .filter((s) => s.affects === "deferred");
 
-    // Colour is live — it tints the body's own maps. Shape is not: hair style,
-    // facial hair and markings are modelled into the export, so those stay
-    // recorded-but-not-shown until they are authored as swappable pieces.
-    const shapeNote = `<p class="cc-disclosure">Saved with your character. The
-      body's own hair is modelled into it, so the shape of it does not change
-      here yet — the colour does.</p>`;
+    const shapeNote = `<p class="cc-disclosure">Every listed style is a real
+      fitted MPFB hair mesh. Bald removes the hair mesh completely.</p>`;
 
     this.$("ccControls").innerHTML = `
       <section class="cc-block">
@@ -205,9 +201,6 @@ export class CharacterCreator {
         ${this.swatches("hairColour", HAIR_COLOURS)}
         ${shapeNote}
         <label class="cc-row"><span>Style</span>${this.options("hairStyle", HAIR_STYLES)}</label>
-        <label class="cc-row"><span>Texture</span>${this.options("hairTexture", HAIR_TEXTURES)}</label>
-        <label class="cc-row"><span>Facial hair</span>${this.options("facialHair", FACIAL_HAIR)}</label>
-        ${this.slider({ key: "hairLength", name: "Length", min: 0, max: 1, step: 0.01, affects: "deferred" })}
       </section>
 
       <section class="cc-block">
@@ -280,7 +273,18 @@ export class CharacterCreator {
 
     root.querySelectorAll("[data-select]").forEach((sel) => {
       sel.addEventListener("change", () => {
-        this.appearance[sel.dataset.select] = sel.value;
+        const key = sel.dataset.select;
+        this.appearance[key] = sel.value;
+        // Keep the legacy bodyBase field synchronized for the world/player
+        // path and older saved presets. bodySex remains the readable setting;
+        // bodyBase is the concrete GLB identity every consumer can understand.
+        if (key === "bodySex") {
+          this.appearance.bodyBase = {
+            male: "veyr-hunter",
+            female: "aurean-keeper",
+            androgynous: "ember-elder",
+          }[sel.value];
+        }
         this.rebuildBodyOnly();
       });
     });

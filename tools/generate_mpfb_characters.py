@@ -738,9 +738,16 @@ def export_character(spec):
         ("eyelashes", "eyelashes01.mhclo", "Eyelashes", "hair", None),
         ("teeth", "teeth_base.mhclo", "Teeth", "mouth", None),
         ("tongue", "tongue01.mhclo", "Tongue", "mouth", None),
+        ("hair", "short01.mhclo", "Hair", "hair", "close-crop"),
+        ("hair", "short02.mhclo", "Hair", "hair", "short-swept"),
+        ("hair", "short03.mhclo", "Hair", "hair", "short-tousled"),
         ("hair", "short04.mhclo", "Hair", "hair", "cropped"),
+        ("hair", "bob01.mhclo", "Hair", "hair", "bob"),
+        ("hair", "bob02.mhclo", "Hair", "hair", "layered-bob"),
+        ("hair", "ponytail01.mhclo", "Hair", "hair", "ponytail"),
         ("hair", "braid01.mhclo", "Hair", "hair", "long-braid"),
         ("hair", "afro01.mhclo", "Hair", "hair", "coiled-crown"),
+        ("hair", "long01.mhclo", "Hair", "hair", "long-loose"),
     ]
     for subdir, filename, asset_type, role, variant in attachments:
         path = AssetService.find_asset_absolute_path(filename, asset_subdir=subdir)
