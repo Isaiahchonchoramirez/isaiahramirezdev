@@ -109,6 +109,90 @@ def bind_to_rig(obj, rig, single_bone=None):
     modifier.use_vertex_groups = True
 
 
+def create_flowing_lower_wrap(spec, body_height, cloth, rig):
+    """Build a pleated lower garment with enough geometry to read as cloth.
+
+    A cone can only look like a lampshade. This is a stack of shaped rings:
+    close at the hips, loose at the knee, with alternating radial folds that
+    grow toward the hem. Runtime adds low-amplitude secondary sway to the whole
+    piece; the folds make that movement catch light like fabric.
+    """
+    sides, rings = 72, 11
+    top_z, bottom_z = 0.565 * body_height, 0.275 * body_height
+    top_radius, bottom_radius = 0.145 * body_height, 0.172 * body_height
+    verts, faces = [], []
+    for row in range(rings):
+        t = row / (rings - 1)
+        z = top_z + (bottom_z - top_z) * t
+        base = top_radius + (bottom_radius - top_radius) * (t ** 0.72)
+        for col in range(sides):
+            angle = math.tau * col / sides
+            # Eight broad folds, plus a smaller travelling wrinkle. Both grow
+            # toward the free hem and vanish at the belted waist.
+            fold = math.sin(angle * 8.0) * (0.004 + 0.015 * t) * body_height
+            ripple = math.sin(angle * 4.0 + t * math.pi * 1.5) * 0.004 * t * body_height
+            radius = base + fold + ripple
+            verts.append((math.cos(angle) * radius, math.sin(angle) * radius, z))
+    for row in range(rings - 1):
+        for col in range(sides):
+            nxt = (col + 1) % sides
+            a, b = row * sides + col, row * sides + nxt
+            c, d = (row + 1) * sides + nxt, (row + 1) * sides + col
+            faces.append((a, b, c, d))
+
+    mesh = bpy.data.meshes.new(f'{spec["id"]}-pleated-wrap-mesh')
+    mesh.from_pydata(verts, [], faces)
+    mesh.update()
+    skirt = bpy.data.objects.new(f'{spec["id"]}-pleated-lower-wrap', mesh)
+    bpy.context.scene.collection.objects.link(skirt)
+    skirt.data.materials.append(cloth)
+    shade_smooth(skirt)
+    solidify = skirt.modifiers.new("woven thickness", "SOLIDIFY")
+    solidify.thickness = 0.0035 * body_height
+    solidify.offset = 0.0
+    bevel = skirt.modifiers.new("soft cloth edges", "BEVEL")
+    bevel.width = 0.0025 * body_height
+    bevel.segments = 2
+    skirt["role"] = "garment-flow"
+    skirt["flow"] = 0.055
+    bind_to_rig(skirt, rig, single_bone="pelvis")
+    return skirt
+
+
+def mask_skin_under_clothes(human, body_height):
+    """Remove export-only skin hidden by the tunic.
+
+    Cloth and skin cannot occupy nearly the same space under animation without
+    occasional punch-through. Production characters solve that with body
+    masks. The editable .blend is saved before this runs, so sculptors retain a
+    complete body; only the browser/game mesh loses the invisible torso faces.
+    """
+    arm_prefixes = ("upperarm", "lowerarm", "hand", "thumb", "index",
+                    "middle", "ring", "pinky", "clavicle")
+    arm_groups = {group.index for group in human.vertex_groups
+                  if group.name.startswith(arm_prefixes)}
+    low, high = 0.485 * body_height, 0.79 * body_height
+    removable = []
+    for polygon in human.data.polygons:
+        verts = [human.data.vertices[index] for index in polygon.vertices]
+        center_z = sum(v.co.z for v in verts) / len(verts)
+        arm_weight = max(
+            (sum(g.weight for g in v.groups if g.group in arm_groups) for v in verts),
+            default=0.0,
+        )
+        if low < center_z < high and arm_weight < 0.34:
+            removable.append(polygon.index)
+
+    bm = bmesh.new()
+    bm.from_mesh(human.data)
+    bm.faces.ensure_lookup_table()
+    bmesh.ops.delete(bm, geom=[bm.faces[index] for index in removable], context="FACES")
+    bm.to_mesh(human.data)
+    bm.free()
+    human.data.update()
+    print(f"MASKED {len(removable)} hidden skin faces beneath clothing")
+
+
 def ground_and_align(human, rig):
     """Stand the character on z=0 with its skeleton actually inside its body.
 
@@ -344,9 +428,15 @@ def add_period_clothing(spec, human, rig):
     # body surfaced through the weave — the nipples appearing to swell and
     # shrink was the body punching through a garment with no air in it.
     bm.normal_update()
-    lift = 0.012 * body_height
+    lift = 0.020 * body_height
     for vert in bm.verts:
-        vert.co += vert.normal * lift
+        # A broad diagonal bias breaks the vacuum-sealed look without noisy,
+        # evenly spaced corrugation. It is strongest near the free waist and
+        # nearly absent at the shoulders where cloth bears on the body.
+        vertical = max(0.0, min(1.0, (high - vert.co.z) / (high - low)))
+        angle = math.atan2(vert.co.y, vert.co.x)
+        wrinkle = math.sin(angle * 3.0 + vertical * math.pi * 4.0)
+        vert.co += vert.normal * (lift + wrinkle * 0.0035 * body_height * vertical)
     bm.to_mesh(fitted_mesh)
     bm.free()
     # The derived mesh arrives wearing the body's skin. Replace every slot, then
@@ -362,8 +452,8 @@ def add_period_clothing(spec, human, rig):
     # contour of that body — navel, nipples, ribs — which reads as paint rather
     # than clothing. Smoothing lets it hang like a garment.
     relax = torso.modifiers.new("hangs like cloth", "SMOOTH")
-    relax.factor = 0.9
-    relax.iterations = 8
+    relax.factor = 1.25
+    relax.iterations = 12
     solidify = torso.modifiers.new("woven thickness", "SOLIDIFY")
     solidify.thickness = 0.006 * body_height
     solidify.offset = 1.0
@@ -371,33 +461,19 @@ def add_period_clothing(spec, human, rig):
     torso["role"] = "garment"
     bind_to_rig(torso, rig)
 
-    # A restrained flared lower wrap overlaps the fitted torso at the belt.
-    # Proportions taken from the 1.72 m hunter and held as ratios so a shorter
-    # body wears the same garment rather than the same measurements.
-    # 96 sides rather than 32: at this scale a 32-sided cone reads as a faceted
-    # barrel, which is most of why the lower garment looked blocky.
-    bpy.ops.mesh.primitive_cone_add(
-        vertices=96,
-        radius1=0.148 * body_height, radius2=0.125 * body_height,
-        depth=0.279 * body_height,
-        location=(0, 0, 0.424 * body_height))
-    skirt = bpy.context.object
-    skirt.name = f'{spec["id"]}-hide-skirt'
-    skirt.data.materials.append(cloth)
-    bevel = skirt.modifiers.new("softened hide edge", "BEVEL")
-    bevel.width = 0.006 * body_height
-    bevel.segments = 3
-    shade_smooth(skirt)
-    skirt["role"] = "garment"
-    bind_to_rig(skirt, rig, single_bone="pelvis")
+    create_flowing_lower_wrap(spec, body_height, cloth, rig)
 
     bpy.ops.mesh.primitive_torus_add(
-        major_radius=0.142 * body_height, minor_radius=0.0105 * body_height,
+        major_radius=0.158 * body_height, minor_radius=0.0105 * body_height,
         major_segments=64, minor_segments=12,
-        location=(0, 0, 0.547 * body_height))
+        location=(0, 0, 0.557 * body_height))
     belt = bpy.context.object
     belt.name = f'{spec["id"]}-fibre-belt'
     belt.data.materials.append(cloth)
+    # Human waists are wider side-to-side than front-to-back. An elliptical
+    # belt sits on the garment instead of intersecting it at four cardinal
+    # points like a circular torus.
+    belt.scale.y = 0.76
     shade_smooth(belt)
     belt["role"] = "garment"
     bind_to_rig(belt, rig, single_bone="pelvis")
@@ -466,6 +542,9 @@ def export_character(spec):
     # Keep the editable MPFB scene as the source of truth for later sculpting.
     blend_path = os.path.join(SOURCE_OUT, f'{spec["id"]}.blend')
     bpy.ops.wm.save_as_mainfile(filepath=blend_path)
+
+    # Body masking belongs to the optimized game export, not the sculpt source.
+    mask_skin_under_clothes(human, max(v.co.z for v in human.data.vertices))
 
     for obj in list(bpy.context.scene.objects):
         if obj.type == "MESH":
