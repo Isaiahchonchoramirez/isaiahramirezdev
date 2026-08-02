@@ -109,7 +109,9 @@ def bind_to_rig(obj, rig, single_bone=None):
     modifier.use_vertex_groups = True
 
 
-def create_flowing_lower_wrap(spec, body_height, cloth, rig):
+def create_flowing_lower_wrap(spec, body_height, cloth, rig, *,
+                               variant="wrap", bottom_ratio=0.275,
+                               bottom_radius_ratio=0.172, flow=0.055):
     """Build a pleated lower garment with enough geometry to read as cloth.
 
     A cone can only look like a lampshade. This is a stack of shaped rings:
@@ -118,8 +120,8 @@ def create_flowing_lower_wrap(spec, body_height, cloth, rig):
     piece; the folds make that movement catch light like fabric.
     """
     sides, rings = 72, 11
-    top_z, bottom_z = 0.565 * body_height, 0.275 * body_height
-    top_radius, bottom_radius = 0.145 * body_height, 0.172 * body_height
+    top_z, bottom_z = 0.565 * body_height, bottom_ratio * body_height
+    top_radius, bottom_radius = 0.145 * body_height, bottom_radius_ratio * body_height
     verts, faces = [], []
     for row in range(rings):
         t = row / (rings - 1)
@@ -140,10 +142,10 @@ def create_flowing_lower_wrap(spec, body_height, cloth, rig):
             c, d = (row + 1) * sides + nxt, (row + 1) * sides + col
             faces.append((a, b, c, d))
 
-    mesh = bpy.data.meshes.new(f'{spec["id"]}-pleated-wrap-mesh')
+    mesh = bpy.data.meshes.new(f'{spec["id"]}-{variant}-mesh')
     mesh.from_pydata(verts, [], faces)
     mesh.update()
-    skirt = bpy.data.objects.new(f'{spec["id"]}-pleated-lower-wrap', mesh)
+    skirt = bpy.data.objects.new(f'{spec["id"]}-{variant}', mesh)
     bpy.context.scene.collection.objects.link(skirt)
     skirt.data.materials.append(cloth)
     shade_smooth(skirt)
@@ -154,9 +156,120 @@ def create_flowing_lower_wrap(spec, body_height, cloth, rig):
     bevel.width = 0.0025 * body_height
     bevel.segments = 2
     skirt["role"] = "garment-flow"
-    skirt["flow"] = 0.055
+    skirt["flow"] = flow
+    skirt["slot"] = "lower"
+    skirt["variant"] = variant
     bind_to_rig(skirt, rig, single_bone="pelvis")
     return skirt
+
+
+def create_loincloth(spec, body_height, cloth, rig):
+    """Two layered, subdivided panels that move independently."""
+    width = 0.23 * body_height
+    top, bottom = 0.56 * body_height, 0.30 * body_height
+    for side, y, phase in (("front", -0.145 * body_height, 0.0),
+                           ("back", 0.135 * body_height, math.pi)):
+        cols, rows = 9, 9
+        verts, faces = [], []
+        for row in range(rows):
+            t = row / (rows - 1)
+            z = top + (bottom - top) * t
+            for col in range(cols):
+                u = col / (cols - 1)
+                x = (u - 0.5) * width * (1.0 - 0.36 * t)
+                ripple = math.sin(u * math.pi * 4 + t * 2.0 + phase) * 0.008 * body_height * t
+                # Longer down the centre and shorter at the corners gives a
+                # cut-hide hem instead of a rectangular apron.
+                hem = math.cos((u - 0.5) * math.pi) * 0.025 * body_height * t
+                verts.append((x, y + ripple, z - hem))
+        for row in range(rows - 1):
+            for col in range(cols - 1):
+                a = row * cols + col
+                faces.append((a, a + 1, a + cols + 1, a + cols))
+        mesh = bpy.data.meshes.new(f'{spec["id"]}-loincloth-{side}-mesh')
+        mesh.from_pydata(verts, [], faces)
+        panel = bpy.data.objects.new(f'{spec["id"]}-loincloth-{side}', mesh)
+        bpy.context.scene.collection.objects.link(panel)
+        panel.data.materials.append(cloth)
+        shade_smooth(panel)
+        solidify = panel.modifiers.new("woven thickness", "SOLIDIFY")
+        solidify.thickness = 0.004 * body_height
+        panel["role"] = "garment-flow"
+        panel["flow"] = 0.085 if side == "front" else 0.065
+        panel["slot"] = "lower"
+        panel["variant"] = "loincloth"
+        bind_to_rig(panel, rig, single_bone="pelvis")
+
+
+def create_mantle(spec, body_height, cloth, rig):
+    """A short shoulder cape, curved around the back with a free scalloped hem."""
+    cols, rows = 17, 7
+    verts, faces = [], []
+    for row in range(rows):
+        t = row / (rows - 1)
+        z = (0.80 - 0.19 * t) * body_height
+        for col in range(cols):
+            u = col / (cols - 1)
+            angle = math.radians(25 + 130 * u)
+            radius = (0.205 + 0.035 * t) * body_height
+            scallop = math.sin(u * math.pi * 6) * 0.008 * body_height * t
+            verts.append((math.cos(angle) * radius, math.sin(angle) * radius,
+                          z + scallop))
+    for row in range(rows - 1):
+        for col in range(cols - 1):
+            a = row * cols + col
+            faces.append((a, a + 1, a + cols + 1, a + cols))
+    mesh = bpy.data.meshes.new(f'{spec["id"]}-mantle-mesh')
+    mesh.from_pydata(verts, [], faces)
+    mantle = bpy.data.objects.new(f'{spec["id"]}-shoulder-mantle', mesh)
+    bpy.context.scene.collection.objects.link(mantle)
+    mantle.data.materials.append(cloth)
+    shade_smooth(mantle)
+    solidify = mantle.modifiers.new("hide thickness", "SOLIDIFY")
+    solidify.thickness = 0.005 * body_height
+    mantle["role"] = "garment-flow"
+    mantle["flow"] = 0.075
+    mantle["slot"] = "mantle"
+    mantle["variant"] = "shoulder-mantle"
+    bind_to_rig(mantle, rig, single_bone="spine_03")
+
+
+def create_fur_boots(spec, body_height, cloth, rig):
+    """Soft calf wraps with generous clearance for deformation."""
+    for side, x in (("l", 0.105 * body_height), ("r", -0.105 * body_height)):
+        bpy.ops.mesh.primitive_cone_add(
+            vertices=48, radius1=0.065 * body_height, radius2=0.078 * body_height,
+            depth=0.19 * body_height,
+            location=(x, 0, 0.17 * body_height))
+        boot = bpy.context.object
+        boot.name = f'{spec["id"]}-fur-boot-{side}'
+        boot.data.materials.append(cloth)
+        shade_smooth(boot)
+        boot["role"] = "garment"
+        boot["slot"] = "feet"
+        boot["variant"] = "fur-boots"
+        bind_to_rig(boot, rig, single_bone=f"calf_{side}")
+
+def create_armor_bands(spec, body_height, hide, rig):
+    """Overlapping worked-hide plates that give armor a distinct silhouette."""
+    for index, z_ratio in enumerate((0.575, 0.625, 0.675, 0.725)):
+        for face, y in (("front", -0.145 * body_height), ("back", 0.13 * body_height)):
+            bpy.ops.mesh.primitive_cube_add(size=1, location=(0, y, z_ratio * body_height))
+            plate = bpy.context.object
+            plate.name = f'{spec["id"]}-armor-{face}-plate-{index + 1}'
+            plate.scale = (0.158 * body_height, 0.018 * body_height,
+                           0.032 * body_height)
+            bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+            plate.data.materials.append(hide)
+            bevel = plate.modifiers.new("soft hide plate edges", "BEVEL")
+            bevel.width = 0.009 * body_height
+            bevel.segments = 3
+            shade_smooth(plate)
+            plate["role"] = "garment"
+            plate["slot"] = "torso"
+            plate["variant"] = "hide-armor"
+            bone = "spine_01" if index < 2 else ("spine_02" if index == 2 else "spine_03")
+            bind_to_rig(plate, rig, single_bone=bone)
 
 
 def mask_skin_under_clothes(human, body_height):
@@ -384,6 +497,14 @@ def add_period_clothing(spec, human, rig):
     bsdf.inputs["Roughness"].default_value = 0.92
     bsdf.inputs["Sheen Weight"].default_value = 0.18
 
+    hide = bpy.data.materials.new(f'{spec["id"]}-smoked-hide')
+    hide.use_nodes = True
+    hide_bsdf = hide.node_tree.nodes.get("Principled BSDF")
+    hide_bsdf.inputs["Base Color"].default_value = tuple(
+        max(0.008, channel * 0.52) for channel in spec["cloth"][:3]) + (1.0,)
+    hide_bsdf.inputs["Roughness"].default_value = 0.72
+    hide_bsdf.inputs["Sheen Weight"].default_value = 0.06
+
     # Derive the torso wrap from the evaluated human surface. This preserves
     # the shoulder slope, chest, waist and back instead of putting a cylinder
     # around a person. The small normal offset prevents z-fighting.
@@ -459,9 +580,35 @@ def add_period_clothing(spec, human, rig):
     solidify.offset = 1.0
     shade_smooth(torso)
     torso["role"] = "garment"
+    torso["slot"] = "torso"
+    torso["variant"] = "tunic"
     bind_to_rig(torso, rig)
 
-    create_flowing_lower_wrap(spec, body_height, cloth, rig)
+    # A second fitted shell is authored as a separate equipment variant. It
+    # sits farther out and uses worked hide, so switching torso slots changes
+    # silhouette/material rather than merely recolouring the tunic.
+    armor = torso.copy()
+    armor.data = torso.data.copy()
+    armor.name = f'{spec["id"]}-layered-hide-armor'
+    bpy.context.scene.collection.objects.link(armor)
+    armor.data.materials.clear()
+    armor.data.materials.append(hide)
+    for polygon in armor.data.polygons:
+        polygon.material_index = 0
+    armor.scale.x = 1.045
+    armor.scale.y = 1.055
+    armor["role"] = "garment"
+    armor["slot"] = "torso"
+    armor["variant"] = "hide-armor"
+    create_armor_bands(spec, body_height, hide, rig)
+
+    create_flowing_lower_wrap(spec, body_height, cloth, rig, variant="wrap")
+    create_loincloth(spec, body_height, hide, rig)
+    create_flowing_lower_wrap(
+        spec, body_height, cloth, rig, variant="robe",
+        bottom_ratio=0.10, bottom_radius_ratio=0.20, flow=0.065)
+    create_mantle(spec, body_height, hide, rig)
+    create_fur_boots(spec, body_height, hide, rig)
 
     bpy.ops.mesh.primitive_torus_add(
         major_radius=0.158 * body_height, minor_radius=0.0105 * body_height,
@@ -538,6 +685,14 @@ def export_character(spec):
             added["role"] = role
 
     add_period_clothing(spec, human, rig)
+
+    # Keep the editable scene readable: render the default outfit while all
+    # alternative slot meshes remain present and exportable.
+    defaults = {"torso": "tunic", "lower": "wrap", "mantle": "none", "feet": "bare"}
+    for obj in bpy.context.scene.objects:
+        slot, variant = obj.get("slot"), obj.get("variant")
+        if slot and variant != defaults.get(slot):
+            obj.hide_render = True
 
     # Keep the editable MPFB scene as the source of truth for later sculpting.
     blend_path = os.path.join(SOURCE_OUT, f'{spec["id"]}.blend')

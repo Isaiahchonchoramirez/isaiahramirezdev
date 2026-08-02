@@ -13,6 +13,13 @@ def look_at(obj, point):
 
 args = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
 output = args[0] if args else "/tmp/mpfb-preview.png"
+selections = dict(arg.split("=", 1) for arg in args[1:] if "=" in arg)
+
+if selections:
+    for obj in bpy.context.scene.objects:
+        slot, variant = obj.get("slot"), obj.get("variant")
+        if slot and slot in selections:
+            obj.hide_render = variant != selections[slot]
 
 for obj in list(bpy.data.objects):
     if obj.type in {"CAMERA", "LIGHT"}:

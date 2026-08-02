@@ -66,6 +66,7 @@ export class RiggedHumanoid {
     this.bones = {};
     this.restPose = {};
     this.clothPieces = [];
+    this.equipmentPieces = [];
     this.bodyQuat = new THREE.Quaternion();
     this.phase = 0;
     this.windPhase = Math.random() * Math.PI * 2;
@@ -89,6 +90,7 @@ export class RiggedHumanoid {
       this.applyHeight();
       this.applySurface(appearance);
       this.applyProportions(appearance);
+      this.applyEquipment(appearance);
       return;
     }
 
@@ -99,6 +101,7 @@ export class RiggedHumanoid {
       this.model?.removeFromParent();
       this.bones = {};
       this.clothPieces = [];
+      this.equipmentPieces = [];
       this.model = cloneSkeleton(gltf.scene);
       this.model.name = `${modelId}-instance`;
       this.model.traverse((node) => {
@@ -127,6 +130,9 @@ export class RiggedHumanoid {
             flow: Number(node.userData.flow) || 0.04,
           });
         }
+        if (node.userData?.slot && node.userData?.variant) {
+          this.equipmentPieces.push(node);
+        }
       });
       // MPFB exports at metre scale. Measure the bind pose once, then match the
       // chosen height without distorting individual body regions; detailed
@@ -137,6 +143,7 @@ export class RiggedHumanoid {
       this.applyHeight();
       this.applySurface(this.appearance);
       this.applyProportions(this.appearance);
+      this.applyEquipment(this.appearance);
       this.root.add(this.model);
       this.fallback.root.visible = false;
       this.onModelChange?.(modelId);
@@ -178,6 +185,19 @@ export class RiggedHumanoid {
         tint(material.color, EYE_COLOURS[appearance.eyeColour] ?? EYE_COLOURS[0], 0.45);
       }
     });
+  }
+
+  /** Toggle authored equipment variants without reloading or cloning a body. */
+  applyEquipment(appearance) {
+    const selected = {
+      torso: appearance.torsoGarment ?? "tunic",
+      lower: appearance.lowerGarment ?? "wrap",
+      mantle: appearance.mantle ?? "none",
+      feet: appearance.footwear ?? "bare",
+    };
+    for (const piece of this.equipmentPieces) {
+      piece.visible = selected[piece.userData.slot] === piece.userData.variant;
+    }
   }
 
   /**
@@ -372,6 +392,7 @@ export class RiggedHumanoid {
     this.model = null;
     this.bones = {};
     this.clothPieces = [];
+    this.equipmentPieces = [];
     this.currentModel = null;
     this.sourceHeight = 0;
     this.fallback?.dispose();

@@ -5,6 +5,7 @@ import { CLASSES, CLASS_IDS } from "./classes.js";
 import {
   BODY_SLIDERS, HEAD_SLIDERS, SKIN_TONES, HAIR_COLOURS, EYE_COLOURS,
   HAIR_STYLES, HAIR_TEXTURES, FACIAL_HAIR, VOICES, MARKINGS, SCARS, BODY_BASES,
+  TORSO_GARMENTS, LOWER_GARMENTS, MANTLES, FOOTWEAR,
   defaultAppearance, randomAppearance, savePreset, loadPresets, deletePreset,
 } from "./appearance.js";
 import { buildStudioEnvironment } from "../render/environment.js";
@@ -212,6 +213,16 @@ export class CharacterCreator {
       <section class="cc-block">
         <h3>Eyes</h3>
         ${this.swatches("eyeColour", EYE_COLOURS)}
+      </section>
+
+      <section class="cc-block">
+        <h3>Clothing</h3>
+        <p class="cc-disclosure">Each piece is a separate rigged equipment slot.
+          Loose layers carry restrained wind and movement response.</p>
+        <label class="cc-row"><span>Torso</span>${this.options("torsoGarment", TORSO_GARMENTS)}</label>
+        <label class="cc-row"><span>Lower body</span>${this.options("lowerGarment", LOWER_GARMENTS)}</label>
+        <label class="cc-row"><span>Mantle</span>${this.options("mantle", MANTLES)}</label>
+        <label class="cc-row"><span>Feet</span>${this.options("footwear", FOOTWEAR)}</label>
       </section>
 
       <section class="cc-block cc-block--future">
