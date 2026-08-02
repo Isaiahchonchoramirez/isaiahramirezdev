@@ -4,7 +4,7 @@ import { CULTURES, CULTURE_IDS } from "./cultures.js";
 import { CLASSES, CLASS_IDS } from "./classes.js";
 import {
   BODY_SLIDERS, HEAD_SLIDERS, SKIN_TONES, HAIR_COLOURS, EYE_COLOURS,
-  HAIR_STYLES, HAIR_TEXTURES, FACIAL_HAIR, VOICES, MARKINGS, SCARS,
+  HAIR_STYLES, HAIR_TEXTURES, FACIAL_HAIR, VOICES, MARKINGS, SCARS, BODY_BASES,
   defaultAppearance, randomAppearance, savePreset, loadPresets, deletePreset,
 } from "./appearance.js";
 import { buildStudioEnvironment } from "../render/environment.js";
@@ -171,6 +171,7 @@ export class CharacterCreator {
     this.$("ccControls").innerHTML = `
       <section class="cc-block">
         <h3>Frame</h3>
+        <label class="cc-row"><span>Human base</span>${this.options("bodyBase", BODY_BASES)}</label>
         ${bodyLive.map((s) => this.slider(s)).join("")}
       </section>
 

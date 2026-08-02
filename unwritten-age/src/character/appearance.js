@@ -67,6 +67,12 @@ export const VOICES = [
   { id: "high", name: "High" },
 ];
 
+export const BODY_BASES = [
+  { id: "veyr-hunter", name: "Veyr hunter" },
+  { id: "aurean-keeper", name: "Aurean keeper" },
+  { id: "ember-elder", name: "Ember elder" },
+];
+
 export const MARKINGS = [
   { id: "none", name: "None" },
   { id: "ochre-bands", name: "Ochre bands", colour: "#b5502f" },
@@ -134,6 +140,7 @@ export function defaultAppearance() {
     culture: "veyr",
     archetype: "huntmaster",
     voice: "low",
+    bodyBase: "veyr-hunter",
 
     // body — all drive the mesh
     height: 1.74,
