@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { groundY, WORLD_SIZE } from "./world.js";
-import { Humanoid } from "./character/humanoid.js";
+import { RiggedHumanoid } from "./character/rigged-humanoid.js";
 
 /**
  * Player controller and third-person camera.
@@ -27,7 +27,7 @@ export class Player {
 
     this.mesh = new THREE.Group();
 
-    this.avatar = new Humanoid(appearance);
+    this.avatar = new RiggedHumanoid(appearance);
     this.mesh.add(this.avatar.root);
 
     // Faint divine presence. Kept low — this is a mortal avatar, and a blazing
