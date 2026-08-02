@@ -36,14 +36,14 @@ export const EYE_COLOURS = [
 
 export const HAIR_STYLES = [
   { id: "cropped", name: "Cropped" },
-  { id: "bound-tail", name: "Bound tail" },
   { id: "long-braid", name: "Long braid" },
-  { id: "loose-waves", name: "Loose waves" },
-  { id: "shaved-sides", name: "Shaved sides" },
-  { id: "matted-locks", name: "Matted locks" },
-  { id: "fur-lined-braids", name: "Fur-lined braids" },
   { id: "coiled-crown", name: "Coiled crown" },
-  { id: "bare", name: "Bare" },
+];
+
+export const BODY_SEXES = [
+  { id: "male", name: "Male body" },
+  { id: "female", name: "Female body" },
+  { id: "androgynous", name: "Androgynous body" },
 ];
 
 export const HAIR_TEXTURES = [
@@ -140,17 +140,17 @@ export const BODY_SLIDERS = [
 
 export const HEAD_SLIDERS = [
   { key: "headSize", name: "Head size", min: 0, max: 1, step: 0.01, affects: "body" },
-  { key: "headWidth", name: "Head width", min: 0, max: 1, step: 0.01, affects: "deferred" },
-  { key: "jawWidth", name: "Jaw width", min: 0, max: 1, step: 0.01, affects: "deferred" },
-  { key: "chinLength", name: "Chin length", min: 0, max: 1, step: 0.01, affects: "deferred" },
+  { key: "headWidth", name: "Head width", min: 0, max: 1, step: 0.01, affects: "body" },
+  { key: "jawWidth", name: "Jaw width", min: 0, max: 1, step: 0.01, affects: "body" },
+  { key: "chinLength", name: "Chin length", min: 0, max: 1, step: 0.01, affects: "body" },
   { key: "browRidge", name: "Brow ridge", min: 0, max: 1, step: 0.01, affects: "deferred" },
-  { key: "noseSize", name: "Nose", min: 0, max: 1, step: 0.01, affects: "deferred" },
-  { key: "cheekbones", name: "Cheekbones", min: 0, max: 1, step: 0.01, affects: "deferred" },
+  { key: "noseSize", name: "Nose", min: 0, max: 1, step: 0.01, affects: "body" },
+  { key: "cheekbones", name: "Cheekbones", min: 0, max: 1, step: 0.01, affects: "body" },
   { key: "earSize", name: "Ears", min: 0, max: 1, step: 0.01, affects: "deferred" },
   { key: "eyeSpacing", name: "Eye spacing", min: 0, max: 1, step: 0.01, affects: "deferred" },
   { key: "eyeHeight", name: "Eye position", min: 0, max: 1, step: 0.01, affects: "deferred" },
   { key: "eyeDepth", name: "Eye depth", min: 0, max: 1, step: 0.01, affects: "deferred" },
-  { key: "mouthWidth", name: "Mouth width", min: 0, max: 1, step: 0.01, affects: "deferred" },
+  { key: "mouthWidth", name: "Mouth width", min: 0, max: 1, step: 0.01, affects: "body" },
   { key: "lipFullness", name: "Lip fullness", min: 0, max: 1, step: 0.01, affects: "deferred" },
   { key: "noseBridge", name: "Nose bridge", min: 0, max: 1, step: 0.01, affects: "deferred" },
   { key: "noseHeight", name: "Nose position", min: 0, max: 1, step: 0.01, affects: "deferred" },
@@ -167,6 +167,7 @@ export function defaultAppearance() {
     archetype: "huntmaster",
     voice: "low",
     bodyBase: "veyr-hunter",
+    bodySex: "male",
 
     // body — all drive the mesh
     height: 1.74,
@@ -206,7 +207,7 @@ export function defaultAppearance() {
 
     // surface
     skinTone: 4,
-    hairStyle: "bound-tail",
+    hairStyle: "cropped",
     hairTexture: "straight",
     hairLength: 0.5,
     hairColour: 2,
@@ -239,7 +240,7 @@ export function randomAppearance(cultureId, cultures) {
 
   base.culture = cultureId;
   base.skinTone = pick(culture.skinBias);
-  base.hairStyle = pick(culture.hairBias);
+  base.hairStyle = pick(HAIR_STYLES).id;
   base.hairTexture = pick(HAIR_TEXTURES).id;
   base.hairColour = rand(HAIR_COLOURS.length);
   base.hairLength = +Math.random().toFixed(2);
