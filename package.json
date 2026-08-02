@@ -15,7 +15,8 @@
     "preview:github": "GITHUB_PAGES=true vite build && vite preview",
     "predeploy": "npm run build:github",
     "deploy": "gh-pages -d dist --add",
-    "dataset": "node server/dataset.mjs"
+    "dataset": "node server/dataset.mjs",
+    "validate:wardrobe": "node tools/validate_wardrobe.mjs && node tools/test_wardrobe_runtime.mjs"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",

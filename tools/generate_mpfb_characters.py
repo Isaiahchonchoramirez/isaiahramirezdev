@@ -213,74 +213,81 @@ def create_loincloth(spec, body_height, cloth, rig):
         bind_to_rig(panel, rig, single_bone="pelvis")
 
 
-def create_mantle(spec, body_height, cloth, rig):
-    """A short shoulder cape, curved around the back with a free scalloped hem."""
-    cols, rows = 17, 7
-    verts, faces = [], []
-    for row in range(rows):
-        t = row / (rows - 1)
-        z = (0.80 - 0.19 * t) * body_height
-        for col in range(cols):
-            u = col / (cols - 1)
-            angle = math.radians(25 + 130 * u)
-            radius = (0.205 + 0.035 * t) * body_height
-            scallop = math.sin(u * math.pi * 6) * 0.008 * body_height * t
-            verts.append((math.cos(angle) * radius, math.sin(angle) * radius,
-                          z + scallop))
-    for row in range(rows - 1):
-        for col in range(cols - 1):
-            a = row * cols + col
-            faces.append((a, a + 1, a + cols + 1, a + cols))
-    mesh = bpy.data.meshes.new(f'{spec["id"]}-mantle-mesh')
-    mesh.from_pydata(verts, [], faces)
+def create_mantle(spec, human, body_height, cloth, rig):
+    """A fitted shoulder hide cut directly from the character's upper back."""
+    depsgraph = bpy.context.evaluated_depsgraph_get()
+    mesh = bpy.data.meshes.new_from_object(human.evaluated_get(depsgraph))
     mantle = bpy.data.objects.new(f'{spec["id"]}-shoulder-mantle', mesh)
     bpy.context.scene.collection.objects.link(mantle)
+    for group in human.vertex_groups:
+        mantle.vertex_groups.new(name=group.name)
+
+    arm_prefixes = ("upperarm", "lowerarm", "hand", "thumb", "index", "middle", "ring", "pinky")
+    arm_groups = {group.index for group in mantle.vertex_groups if group.name.startswith(arm_prefixes)}
+    on_arm = [sum(g.weight for g in vert.groups if g.group in arm_groups) > 0.55 for vert in mesh.vertices]
+
+    bm = bmesh.new()
+    bm.from_mesh(mesh)
+    bm.verts.ensure_lookup_table()
+    low, high = 0.655 * body_height, 0.815 * body_height
+    remove = [vert for vert in bm.verts if on_arm[vert.index]
+              or not (low <= vert.co.z <= high)
+              or vert.co.y < 0.015 * body_height
+              or abs(vert.co.x) > 0.235 * body_height]
+    bmesh.ops.delete(bm, geom=remove, context="VERTS")
+    bm.normal_update()
+    for vert in bm.verts:
+        # A real layer of hide resting on the back, not a remote billboard.
+        vert.co += vert.normal * (0.010 * body_height)
+    bm.to_mesh(mesh)
+    bm.free()
+
+    mesh.materials.clear()
     mantle.data.materials.append(cloth)
+    for polygon in mantle.data.polygons:
+        polygon.material_index = 0
     shade_smooth(mantle)
     solidify = mantle.modifiers.new("hide thickness", "SOLIDIFY")
     solidify.thickness = 0.005 * body_height
     mantle["role"] = "garment-flow"
-    mantle["flow"] = 0.075
+    mantle["flow"] = 0.035
+    mantle["cloth_anchor"] = 0.28
     mantle["slot"] = "mantle"
     mantle["variant"] = "shoulder-mantle"
-    bind_to_rig(mantle, rig, single_bone="spine_03")
-
-    # A broken fringe gives the hide a readable fur edge even after glTF has
-    # flattened Blender's procedural shading. These are sparse guard-hair
-    # clumps, not a costly particle system.
-    for index in range(15):
-        u = index / 14
-        angle = math.radians(28 + 124 * u)
-        radius = 0.242 * body_height
-        z = (0.605 + math.sin(u * math.pi * 6) * 0.008) * body_height
-        bpy.ops.mesh.primitive_cone_add(
-            vertices=5, radius1=0.007 * body_height, radius2=0,
-            depth=(0.025 + 0.012 * ((index * 7) % 5) / 4) * body_height,
-            location=(math.cos(angle) * radius, math.sin(angle) * radius, z))
-        tuft = bpy.context.object
-        tuft.name = f'{spec["id"]}-mantle-fur-tuft-{index + 1}'
-        tuft.data.materials.append(cloth)
-        tuft["role"] = "garment"
-        tuft["slot"] = "mantle"
-        tuft["variant"] = "shoulder-mantle"
-        bind_to_rig(tuft, rig, single_bone="spine_03")
-
+    bind_to_rig(mantle, rig)
 
 def create_fur_boots(spec, body_height, cloth, rig):
-    """Soft calf wraps with generous clearance for deformation."""
+    """Close tapered hide gaiters with overlapping binding bands."""
     for side, x in (("l", 0.105 * body_height), ("r", -0.105 * body_height)):
         bpy.ops.mesh.primitive_cone_add(
-            vertices=48, radius1=0.065 * body_height, radius2=0.078 * body_height,
-            depth=0.19 * body_height,
-            location=(x, 0, 0.17 * body_height))
-        boot = bpy.context.object
-        boot.name = f'{spec["id"]}-fur-boot-{side}'
-        boot.data.materials.append(cloth)
-        shade_smooth(boot)
-        boot["role"] = "garment"
-        boot["slot"] = "feet"
-        boot["variant"] = "fur-boots"
-        bind_to_rig(boot, rig, single_bone=f"calf_{side}")
+            vertices=40, radius1=0.042 * body_height, radius2=0.052 * body_height,
+            depth=0.14 * body_height, location=(x, 0, 0.17 * body_height))
+        gaiter = bpy.context.object
+        gaiter.name = f'{spec["id"]}-calf-gaiter-{side}'
+        gaiter.scale.y = 0.84
+        gaiter.data.materials.append(cloth)
+        shade_smooth(gaiter)
+        gaiter["role"] = "garment"
+        gaiter["slot"] = "feet"
+        gaiter["variant"] = "fur-boots"
+        bind_to_rig(gaiter, rig, single_bone=f"calf_{side}")
+
+        for band, z_ratio in enumerate((0.125, 0.170, 0.215)):
+            bpy.ops.mesh.primitive_torus_add(
+                major_radius=(0.045 + band * 0.004) * body_height,
+                minor_radius=0.006 * body_height,
+                major_segments=32, minor_segments=8,
+                location=(x, 0, z_ratio * body_height))
+            wrap = bpy.context.object
+            wrap.name = f'{spec["id"]}-calf-wrap-{side}-{band + 1}'
+            wrap.scale.y = 0.82
+            wrap.rotation_euler.x = math.radians(-6 if band % 2 else 6)
+            wrap.data.materials.append(cloth)
+            shade_smooth(wrap)
+            wrap["role"] = "garment"
+            wrap["slot"] = "feet"
+            wrap["variant"] = "fur-boots"
+            bind_to_rig(wrap, rig, single_bone=f"calf_{side}")
 
 def create_armor_bands(spec, body_height, hide, rig):
     """Overlapping worked-hide plates that give armor a distinct silhouette."""
@@ -670,11 +677,10 @@ def add_period_clothing(spec, human, rig):
     create_armor_bands(spec, body_height, hide, rig)
 
     create_flowing_lower_wrap(spec, body_height, cloth, rig, variant="wrap")
-    create_loincloth(spec, body_height, hide, rig)
     create_flowing_lower_wrap(
         spec, body_height, cloth, rig, variant="robe",
         bottom_ratio=0.10, bottom_radius_ratio=0.20, flow=0.065)
-    create_mantle(spec, body_height, hide, rig)
+    create_mantle(spec, human, body_height, hide, rig)
     create_fur_boots(spec, body_height, hide, rig)
 
     bpy.ops.mesh.primitive_torus_add(
@@ -690,6 +696,8 @@ def add_period_clothing(spec, human, rig):
     belt.scale.y = 0.76
     shade_smooth(belt)
     belt["role"] = "garment"
+    belt["slot"] = "waist"
+    belt["variant"] = "fibre-belt"
     bind_to_rig(belt, rig, single_bone="pelvis")
 
 
@@ -739,11 +747,6 @@ def export_character(spec):
         ("teeth", "teeth_base.mhclo", "Teeth", "mouth", None),
         ("tongue", "tongue01.mhclo", "Tongue", "mouth", None),
         ("hair", "short01.mhclo", "Hair", "hair", "close-crop"),
-        ("hair", "short02.mhclo", "Hair", "hair", "short-swept"),
-        ("hair", "short03.mhclo", "Hair", "hair", "short-tousled"),
-        ("hair", "short04.mhclo", "Hair", "hair", "cropped"),
-        ("hair", "bob01.mhclo", "Hair", "hair", "bob"),
-        ("hair", "bob02.mhclo", "Hair", "hair", "layered-bob"),
         ("hair", "ponytail01.mhclo", "Hair", "hair", "ponytail"),
         ("hair", "braid01.mhclo", "Hair", "hair", "long-braid"),
         ("hair", "afro01.mhclo", "Hair", "hair", "coiled-crown"),
@@ -769,7 +772,7 @@ def export_character(spec):
     # Keep the editable scene readable: render the default outfit while all
     # alternative slot meshes remain present and exportable.
     defaults = {"torso": "tunic", "lower": "wrap", "mantle": "none",
-                "feet": "bare", "hair": "cropped"}
+                "feet": "bare", "waist": "fibre-belt", "hair": "close-crop"}
     for obj in bpy.context.scene.objects:
         slot, variant = obj.get("slot"), obj.get("variant")
         if slot and variant != defaults.get(slot):
@@ -779,8 +782,9 @@ def export_character(spec):
     blend_path = os.path.join(SOURCE_OUT, f'{spec["id"]}.blend')
     bpy.ops.wm.save_as_mainfile(filepath=blend_path)
 
-    # Body masking belongs to the optimized game export, not the sculpt source.
-    mask_skin_under_clothes(human, max(v.co.z for v in human.data.vertices))
+    # Export the complete body. Runtime wardrobe masking rebuilds an
+    # instance-local triangle index from active catalog items, so removing a
+    # garment restores skin without mutating the cached/original geometry.
 
     for obj in list(bpy.context.scene.objects):
         if obj.type == "MESH":

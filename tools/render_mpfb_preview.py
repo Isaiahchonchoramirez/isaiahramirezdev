@@ -14,6 +14,7 @@ def look_at(obj, point):
 args = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
 output = args[0] if args else "/tmp/mpfb-preview.png"
 selections = dict(arg.split("=", 1) for arg in args[1:] if "=" in arg)
+view = selections.pop("view", "front")
 
 if selections:
     for obj in bpy.context.scene.objects:
@@ -37,7 +38,14 @@ world.color = (0.025, 0.022, 0.02)
 camera_data = bpy.data.cameras.new("Preview Camera")
 camera = bpy.data.objects.new("Preview Camera", camera_data)
 bpy.context.scene.collection.objects.link(camera)
-camera.location = (0, -4.1, 1.02)
+camera_positions = {
+    "front": (0, -4.1, 1.02),
+    "back": (0, 4.1, 1.02),
+    "left": (-4.1, 0, 1.02),
+    "right": (4.1, 0, 1.02),
+    "three-quarter": (2.85, -2.85, 1.12),
+}
+camera.location = camera_positions.get(view, camera_positions["front"])
 camera.data.lens = 58
 look_at(camera, (0, 0, 0.88))
 bpy.context.scene.camera = camera

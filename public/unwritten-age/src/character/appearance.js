@@ -1,3 +1,5 @@
+import { HAIR_OPTIONS, normaliseWardrobeAppearance } from "./wardrobe-catalog.js";
+
 /**
  * The appearance data model.
  *
@@ -34,19 +36,7 @@ export const EYE_COLOURS = [
   "#3f5f7a", "#5a6b8a", "#2e2a28",
 ];
 
-export const HAIR_STYLES = [
-  { id: "bald", name: "Bald / shaved" },
-  { id: "close-crop", name: "Close crop" },
-  { id: "cropped", name: "Cropped" },
-  { id: "short-swept", name: "Short swept" },
-  { id: "short-tousled", name: "Short tousled" },
-  { id: "bob", name: "Jaw-length bob" },
-  { id: "layered-bob", name: "Layered bob" },
-  { id: "ponytail", name: "Ponytail" },
-  { id: "long-braid", name: "Long braid" },
-  { id: "coiled-crown", name: "Coiled crown" },
-  { id: "long-loose", name: "Long loose" },
-];
+export const HAIR_STYLES = HAIR_OPTIONS;
 
 export const BODY_SEXES = [
   { id: "male", name: "Male body" },
@@ -86,13 +76,14 @@ export const BODY_BASES = [
 ];
 
 export const TORSO_GARMENTS = [
+  { id: "none", name: "None" },
   { id: "tunic", name: "Woven tunic" },
   { id: "hide-armor", name: "Layered hide armor" },
 ];
 
 export const LOWER_GARMENTS = [
+  { id: "none", name: "None" },
   { id: "wrap", name: "Pleated wrap" },
-  { id: "loincloth", name: "Split loincloth" },
   { id: "robe", name: "Long ritual robe" },
 ];
 
@@ -215,7 +206,8 @@ export function defaultAppearance() {
 
     // surface
     skinTone: 4,
-    hairStyle: "cropped",
+    hairStyle: "hair_close_crop",
+    outfitPreset: "veyr_hunter",
     hairTexture: "straight",
     hairLength: 0.5,
     hairColour: 2,
@@ -278,7 +270,9 @@ export function savePreset(appearance) {
 
 export function loadPresets() {
   try {
-    return JSON.parse(localStorage.getItem(STORE_KEY) || "{}");
+    const saved = JSON.parse(localStorage.getItem(STORE_KEY) || "{}");
+    return Object.fromEntries(Object.entries(saved)
+      .map(([name, appearance]) => [name, normaliseWardrobeAppearance(appearance)]));
   } catch {
     return {};
   }
@@ -302,7 +296,7 @@ export function saveActive(appearance) {
 export function loadActive() {
   try {
     const raw = localStorage.getItem("unwritten-age:active");
-    return raw ? { ...defaultAppearance(), ...JSON.parse(raw) } : null;
+    return raw ? normaliseWardrobeAppearance({ ...defaultAppearance(), ...JSON.parse(raw) }) : null;
   } catch {
     return null;
   }
