@@ -8,6 +8,10 @@ import {
   defaultAppearance, randomAppearance, savePreset, loadPresets, deletePreset,
 } from "./appearance.js";
 import { buildStudioEnvironment } from "../render/environment.js";
+import {
+  applyGmRules, appearanceFromGmDefaults, clearGmRules,
+  loadGmRules, normaliseGmRules, playerSliders, saveGmRules,
+} from "./gm-rules.js";
 
 /**
  * Character creation.
@@ -26,7 +30,8 @@ export class CharacterCreator {
   constructor(container, onConfirm) {
     this.container = container;
     this.onConfirm = onConfirm;
-    this.appearance = defaultAppearance();
+    this.gmRules = loadGmRules();
+    this.appearance = appearanceFromGmDefaults(defaultAppearance(), this.gmRules);
     this.orbit = 0.0;
     this.camDistance = 3.0;
     this.camHeight = 0.62;   // 0..1 up the body
@@ -86,6 +91,7 @@ export class CharacterCreator {
           <button type="button" id="ccReset">Reset</button>
           <button type="button" id="ccSave">Save preset</button>
           <select id="ccPresets"><option value="">Load preset…</option></select>
+          <button type="button" id="ccGm" class="cc-gm" hidden>Game Master</button>
           <button type="button" id="ccConfirm" class="cc-primary">Enter the valley</button>
         </div>
         <p class="cc-note" id="ccNote"></p>
@@ -156,10 +162,11 @@ export class CharacterCreator {
   }
 
   buildControls() {
-    const bodyLive = BODY_SLIDERS.filter((s) => s.affects !== "deferred");
-    const headLive = HEAD_SLIDERS.filter((s) => s.affects !== "deferred");
+    const bodyLive = playerSliders(BODY_SLIDERS, this.gmRules).filter((s) => s.affects !== "deferred");
+    const headLive = playerSliders(HEAD_SLIDERS, this.gmRules).filter((s) => s.affects !== "deferred");
     // Anything the builder cannot honour would land here and render disabled.
-    const deferred = [...BODY_SLIDERS, ...HEAD_SLIDERS].filter((s) => s.affects === "deferred");
+    const deferred = playerSliders([...BODY_SLIDERS, ...HEAD_SLIDERS], this.gmRules)
+      .filter((s) => s.affects === "deferred");
 
     this.$("ccControls").innerHTML = `
       <section class="cc-block">
@@ -256,7 +263,7 @@ export class CharacterCreator {
     this.$("ccRandom").addEventListener("click", () => {
       const name = this.appearance.name;
       const archetype = this.appearance.archetype;
-      this.appearance = randomAppearance(this.appearance.culture, CULTURES);
+      this.appearance = applyGmRules(randomAppearance(this.appearance.culture, CULTURES), this.gmRules);
       this.appearance.name = name;
       this.appearance.archetype = archetype;
       this.buildControls();
@@ -265,7 +272,7 @@ export class CharacterCreator {
 
     this.$("ccReset").addEventListener("click", () => {
       const { culture, archetype, name } = this.appearance;
-      this.appearance = { ...defaultAppearance(), culture, archetype, name };
+      this.appearance = appearanceFromGmDefaults({ ...defaultAppearance(), culture, archetype, name }, this.gmRules);
       this.buildControls();
       this.rebuild();
     });
@@ -285,7 +292,7 @@ export class CharacterCreator {
       const all = loadPresets();
       const preset = all[e.target.value];
       if (!preset) return;
-      this.appearance = { ...defaultAppearance(), ...preset };
+      this.appearance = applyGmRules({ ...defaultAppearance(), ...preset }, this.gmRules);
       this.$("ccName").value = this.appearance.name ?? "";
       this.buildControls();
       this.rebuild();
@@ -296,8 +303,13 @@ export class CharacterCreator {
       if (!this.appearance.name?.trim()) {
         this.appearance.name = this.appearance.culture === "aurean" ? "Nameless" : "Unspoken";
       }
-      this.onConfirm(this.appearance);
+      this.onConfirm(applyGmRules(this.appearance, this.gmRules));
     });
+
+    const gmButton = this.$("ccGm");
+    const gmRequested = new URLSearchParams(location.search).get("gm") === "1";
+    gmButton.hidden = !gmRequested;
+    gmButton.addEventListener("click", () => this.openGmStudio());
 
     this.refreshPresets();
   }
@@ -315,6 +327,97 @@ export class CharacterCreator {
     el.textContent = text;
     clearTimeout(this._noteTimer);
     this._noteTimer = setTimeout(() => { el.textContent = ""; }, 3200);
+  }
+
+  openGmStudio() {
+    const existing = this.container.querySelector(".gm-studio");
+    existing?.remove();
+    const studio = document.createElement("div");
+    studio.className = "gm-studio";
+    studio.innerHTML = `
+      <div class="gm-panel" role="dialog" aria-modal="true" aria-labelledby="gmTitle">
+        <header><div><p>Private authoring surface</p><h2 id="gmTitle">Game Master Studio</h2></div>
+          <button type="button" data-gm-close aria-label="Close">×</button></header>
+        <div class="gm-copy">Set the body players begin with, the safe extremes they can reach, and which controls they are allowed to touch. Changes preview immediately and stay only in this browser until exported.</div>
+        <label class="gm-title-field">Ruleset name <input data-gm-title maxlength="48"></label>
+        <div class="gm-rule-head"><span>Parameter</span><span>Player</span><span>Minimum</span><span>Default</span><span>Maximum</span></div>
+        <div class="gm-rules"></div>
+        <footer>
+          <button type="button" data-gm-reset>Factory rules</button>
+          <button type="button" data-gm-import>Import JSON</button>
+          <button type="button" data-gm-export>Export JSON</button>
+          <button type="button" data-gm-save class="cc-primary">Save rules</button>
+          <input type="file" data-gm-file accept="application/json,.json" hidden>
+          <span data-gm-note></span>
+        </footer>
+      </div>`;
+    this.container.appendChild(studio);
+    studio.querySelector("[data-gm-title]").value = this.gmRules.title;
+
+    const definitions = [...BODY_SLIDERS, ...HEAD_SLIDERS];
+    const rows = studio.querySelector(".gm-rules");
+    rows.innerHTML = definitions.map((def) => {
+      const rule = this.gmRules.controls[def.key];
+      return `<label class="gm-rule" data-gm-key="${def.key}">
+        <span><strong>${def.name}</strong><small>${def.key}</small></span>
+        <input type="checkbox" data-field="playerEditable" ${rule.playerEditable ? "checked" : ""} aria-label="Players may edit ${def.name}">
+        <input type="number" data-field="min" value="${rule.min}" step="${def.step}" aria-label="${def.name} minimum">
+        <input type="number" data-field="default" value="${rule.default}" step="${def.step}" aria-label="${def.name} default">
+        <input type="number" data-field="max" value="${rule.max}" step="${def.step}" aria-label="${def.name} maximum">
+      </label>`;
+    }).join("");
+
+    const readRules = () => {
+      const candidate = { version: 1, title: studio.querySelector("[data-gm-title]").value, controls: {} };
+      rows.querySelectorAll("[data-gm-key]").forEach((row) => {
+        candidate.controls[row.dataset.gmKey] = {
+          playerEditable: row.querySelector('[data-field="playerEditable"]').checked,
+          min: Number(row.querySelector('[data-field="min"]').value),
+          default: Number(row.querySelector('[data-field="default"]').value),
+          max: Number(row.querySelector('[data-field="max"]').value),
+        };
+      });
+      return normaliseGmRules(candidate);
+    };
+    const preview = () => {
+      this.gmRules = readRules();
+      this.appearance = appearanceFromGmDefaults(this.appearance, this.gmRules);
+      this.rebuildBodyOnly();
+    };
+    let previewTimer;
+    rows.addEventListener("input", () => {
+      clearTimeout(previewTimer);
+      previewTimer = setTimeout(preview, 80);
+    });
+    studio.querySelector("[data-gm-close]").addEventListener("click", () => {
+      this.gmRules = loadGmRules();
+      this.appearance = applyGmRules(this.appearance, this.gmRules);
+      this.buildControls(); this.rebuild(); studio.remove();
+    });
+    studio.querySelector("[data-gm-save]").addEventListener("click", () => {
+      this.gmRules = saveGmRules(readRules());
+      this.appearance = appearanceFromGmDefaults(this.appearance, this.gmRules);
+      this.buildControls(); this.rebuild();
+      studio.querySelector("[data-gm-note]").textContent = "Saved locally";
+    });
+    studio.querySelector("[data-gm-reset]").addEventListener("click", () => {
+      this.gmRules = clearGmRules(); studio.remove(); this.openGmStudio(); this.rebuildBodyOnly();
+    });
+    studio.querySelector("[data-gm-export]").addEventListener("click", () => {
+      const rules = readRules();
+      const blob = new Blob([JSON.stringify(rules, null, 2)], { type: "application/json" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob); link.download = "unwritten-age-gm-rules.json"; link.click();
+      setTimeout(() => URL.revokeObjectURL(link.href), 0);
+    });
+    const file = studio.querySelector("[data-gm-file]");
+    studio.querySelector("[data-gm-import]").addEventListener("click", () => file.click());
+    file.addEventListener("change", async () => {
+      try {
+        this.gmRules = normaliseGmRules(JSON.parse(await file.files[0].text()));
+        studio.remove(); this.openGmStudio(); this.rebuildBodyOnly();
+      } catch { studio.querySelector("[data-gm-note]").textContent = "That JSON is not a valid ruleset"; }
+    });
   }
 
   bindStage() {

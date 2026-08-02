@@ -535,7 +535,37 @@ input[type=range]::-moz-range-thumb {
   background: linear-gradient(180deg, #f0cf8a, #c9922f);
 }
 .cc-actions .cc-primary:hover { background: linear-gradient(180deg, #ffe3a8, #d9a441); }
+.cc-actions .cc-gm { border-color: rgba(190,112,255,.55); color: #d7b4f7; }
 .cc-note { width: 100%; font-size: .68rem; color: var(--bronze); min-height: 1em; }
+
+/* Game Master Studio is deliberately absent unless the owner opens ?gm=1. */
+.gm-studio { position: fixed; inset: 0; z-index: 90; display: grid; place-items: center; padding: 1rem; background: rgba(3,2,2,.9); }
+.gm-panel { width: min(72rem, 100%); max-height: calc(100vh - 2rem); display: flex; flex-direction: column; background: #11100e; border: 1px solid rgba(190,112,255,.42); box-shadow: 0 1.5rem 5rem #000; }
+.gm-panel > header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.2rem; border-bottom: 1px solid var(--edge); }
+.gm-panel > header p { color: #b98de0; font-size: .55rem; letter-spacing: .2em; text-transform: uppercase; }
+.gm-panel > header h2 { margin-top: .2rem; font-weight: 400; font-size: 1.35rem; }
+.gm-panel > header button { border: 0; background: none; color: var(--ink); font-size: 1.8rem; cursor: pointer; }
+.gm-copy { padding: .8rem 1.2rem; color: #9f9789; font-size: .72rem; line-height: 1.55; border-bottom: 1px solid var(--edge); }
+.gm-title-field { display: flex; gap: .7rem; align-items: center; padding: .7rem 1.2rem; color: var(--dim); font-size: .7rem; }
+.gm-title-field input, .gm-rule input[type=number] { color: var(--ink); background: #090807; border: 1px solid var(--edge); padding: .35rem .45rem; font: inherit; }
+.gm-rule-head, .gm-rule { display: grid; grid-template-columns: minmax(10rem, 1fr) 4rem 7rem 7rem 7rem; align-items: center; gap: .65rem; padding: .45rem 1.2rem; }
+.gm-rule-head { color: #756e62; font-size: .55rem; letter-spacing: .14em; text-transform: uppercase; border-block: 1px solid var(--edge); }
+.gm-rules { overflow-y: auto; min-height: 0; }
+.gm-rule { border-bottom: 1px solid rgba(214,190,140,.06); }
+.gm-rule:hover { background: rgba(190,112,255,.035); }
+.gm-rule strong { display: block; color: #bbb2a3; font-size: .73rem; font-weight: 400; }
+.gm-rule small { display: block; color: #625c52; font-size: .58rem; }
+.gm-rule input[type=number] { width: 100%; font-size: .7rem; }
+.gm-rule input[type=checkbox] { accent-color: #b970ee; }
+.gm-panel > footer { display: flex; gap: .55rem; align-items: center; flex-wrap: wrap; padding: .8rem 1.2rem; border-top: 1px solid var(--edge); }
+.gm-panel > footer button { padding: .5rem .8rem; color: var(--ink); background: rgba(255,255,255,.03); border: 1px solid var(--edge); font: .65rem var(--font); cursor: pointer; }
+.gm-panel > footer .cc-primary { color: #160d1d; border-color: transparent; background: linear-gradient(#d8b0f5,#a567d2); }
+.gm-panel > footer span { margin-left: auto; color: #b98de0; font-size: .68rem; }
+
+@media (max-width: 700px) {
+  .gm-rule-head, .gm-rule { grid-template-columns: minmax(7rem, 1fr) 3.2rem repeat(3, 4.3rem); gap: .35rem; padding-inline: .65rem; }
+  .gm-panel { max-height: 100vh; }
+}
 
 @media (max-width: 1180px) {
   .cc-grid { grid-template-columns: 1fr; grid-template-rows: auto 22rem auto; }
