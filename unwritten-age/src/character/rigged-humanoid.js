@@ -3,6 +3,7 @@ import { GLTFLoader } from "../../vendor/GLTFLoader.js";
 import { clone as cloneSkeleton } from "../../vendor/SkeletonUtils.js";
 import { Humanoid } from "./humanoid.js";
 import { EYE_COLOURS, HAIR_COLOURS, SKIN_TONES } from "./appearance.js";
+import { WardrobeController } from "./wardrobe-controller.js";
 
 const MODEL_FILES = {
   "veyr-hunter": "veyr-hunter.glb",
@@ -12,7 +13,7 @@ const MODEL_FILES = {
 // GitHub Pages gives immutable-looking asset URLs a browser cache lifetime.
 // Bump this whenever the generated GLBs change so body/sex switches cannot
 // silently reuse an older character file from a previous deployment.
-const MODEL_REVISION = "2026-08-02-hair-library";
+const MODEL_REVISION = "2026-08-02-modular-wardrobe-v1";
 
 const cache = new Map();
 const loader = new GLTFLoader();
@@ -73,6 +74,8 @@ export class RiggedHumanoid {
     this.restPose = {};
     this.clothPieces = [];
     this.equipmentPieces = [];
+    this.wardrobe = null;
+    this.loadVersion = 0;
     this.bodyQuat = new THREE.Quaternion();
     this.phase = 0;
     this.windPhase = Math.random() * Math.PI * 2;
@@ -104,13 +107,14 @@ export class RiggedHumanoid {
     }
 
     this.currentModel = modelId;
-    const requestId = modelId;
+    const requestId = ++this.loadVersion;
     loadModel(modelId).then((gltf) => {
-      if (requestId !== this.currentModel) return;
+      if (requestId !== this.loadVersion || modelId !== this.currentModel) return;
       this.model?.removeFromParent();
       this.bones = {};
       this.clothPieces = [];
       this.equipmentPieces = [];
+      this.wardrobe = null;
       this.model = cloneSkeleton(gltf.scene);
       this.model.name = `${modelId}-instance`;
       this.model.traverse((node) => {
@@ -124,6 +128,7 @@ export class RiggedHumanoid {
             ? node.material.map((m) => m.clone())
             : node.material.clone();
           (Array.isArray(node.material) ? node.material : [node.material]).forEach(forceOpaque);
+          if (node.userData?.role === "skin") node.geometry = node.geometry.clone();
         }
         if (node.isBone) {
           this.bones[node.name] = node;
@@ -153,6 +158,9 @@ export class RiggedHumanoid {
       const bounds = new THREE.Box3().setFromObject(this.model);
       this.sourceHeight = Math.max(0.01, bounds.max.y - bounds.min.y);
       this.sourceFloor = bounds.min.y;
+      this.wardrobe = new WardrobeController(this.model, {
+        debug: new URLSearchParams(location.search).get("wardrobeDebug") === "1",
+      });
       this.applyHeight();
       this.applySurface(this.appearance);
       this.applyProportions(this.appearance);
@@ -206,16 +214,8 @@ export class RiggedHumanoid {
 
   /** Toggle authored equipment variants without reloading or cloning a body. */
   applyEquipment(appearance) {
-    const selected = {
-      torso: appearance.torsoGarment ?? "tunic",
-      lower: appearance.lowerGarment ?? "wrap",
-      mantle: appearance.mantle ?? "none",
-      feet: appearance.footwear ?? "bare",
-      hair: appearance.hairStyle ?? "cropped",
-    };
-    for (const piece of this.equipmentPieces) {
-      piece.visible = selected[piece.userData.slot] === piece.userData.variant;
-    }
+    this.wardrobe?.applyAppearance(appearance);
+    this.wardrobe?.applySharedMorphs(appearance);
   }
 
   /** Drive the facial shape keys authored after MPFB's relaxed pose is baked. */
@@ -382,6 +382,7 @@ export class RiggedHumanoid {
     // the pelvis for locomotion; this adds a damped lag from stride plus two
     // off-frequency wind notes so it never rocks like a rigid pendulum.
     for (const cloth of this.clothPieces) {
+      if (!cloth.node.visible) continue;
       const wind = Math.sin(this.windPhase * 1.17) * 0.55
         + Math.sin(this.windPhase * 2.31 + 1.4) * 0.22;
       const stride = Math.sin(t - 0.55) * g;
@@ -449,6 +450,7 @@ export class RiggedHumanoid {
     this.bones = {};
     this.clothPieces = [];
     this.equipmentPieces = [];
+    this.wardrobe = null;
     this.currentModel = null;
     this.sourceHeight = 0;
     this.fallback?.dispose();

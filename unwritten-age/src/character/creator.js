@@ -13,6 +13,7 @@ import {
   applyGmRules, appearanceFromGmDefaults, clearGmRules,
   loadGmRules, normaliseGmRules, playerSliders, saveGmRules,
 } from "./gm-rules.js";
+import { OUTFIT_PRESETS, applyOutfitPresetToAppearance } from "./wardrobe-catalog.js";
 
 /**
  * Character creation.
@@ -212,6 +213,10 @@ export class CharacterCreator {
         <h3>Clothing</h3>
         <p class="cc-disclosure">Each piece is a separate rigged equipment slot.
           Loose layers carry restrained wind and movement response.</p>
+        <label class="cc-row"><span>Outfit preset</span><select data-select="outfitPreset">
+          <option value="custom" ${this.appearance.outfitPreset === "custom" ? "selected" : ""}>Custom</option>
+          ${OUTFIT_PRESETS.map((preset) => `<option value="${preset.id}" ${this.appearance.outfitPreset === preset.id ? "selected" : ""}>${preset.label}</option>`).join("")}
+        </select></label>
         <label class="cc-row"><span>Torso</span>${this.options("torsoGarment", TORSO_GARMENTS)}</label>
         <label class="cc-row"><span>Lower body</span>${this.options("lowerGarment", LOWER_GARMENTS)}</label>
         <label class="cc-row"><span>Mantle</span>${this.options("mantle", MANTLES)}</label>
@@ -274,7 +279,16 @@ export class CharacterCreator {
     root.querySelectorAll("[data-select]").forEach((sel) => {
       sel.addEventListener("change", () => {
         const key = sel.dataset.select;
+        if (key === "outfitPreset") {
+          this.appearance = applyOutfitPresetToAppearance(this.appearance, sel.value);
+          this.buildControls();
+          this.rebuildBodyOnly();
+          return;
+        }
         this.appearance[key] = sel.value;
+        if (["torsoGarment", "lowerGarment", "mantle", "footwear"].includes(key)) {
+          this.appearance.outfitPreset = "custom";
+        }
         // Keep the legacy bodyBase field synchronized for the world/player
         // path and older saved presets. bodySex remains the readable setting;
         // bodyBase is the concrete GLB identity every consumer can understand.
