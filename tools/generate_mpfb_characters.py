@@ -181,6 +181,12 @@ def export_character(spec):
     blend_path = os.path.join(SOURCE_OUT, f'{spec["id"]}.blend')
     bpy.ops.wm.save_as_mainfile(filepath=blend_path)
 
+    # Keep source textures in the editable .blend, but cap browser-export copies.
+    for image in bpy.data.images:
+        if image.size[0] > 1024 or image.size[1] > 1024:
+            scale = min(1024 / image.size[0], 1024 / image.size[1])
+            image.scale(max(1, round(image.size[0] * scale)), max(1, round(image.size[1] * scale)))
+
     bpy.ops.object.select_all(action="SELECT")
     bpy.context.view_layer.objects.active = rig
     glb_path = os.path.join(OUT, f'{spec["id"]}.glb')
@@ -197,5 +203,8 @@ def export_character(spec):
     print(f"WROTE {glb_path}")
 
 
+requested = set(sys.argv[sys.argv.index("--") + 1:]) if "--" in sys.argv else set()
 for character in CHARACTERS:
+    if requested and character["id"] not in requested:
+        continue
     export_character(character)
