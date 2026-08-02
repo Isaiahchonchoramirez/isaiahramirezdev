@@ -3,8 +3,10 @@ import emailjs from "@emailjs/browser";
 
 import TitleHeader from "../components/TitleHeader";
 import { getAssetPath } from "../utils/assetPath";
+import useReveal from "../hooks/useReveal";
 
 const Contact = () => {
+  const scopeRef = useReveal({ selector: ".contact-reveal", stagger: 120, variant: "alternate" });
   const formRef = useRef(null);
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
@@ -40,14 +42,14 @@ const Contact = () => {
   };
 
   return (
-    <section id="contact" className="flex-center section-padding">
+    <section id="contact" ref={scopeRef} className="flex-center section-padding">
       <div className="w-full h-full md:px-10 px-5">
         <TitleHeader
           title="Get in Touch – Let's Connect"
           sub="💬 Have questions or ideas? Let's talk! 🚀"
         />
         <div className="grid-12-cols mt-16">
-          <div className="xl:col-span-5">
+          <div className="contact-reveal xl:col-span-5">
             <div className="flex-center card-border rounded-xl p-10">
               <form
                 ref={formRef}
@@ -109,7 +111,7 @@ const Contact = () => {
           </div>
           {/* A glass panel rather than a second WebGL scene: the computer GLB
               cost ~500 KB and an orange box that fought the ocean palette. */}
-          <div className="xl:col-span-7 min-h-96">
+          <div className="contact-reveal xl:col-span-7 min-h-96">
             <div className="contact-panel h-full w-full rounded-3xl p-8 md:p-10">
               <p className="text-white-50 text-lg leading-relaxed">
                 I'm a University of Michigan information analysis student building AI tools,

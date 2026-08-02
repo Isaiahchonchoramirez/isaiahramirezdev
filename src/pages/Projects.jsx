@@ -1,17 +1,13 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation, useSearchParams } from "react-router-dom";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
 
 import TitleHeader from "../components/TitleHeader";
 import ProjectGallery from "../components/ProjectGallery";
 import ProjectVideo from "../components/ProjectVideo";
 import DataCaseStudy from "../components/DataCaseStudy";
+import useReveal from "../hooks/useReveal";
 import projects from "../constants/projects";
 import { getAssetPath } from "../utils/assetPath";
-
-gsap.registerPlugin(ScrollTrigger);
 
 const ProjectPreview = ({ src, alt }) => {
   const [failed, setFailed] = useState(false);
@@ -63,28 +59,7 @@ const DataPreview = ({ preview, title }) => (
 );
 
 const ProjectRow = ({ project, index }) => {
-  const rowRef = useRef(null);
   const flipped = index % 2 === 1;
-
-  useGSAP(
-    () => {
-      gsap.fromTo(
-        rowRef.current,
-        { y: 60, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 1,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: rowRef.current,
-            start: "top bottom-=120",
-          },
-        }
-      );
-    },
-    { scope: rowRef }
-  );
 
   // Not every project has somewhere to go — the Maya work is media, not a
   // site — so the anchors collapse to plain elements when there is no href.
@@ -98,8 +73,7 @@ const ProjectRow = ({ project, index }) => {
   return (
     <div
       id={project.id}
-      ref={rowRef}
-      className="group md:py-20 py-12 border-t border-black-50 first:border-t-0"
+      className="project-row group md:py-20 py-12 border-t border-black-50 first:border-t-0"
     >
       <div className="grid xl:grid-cols-2 grid-cols-1 gap-10 xl:gap-16 items-center">
         <div className={flipped ? "xl:order-2" : ""}>
@@ -209,9 +183,10 @@ const ProjectRow = ({ project, index }) => {
 };
 
 const Projects = () => {
+  const revealRef = useReveal({ selector: ".project-row", stagger: 0, variant: "alternate" });
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
-  const categories = ["All", "AI", "Data", "Web", "UX", "Design", "3D"];
+  const categories = ["All", "AI", "Data", "C++", "Web", "UX", "Design", "3D"];
   const requested = searchParams.get("category") || "All";
   const active = categories.includes(requested) ? requested : "All";
   const visible = active === "All"
@@ -227,7 +202,7 @@ const Projects = () => {
   }, [location.hash]);
 
   return (
-    <section id="projects-page" className="section-padding min-h-screen">
+    <section id="projects-page" ref={revealRef} className="section-padding min-h-screen">
       <div className="w-full md:px-20 px-5">
         <TitleHeader
           title="Projects & Case Studies"

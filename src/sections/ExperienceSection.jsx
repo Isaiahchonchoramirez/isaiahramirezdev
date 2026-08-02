@@ -16,7 +16,7 @@ import { education, expCards, leadership } from "../constants";
  * itself at opacity 0.
  */
 const ExperienceSection = () => {
-  const scopeRef = useReveal({ selector: ".timeline-entry", stagger: 70 });
+  const scopeRef = useReveal({ selector: ".timeline-entry", stagger: 75, variant: "left" });
 
   return (
     <section id="experience" ref={scopeRef} className="flex-center section-padding xl:px-0">

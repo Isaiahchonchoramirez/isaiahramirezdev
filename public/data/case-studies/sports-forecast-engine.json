@@ -1,0 +1,22 @@
+{
+  "source": "StatsBomb Open Data · Premier League 2015/16 · chronological 80/20 holdout",
+  "sourceUrl": "https://github.com/statsbomb/open-data",
+  "sample": "380 matches · 76 held out",
+  "metrics": [
+    {"label": "Outcome accuracy", "value": "48.684%"},
+    {"label": "Multiclass log loss", "value": "1.006"},
+    {"label": "Goal MAE", "value": "0.955"},
+    {"label": "Held-out matches", "value": "76"}
+  ],
+  "charts": [
+    {"title": "Correct outcomes by result", "subtitle": "Accuracy within each actual result class; draws are the hardest outcome.", "xLabel": "Percent correctly classified", "yLabel": "Actual match result", "series": [{"name": "Accuracy", "values": [{"label": "Home win", "value": 72.973},{"label": "Draw", "value": 0.000},{"label": "Away win", "value": 71.429}]}]},
+    {"title": "Goals per held-out match", "subtitle": "Aggregate scoring level predicted before each game compared with the result.", "xLabel": "Average total goals", "yLabel": "Model versus observed", "series": [{"name": "Goals", "values": [{"label": "Predicted", "value": 2.639},{"label": "Actual", "value": 3.039}]}]}
+  ],
+  "findings": [
+    "Every held-out forecast was generated before that match and the model was then updated, preventing future results from leaking backward.",
+    "The model estimates team attack, defense, and home advantage, then converts expected goals into score and win/draw/loss probabilities with a Poisson distribution.",
+    "A full-season Leicester City vs Arsenal example produces 44.213% home, 26.508% draw, and 29.279% away, with 1–1 the most likely score.",
+    "This is an educational baseline, not betting advice: injuries, lineups, odds, and uncertainty beyond historical scores are not modeled."
+  ],
+  "updated": "Rebuilt by the C++20 engine from the committed match CSV"
+}

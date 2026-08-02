@@ -1,5 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import useReveal from "../hooks/useReveal";
+
+const GameJelly = lazy(() => import("../components/GameJelly"));
 
 const currents = [
   { id: "code", label: "Code", category: "Web", symbol: "</>", copy: "Interfaces and full-stack applications", x: 16, y: 24 },
@@ -10,23 +13,9 @@ const currents = [
 
 const clamp = (value) => Math.max(6, Math.min(94, value));
 
-const JellyAvatar = () => (
-  <svg viewBox="0 0 80 100" aria-hidden="true">
-    <defs>
-      <radialGradient id="jelly-body" cx="45%" cy="25%">
-        <stop offset="0" stopColor="#e9fbff" />
-        <stop offset=".38" stopColor="#77e8ff" />
-        <stop offset="1" stopColor="#8656d9" />
-      </radialGradient>
-    </defs>
-    <path fill="url(#jelly-body)" d="M12 43C12 20 24 8 40 8s28 12 28 35c0 8-4 12-11 12H23c-7 0-11-4-11-12Z" />
-    <path d="M22 53c-2 15 6 18 1 34M34 54c-4 18 7 23 1 39M47 54c5 16-6 24 1 38M59 53c3 14-5 20-1 33" fill="none" stroke="#8aeaff" strokeWidth="4" strokeLinecap="round" />
-    <circle cx="31" cy="36" r="2.5" fill="#06111e" /><circle cx="49" cy="36" r="2.5" fill="#06111e" />
-  </svg>
-);
-
 const ExploreCurrent = () => {
   const navigate = useNavigate();
+  const revealRef = useReveal({ selector: ".explore-current-card", variant: "rise-scale" });
   const fieldRef = useRef(null);
   const [active, setActive] = useState(false);
   const [position, setPosition] = useState({ x: 50, y: 52 });
@@ -95,7 +84,7 @@ const ExploreCurrent = () => {
 
   return (
     <>
-      <section id="explore" className="section-padding">
+      <section id="explore" ref={revealRef} className="section-padding">
         <div className="explore-current-card">
           <div>
             <p className="featured-project-kicker">Optional interactive</p>
@@ -153,7 +142,10 @@ const ExploreCurrent = () => {
                 );
               })}
               <div className="current-jelly" style={{ left: `${position.x}%`, top: `${position.y}%` }}>
-                <JellyAvatar /><span className="sr-only">Jellyfish position</span>
+                <Suspense fallback={<span className="current-jelly-fallback" aria-hidden="true" />}>
+                  <GameJelly />
+                </Suspense>
+                <span className="sr-only">Jellyfish position</span>
               </div>
               {latest && (
                 <div className="current-discovery" role="status">

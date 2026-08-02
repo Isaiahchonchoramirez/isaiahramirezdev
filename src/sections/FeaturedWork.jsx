@@ -5,7 +5,7 @@ import projects from "../constants/projects";
 import useReveal from "../hooks/useReveal";
 
 const FeaturedWork = () => {
-  const scopeRef = useReveal({ selector: ".featured-project", stagger: 90 });
+  const scopeRef = useReveal({ selector: ".featured-project", stagger: 100, variant: "rise-scale" });
   const featured = projects.filter((project) => project.featured).slice(0, 3);
 
   return (

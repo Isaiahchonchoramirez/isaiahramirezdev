@@ -85,9 +85,9 @@ section.section-inline {
 .current-bubbles i:nth-child(4) { left: 86%; bottom: -7%; animation-delay: -4s; transform: scale(.7); }
 .current-bubbles i:nth-child(5) { left: 73%; bottom: -5%; animation-delay: -6s; transform: scale(1.25); }
 @keyframes currentBubble { to { translate: 0 -520px; opacity: 0; } }
-.current-jelly { position: absolute; z-index: 5; width: clamp(3.8rem, 8vw, 5.5rem); transform: translate(-50%, -50%); pointer-events: none; filter: drop-shadow(0 0 18px rgba(102,229,255,.55)); transition: left .12s linear, top .12s linear; }
-.current-jelly svg { display: block; width: 100%; overflow: visible; animation: jellyPulse 1.8s ease-in-out infinite; }
-@keyframes jellyPulse { 50% { transform: scale(.94, 1.04); } }
+.current-jelly { position: absolute; z-index: 5; width: clamp(5.5rem, 11vw, 8.5rem); aspect-ratio: 1; transform: translate(-50%, -50%); pointer-events: none; filter: drop-shadow(0 0 18px rgba(102,229,255,.55)); transition: left .12s linear, top .12s linear; }
+.current-jelly canvas { display: block; width: 100% !important; height: 100% !important; }
+.current-jelly-fallback { display: block; width: 54%; aspect-ratio: 1; margin: 23%; border-radius: 50%; background: radial-gradient(circle at 40% 30%, #eaffff, #73e7ff 40%, #8158d2); box-shadow: 0 0 26px rgba(102,229,255,.55); }
 .current-collectible { position: absolute; z-index: 4; width: clamp(4.2rem, 9vw, 6.5rem); aspect-ratio: 1; display: grid; place-content: center; gap: .15rem; transform: translate(-50%, -50%); border: 1px solid rgba(142,236,255,.45); border-radius: 50%; background: radial-gradient(circle, rgba(120,231,255,.22), rgba(111,62,187,.14) 55%, transparent 72%); box-shadow: 0 0 26px rgba(106,225,255,.16); color: #fff; animation: collectibleDrift 3s ease-in-out infinite; }
 .current-collectible:nth-of-type(even) { animation-delay: -1.3s; }
 .current-collectible span { color: #8deeff; font-size: clamp(1rem, 2vw, 1.45rem); }
@@ -197,7 +197,7 @@ section.section-inline {
   .current-game-footer { align-items: flex-start; flex-direction: column; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .current-bubbles i, .current-jelly svg, .current-collectible { animation: none; }
+  .current-bubbles i, .current-collectible { animation: none; }
   .current-jelly { transition: none; }
 }
 
@@ -389,20 +389,36 @@ section.section-inline {
       @apply group-hover:bg-white-50 size-10 rounded-full absolute right-10 top-1/2
         -translate-y-1/2 flex justify-center items-center overflow-hidden;
 
+      opacity: 0;
+      scale: 0.35;
+      transition: opacity 0.3s ease, scale 0.45s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.3s ease;
+
       /* The arrow used to park 8rem above this wrapper on xl and only slide in
          on hover — but the wrapper clips, so at rest the button just looked
          like it was missing its icon. It now sits in place and the motion is
          the accent rather than the reveal. */
       img {
-        @apply size-5 translate-y-0 animate-bounce transition-transform duration-500;
+        @apply size-5 translate-y-0 animate-bounce;
       }
+    }
+
+    &:hover .arrow-wrapper,
+    &:focus-visible .arrow-wrapper,
+    &:focus-within .arrow-wrapper {
+      opacity: 1;
+      scale: 1;
     }
 
     /* Buttons that navigate somewhere, as opposed to scrolling down the page.
        The arrow points where you're going and nudges instead of bouncing. */
     .arrow-wrapper--nav img {
-      @apply animate-none group-hover:translate-x-1;
+      animation: arrowPointRight 0.8s ease-in-out infinite;
     }
+  }
+
+  @keyframes arrowPointRight {
+    0%, 100% { transform: translateX(-2px); }
+    50% { transform: translateX(4px); }
   }
 
   .card-border {
@@ -567,19 +583,36 @@ section.section-inline {
      so a failure shows content rather than hiding it. */
   [data-reveal="pending"] {
     opacity: 0;
-    transform: translateY(34px);
+    transform: translate3d(0, 38px, 0);
+    filter: blur(3px);
+  }
+  [data-reveal="pending"][data-reveal-motion="left"] {
+    transform: translate3d(-54px, 12px, 0);
+  }
+  [data-reveal="pending"][data-reveal-motion="right"] {
+    transform: translate3d(54px, 12px, 0);
+  }
+  [data-reveal="pending"][data-reveal-motion="scale"] {
+    transform: scale(.9) translate3d(0, 20px, 0);
+  }
+  [data-reveal="pending"][data-reveal-motion="rise-scale"] {
+    transform: scale(.96) translate3d(0, 48px, 0);
   }
   [data-reveal="in"] {
     opacity: 1;
     transform: none;
+    filter: none;
     transition:
-      opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms),
-      transform 0.65s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms);
+      opacity 0.75s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms),
+      transform 0.85s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms),
+      filter 0.7s ease var(--reveal-delay, 0ms);
+    will-change: opacity, transform;
   }
   @media (prefers-reduced-motion: reduce) {
     [data-reveal] {
       opacity: 1 !important;
       transform: none !important;
+      filter: none !important;
       transition: none !important;
     }
   }

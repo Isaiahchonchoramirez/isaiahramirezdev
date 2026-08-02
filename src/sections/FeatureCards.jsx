@@ -1,12 +1,16 @@
 import { abilities } from "../constants";
+import useReveal from "../hooks/useReveal";
 
-const FeatureCards = () => (
-  <div className="w-full padding-x-lg">
+const FeatureCards = () => {
+  const scopeRef = useReveal({ selector: ".ability-card", stagger: 90, variant: "rise-scale" });
+
+  return (
+  <div ref={scopeRef} className="w-full padding-x-lg">
     <div className="mx-auto grid-3-cols">
       {abilities.map(({ imgPath, title, desc }) => (
         <div
           key={title}
-          className="card-border rounded-xl p-8 flex flex-col gap-4"
+          className="ability-card card-border rounded-xl p-8 flex flex-col gap-4"
         >
           <div className="size-14 flex items-center justify-center rounded-full">
             <img src={imgPath} alt={title} />
@@ -17,6 +21,7 @@ const FeatureCards = () => (
       ))}
     </div>
   </div>
-);
+  );
+};
 
 export default FeatureCards;

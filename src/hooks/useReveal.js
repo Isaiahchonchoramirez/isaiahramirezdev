@@ -14,7 +14,7 @@ import { useEffect, useRef } from "react";
  * observing. If the script never runs, the observer never fires, or the
  * browser lacks IntersectionObserver, the content just shows.
  */
-export default function useReveal({ selector, stagger = 90, threshold = 0.15 } = {}) {
+export default function useReveal({ selector, stagger = 90, threshold = 0.15, variant = "rise" } = {}) {
   const scopeRef = useRef(null);
 
   useEffect(() => {
@@ -29,6 +29,9 @@ export default function useReveal({ selector, stagger = 90, threshold = 0.15 } =
 
     items.forEach((el, i) => {
       el.dataset.reveal = "pending";
+      el.dataset.revealMotion = el.dataset.revealMotion || (
+        variant === "alternate" ? (i % 2 === 0 ? "left" : "right") : variant
+      );
       el.style.setProperty("--reveal-delay", `${i * stagger}ms`);
     });
 
@@ -74,7 +77,7 @@ export default function useReveal({ selector, stagger = 90, threshold = 0.15 } =
       clearTimeout(failsafe);
       observer.disconnect();
     };
-  }, [selector, stagger, threshold]);
+  }, [selector, stagger, threshold, variant]);
 
   return scopeRef;
 }

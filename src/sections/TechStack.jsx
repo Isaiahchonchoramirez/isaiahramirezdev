@@ -8,7 +8,7 @@ import { techStackIcons } from "../constants";
 // import { techStackImgs } from "../constants";
 
 const TechStack = () => {
-  const scopeRef = useReveal({ selector: ".tech-card", stagger: 80 });
+  const scopeRef = useReveal({ selector: ".tech-card", stagger: 85, variant: "scale" });
 
   return (
     <div id="skills" ref={scopeRef} className="flex-center section-padding">

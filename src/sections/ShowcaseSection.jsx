@@ -20,7 +20,7 @@ import { getAssetPath } from "../utils/assetPath";
  * artwork at full size, which is where someone actually wants to read it.
  */
 const DesignShowcase = () => {
-  const scopeRef = useReveal({ selector: ".design-card", stagger: 55 });
+  const scopeRef = useReveal({ selector: ".design-card", stagger: 65, variant: "alternate" });
   const [lightbox, setLightbox] = useState(null);
   const close = useCallback(() => setLightbox(null), []);
 

@@ -94,7 +94,11 @@ const DataCaseStudy = ({ file }) => {
         <div>
           <p className="featured-project-kicker">Notebook evidence</p>
           <h3>What the data actually showed</h3>
-          <p>{data.source}</p>
+          <p>
+            {data.sourceUrl ? (
+              <a href={data.sourceUrl} target="_blank" rel="noreferrer">{data.source}</a>
+            ) : data.source}
+          </p>
         </div>
         <div className="evidence-sample"><span>Sample</span><strong>{data.sample}</strong></div>
       </header>

@@ -224,6 +224,40 @@ const projects = [
     ],
   },
   {
+    id: "sports-forecast-engine",
+    dataFile: "sports-forecast-engine",
+    title: "Sports Forecast Engine",
+    year: "2026",
+    tagline: "An honest C++ probability model, tested before the final whistle",
+    categories: ["C++", "Data"],
+    role: "C++ engineering · Statistical modeling · Backtest design",
+    problem:
+      "A player-stat assignment could rank past performance, but it could not forecast a game or prove whether its predictions generalized.",
+    outcome:
+      "A dependency-free C++20 engine that generates score probabilities and measures them on 76 unseen matches without future-data leakage.",
+    stack: ["C++20", "Poisson Modeling", "Backtesting", "CSV", "StatsBomb Open Data"],
+    description:
+      "I rebuilt an early C++ sports-statistics project as a reproducible forecasting engine. It learns team attack, defense, and home advantage from match results, produces a complete score-probability grid, and reports home/draw/away probabilities instead of pretending one score is certain. An expanding-window backtest makes every holdout prediction using only information available before kickoff.",
+    highlights: [
+      "Written with the C++20 standard library only—CSV parsing, model fitting, Poisson probabilities, evaluation, and JSON reporting",
+      "Chronological 80/20 split across all 380 Premier League 2015/16 matches, with the model refit after each held-out result",
+      "Reports outcome accuracy, multiclass log loss, Brier score, and goal mean absolute error rather than selecting one flattering metric",
+      "Five-match prior smooths early and sparse team records toward the league average",
+      "Publishes model limitations beside the result: no injuries, lineups, market odds, or claim of betting certainty",
+    ],
+    preview: {
+      variant: "lead",
+      eyebrow: "C++20 · chronological backtest",
+      metric: "380 matches",
+      values: [73, 49, 29, 27, 71],
+      caption: "Attack · defense · Poisson score grid · holdout metrics",
+      alt: "Abstract probability bars representing the C++ sports forecast backtest",
+    },
+    href: "https://github.com/Isaiahchonchoramirez/isaiahramirezdev/tree/main/projects/sports-forecast-engine",
+    external: true,
+    cta: "Read the C++ source",
+  },
+  {
     id: "michigan-lead-risk",
     dataFile: "michigan-lead-risk",
     title: "Michigan Lead-Risk Analysis",
