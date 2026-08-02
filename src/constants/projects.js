@@ -108,6 +108,41 @@ const projects = [
     },
   },
   {
+    id: "unwritten-age",
+    featured: true,
+    title: "The Unwritten Age",
+    year: "2026",
+    tagline: "A mythic RPG where memory rewrites the world",
+    categories: ["Web", "3D", "Design"],
+    role: "Game systems · Procedural 3D · World design · UX",
+    problem:
+      "Build an explorable prehistoric world without copying familiar fantasy settings—and make history, mythology, character identity, and progression reinforce one another.",
+    outcome:
+      "A playable Three.js RPG prototype with character creation, combat, classes, cultures, factions, skills, beasts, ancient-site discovery, equipment, and a world-changing god-erasure mechanic.",
+    stack: ["JavaScript", "Three.js", "WebGL", "Procedural Generation", "Game Systems"],
+    description:
+      "The Unwritten Age is a browser RPG set in a compressed mythological interpretation of Earth around 30,000–12,000 BCE. You inhabit a customizable mortal body, develop practical skills and divine Aspects, encounter remembered beasts, and discover locations informed by real archaeology. Its central mechanic is erasure: defeating a god removes their name, gifts, quests, and monuments from history while the player alone remembers what changed.",
+    highlights: [
+      "Procedural humanoid with visible face, body, hair, clothing, ritual markings, scars, and live character-creation controls",
+      "Five cultures and multiple combat callings without race-locked statistics",
+      "Twelve 1–99 Practices, faction standing, combat abilities, quests, and persistent character presets",
+      "Data-driven ancient sites inspired by Pavlov, Kostenki, Sunghir, and Chauvet, each separating archaeological evidence from fictional myth",
+      "Material-aware equipment rewards using ivory, bone, hide, ochre, flint, stone, and wood rather than generic fantasy metal loot",
+      "God erasure mutates the live world, interface, abilities, quest history, and the player's private Chronicle",
+    ],
+    preview: {
+      variant: "lead",
+      eyebrow: "Playable procedural RPG",
+      metric: "Explore in browser",
+      values: [92, 68, 81, 56, 74, 88],
+      caption: "Cultures · callings · ancient sites · beasts · memory",
+      alt: "Abstract landscape bars representing regions and systems in The Unwritten Age",
+    },
+    href: getAssetPath("/unwritten-age/index.html"),
+    external: true,
+    cta: "Enter the Unwritten Age",
+  },
+  {
     id: "maya-3d",
     categories: ["3D", "Design"],
     role: "3D modeling · Materials · Lighting · Animation",

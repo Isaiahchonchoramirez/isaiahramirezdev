@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>The Unwritten Age</title>
+<meta name="description" content="A mythic RPG where defeating a god does not kill them — it erases them from history, and the world rewrites itself around the gap." />
+<link rel="stylesheet" href="./style.css?v=4" />
+<script type="importmap">
+{ "imports": { "three": "./vendor/three.module.min.js", "three/webgpu": "./vendor/three.module.min.js" } }
+</script>
+</head>
+<body>
+
+<canvas id="game"></canvas>
+
+<div id="loading"><span>Remembering the world…</span></div>
+
+<!-- Title / entry -->
+<div id="intro">
+  <div class="intro-inner">
+    <p class="kicker">Before history, memory was law</p>
+    <h1>The Unwritten Age</h1>
+    <p class="tag">
+      Thirty thousand years before anyone writes anything down. You are a god in the making,
+      remembered through a mortal body. Kill a rival and you do not end them — you make a
+      world in which they never existed.
+    </p>
+    <button id="beginBtn" type="button">Take a body</button>
+    <ul class="controls">
+      <li><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> move</li>
+      <li><kbd>Shift</kbd> sprint</li>
+      <li>right-drag orbit · wheel zoom</li>
+      <li><kbd>Space</kbd> strike</li>
+      <li><kbd>1</kbd>–<kbd>5</kbd> miracles</li>
+      <li><kbd>J</kbd> journal</li>
+      <li><kbd>C</kbd> ancient sites · <kbd>I</kbd> equipment</li>
+    </ul>
+  </div>
+</div>
+
+<div id="creator"></div>
+
+<!-- HUD -->
+<div id="hud">
+  <div id="vitals">
+    <div class="bar hp">
+      <i id="hpFill"></i><i id="shieldFill" class="shield"></i>
+      <span id="hpText">220 / 220</span>
+    </div>
+    <div class="rem">
+      <span class="rem-label">Remembrance</span>
+      <b id="remValue">40</b>
+      <em id="remRate">+1.2/s</em>
+    </div>
+  </div>
+
+  <div id="aspects"></div>
+
+  <div id="target">
+    <span class="target-name"></span>
+    <div class="target-bar"><i class="target-fill"></i></div>
+    <span class="target-hp"></span>
+  </div>
+
+  <div id="questPanel">
+    <h3>Chronicle</h3>
+    <ul id="questList"></ul>
+  </div>
+
+  <div id="feed"></div>
+  <div id="hotbar"></div>
+  <div id="practicePanel">
+    <h3>Practices <b id="practiceTotal">12</b></h3>
+    <div id="practiceList"></div>
+    <div id="standingList"></div>
+  </div>
+
+  <button id="practiceTab" type="button" title="What you are known for">Practices <kbd>P</kbd></button>
+  <button id="journalTab" type="button" title="What only you remember">Journal <kbd>J</kbd></button>
+  <button id="codexTab" type="button" title="Places encountered">Sites <kbd>C</kbd></button>
+  <button id="inventoryTab" type="button" title="Carried equipment">Equipment <kbd>I</kbd></button>
+</div>
+
+<div id="floaters"></div>
+<div id="banner" class="banner"></div>
+
+<!-- The player's private memory -->
+<div id="journal">
+  <div class="journal-panel">
+    <button id="journalClose" type="button" aria-label="Close">✕</button>
+    <h2>What only you remember</h2>
+    <p class="journal-sub">
+      The world has no record of these. Neither do your people. This page exists
+      because you were there when it was true.
+    </p>
+    <div id="journalBody"><p class="journal-empty">Nothing yet. Nothing has been lost.</p></div>
+  </div>
+</div>
+
+<div id="codex" class="game-overlay"><div class="game-panel">
+  <button class="overlay-close" type="button" aria-label="Close">✕</button>
+  <p class="kicker">Archaeology and remembered myth</p><h2>Ancient Sites</h2>
+  <div id="codexBody"></div>
+</div></div>
+
+<div id="inventory" class="game-overlay"><div class="game-panel">
+  <button class="overlay-close" type="button" aria-label="Close">✕</button>
+  <p class="kicker">What the body carries</p><h2>Equipment</h2>
+  <div id="equipmentBody"></div><div id="inventoryBody"></div>
+</div></div>
+
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>

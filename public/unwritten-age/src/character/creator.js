@@ -1,0 +1,499 @@
+import * as THREE from "three";
+import { Humanoid } from "./humanoid.js";
+import { CULTURES, CULTURE_IDS } from "./cultures.js";
+import { CLASSES, CLASS_IDS } from "./classes.js";
+import {
+  BODY_SLIDERS, HEAD_SLIDERS, SKIN_TONES, HAIR_COLOURS, EYE_COLOURS,
+  HAIR_STYLES, HAIR_TEXTURES, FACIAL_HAIR, VOICES, MARKINGS, SCARS,
+  defaultAppearance, randomAppearance, savePreset, loadPresets, deletePreset,
+} from "./appearance.js";
+import { buildStudioEnvironment } from "../render/environment.js";
+
+/**
+ * Character creation.
+ *
+ * Runs its own small renderer against its own scene, so it neither disturbs
+ * nor is disturbed by the world renderer. It edits one plain object (the
+ * appearance record) and rebuilds the `Humanoid` on change — the humanoid is
+ * cheap enough to rebuild at interactive rates, which is why sliders can be
+ * live rather than applied on release.
+ *
+ * Controls whose `affects` is "future" are rendered in a separate, clearly
+ * labelled group. They save and load, but they will not move the mesh until a
+ * morph-target rig exists. Showing them as working sliders would be a lie.
+ */
+export class CharacterCreator {
+  constructor(container, onConfirm) {
+    this.container = container;
+    this.onConfirm = onConfirm;
+    this.appearance = defaultAppearance();
+    this.orbit = 0.0;
+    this.camDistance = 3.0;
+    this.camHeight = 0.62;   // 0..1 up the body
+    this.lightAngle = 0.7;
+    this.dragging = false;
+
+    this.buildDom();
+    this.buildScene();
+    this.rebuild();
+    this.renderLoop();
+  }
+
+  /* ------------------------------------------------------------------- DOM */
+
+  buildDom() {
+    this.container.innerHTML = `
+      <div class="cc-grid">
+        <aside class="cc-col cc-left">
+          <h2 class="cc-title">Who you were</h2>
+
+          <section class="cc-block">
+            <h3>Lineage</h3>
+            <div class="cc-choices" id="ccCultures"></div>
+            <p class="cc-lore" id="ccCultureLore"></p>
+            <div class="cc-future" id="ccCultureFuture"></div>
+          </section>
+
+          <section class="cc-block">
+            <h3>Calling</h3>
+            <div class="cc-choices cc-choices--grid" id="ccClasses"></div>
+            <p class="cc-lore" id="ccClassLore"></p>
+            <dl class="cc-abilities" id="ccClassAbilities"></dl>
+          </section>
+        </aside>
+
+        <div class="cc-stage">
+          <canvas id="ccCanvas"></canvas>
+          <div class="cc-stage-controls">
+            <label>Turn<input type="range" id="ccOrbit" min="0" max="6.28" step="0.01" value="0"></label>
+            <label>Zoom<input type="range" id="ccZoom" min="1.1" max="6" step="0.02" value="3.0"></label>
+            <label>View<input type="range" id="ccHeight" min="0.15" max="1" step="0.01" value="0.62"></label>
+            <label>Light<input type="range" id="ccLight" min="0" max="6.28" step="0.01" value="0.7"></label>
+          </div>
+          <p class="cc-hint">Drag the figure to turn · scroll to zoom</p>
+        </div>
+
+        <aside class="cc-col cc-right">
+          <h2 class="cc-title">What they looked like</h2>
+          <div class="cc-scroll" id="ccControls"></div>
+        </aside>
+      </div>
+
+      <footer class="cc-footer">
+        <input type="text" id="ccName" maxlength="24" placeholder="Name" autocomplete="off" />
+        <div class="cc-actions">
+          <button type="button" id="ccRandom">Randomise</button>
+          <button type="button" id="ccReset">Reset</button>
+          <button type="button" id="ccSave">Save preset</button>
+          <select id="ccPresets"><option value="">Load preset…</option></select>
+          <button type="button" id="ccConfirm" class="cc-primary">Enter the valley</button>
+        </div>
+        <p class="cc-note" id="ccNote"></p>
+      </footer>`;
+
+    this.$ = (id) => this.container.querySelector(`#${id}`);
+    this.buildCultureChoices();
+    this.buildClassChoices();
+    this.buildControls();
+    this.bindFooter();
+    this.bindStage();
+  }
+
+  buildCultureChoices() {
+    const wrap = this.$("ccCultures");
+    wrap.innerHTML = CULTURE_IDS.map((id) => `
+      <button type="button" class="cc-choice" data-culture="${id}">
+        <span class="cc-choice-name">${CULTURES[id].name}</span>
+        <span class="cc-choice-sub">${CULTURES[id].informedBy}</span>
+      </button>`).join("");
+    wrap.querySelectorAll("[data-culture]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        this.appearance.culture = btn.dataset.culture;
+        this.rebuild();
+      });
+    });
+  }
+
+  buildClassChoices() {
+    const wrap = this.$("ccClasses");
+    wrap.innerHTML = CLASS_IDS.map((id) => `
+      <button type="button" class="cc-choice cc-choice--sm" data-class="${id}">
+        <span class="cc-choice-name">${CLASSES[id].name}</span>
+        <span class="cc-choice-sub">${CLASSES[id].tagline}</span>
+      </button>`).join("");
+    wrap.querySelectorAll("[data-class]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        this.appearance.archetype = btn.dataset.class;
+        this.rebuild();
+      });
+    });
+  }
+
+  /* Build a labelled slider bound to an appearance key. */
+  slider(def) {
+    const value = this.appearance[def.key];
+    const readout = def.unit === "m" ? `${value.toFixed(2)} m` : "";
+    return `
+      <label class="cc-slider" data-affects="${def.affects}">
+        <span class="cc-slider-name">${def.name}</span>
+        <span class="cc-slider-value" data-readout="${def.key}">${readout}</span>
+        <input type="range" data-key="${def.key}"
+               min="${def.min}" max="${def.max}" step="${def.step}" value="${value}">
+      </label>`;
+  }
+
+  swatches(key, colours) {
+    return `<div class="cc-swatches" data-swatch="${key}">${
+      colours.map((c, i) => `<button type="button" style="--c:${c}" data-index="${i}"
+        class="${this.appearance[key] === i ? "is-on" : ""}" aria-label="Option ${i + 1}"></button>`).join("")
+    }</div>`;
+  }
+
+  options(key, list) {
+    return `<select data-select="${key}">${
+      list.map((o) => `<option value="${o.id}" ${this.appearance[key] === o.id ? "selected" : ""}>${o.name}</option>`).join("")
+    }</select>`;
+  }
+
+  buildControls() {
+    const bodyLive = BODY_SLIDERS.filter((s) => s.affects !== "deferred");
+    const headLive = HEAD_SLIDERS.filter((s) => s.affects !== "deferred");
+    // Anything the builder cannot honour would land here and render disabled.
+    const deferred = [...BODY_SLIDERS, ...HEAD_SLIDERS].filter((s) => s.affects === "deferred");
+
+    this.$("ccControls").innerHTML = `
+      <section class="cc-block">
+        <h3>Frame</h3>
+        ${bodyLive.map((s) => this.slider(s)).join("")}
+      </section>
+
+      <section class="cc-block">
+        <h3>Face</h3>
+        ${headLive.map((s) => this.slider(s)).join("")}
+      </section>
+
+      <section class="cc-block">
+        <h3>Skin</h3>
+        ${this.swatches("skinTone", SKIN_TONES)}
+      </section>
+
+      <section class="cc-block">
+        <h3>Hair</h3>
+        <label class="cc-row"><span>Style</span>${this.options("hairStyle", HAIR_STYLES)}</label>
+        <label class="cc-row"><span>Texture</span>${this.options("hairTexture", HAIR_TEXTURES)}</label>
+        <label class="cc-row"><span>Facial hair</span>${this.options("facialHair", FACIAL_HAIR)}</label>
+        ${this.slider({ key: "hairLength", name: "Length", min: 0, max: 1, step: 0.01, affects: "body" })}
+        ${this.swatches("hairColour", HAIR_COLOURS)}
+      </section>
+
+      <section class="cc-block">
+        <h3>Eyes</h3>
+        ${this.swatches("eyeColour", EYE_COLOURS)}
+      </section>
+
+      <section class="cc-block">
+        <h3>Markings</h3>
+        <label class="cc-row"><span>Paint / ash / ochre</span>${this.options("marking", MARKINGS)}</label>
+        <label class="cc-row"><span>Scars</span>${this.options("scar", SCARS)}</label>
+      </section>
+
+      <section class="cc-block">
+        <h3>Voice</h3>
+        <label class="cc-row"><span>Register</span>${this.options("voice", VOICES)}</label>
+      </section>
+
+      ${deferred.length ? `
+      <section class="cc-block cc-block--future">
+        <h3>Stored, not yet shown</h3>
+        <p class="cc-disclosure">
+          These save with your character but do not move the model yet.
+        </p>
+        ${deferred.map((s) => this.slider(s)).join("")}
+      </section>` : ""}`;
+
+    this.bindControls();
+  }
+
+  bindControls() {
+    const root = this.$("ccControls");
+
+    root.querySelectorAll("input[type=range][data-key]").forEach((input) => {
+      input.addEventListener("input", () => {
+        this.appearance[input.dataset.key] = parseFloat(input.value);
+        const readout = root.querySelector(`[data-readout="${input.dataset.key}"]`);
+        if (readout && input.dataset.key === "height") {
+          readout.textContent = `${parseFloat(input.value).toFixed(2)} m`;
+        }
+        this.rebuildBodyOnly();
+      });
+    });
+
+    root.querySelectorAll("[data-swatch]").forEach((group) => {
+      const key = group.dataset.swatch;
+      group.querySelectorAll("button").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          this.appearance[key] = Number(btn.dataset.index);
+          group.querySelectorAll("button").forEach((b) => b.classList.remove("is-on"));
+          btn.classList.add("is-on");
+          this.rebuildBodyOnly();
+        });
+      });
+    });
+
+    root.querySelectorAll("[data-select]").forEach((sel) => {
+      sel.addEventListener("change", () => {
+        this.appearance[sel.dataset.select] = sel.value;
+        this.rebuildBodyOnly();
+      });
+    });
+  }
+
+  bindFooter() {
+    this.$("ccName").addEventListener("input", (e) => {
+      this.appearance.name = e.target.value;
+    });
+
+    this.$("ccRandom").addEventListener("click", () => {
+      const name = this.appearance.name;
+      const archetype = this.appearance.archetype;
+      this.appearance = randomAppearance(this.appearance.culture, CULTURES);
+      this.appearance.name = name;
+      this.appearance.archetype = archetype;
+      this.buildControls();
+      this.rebuild();
+    });
+
+    this.$("ccReset").addEventListener("click", () => {
+      const { culture, archetype, name } = this.appearance;
+      this.appearance = { ...defaultAppearance(), culture, archetype, name };
+      this.buildControls();
+      this.rebuild();
+    });
+
+    this.$("ccSave").addEventListener("click", () => {
+      if (!this.appearance.name?.trim()) {
+        this.note("Give them a name first.");
+        return;
+      }
+      this.note(savePreset(this.appearance)
+        ? `Saved “${this.appearance.name}”.`
+        : "Could not save — storage is unavailable in this browser.");
+      this.refreshPresets();
+    });
+
+    this.$("ccPresets").addEventListener("change", (e) => {
+      const all = loadPresets();
+      const preset = all[e.target.value];
+      if (!preset) return;
+      this.appearance = { ...defaultAppearance(), ...preset };
+      this.$("ccName").value = this.appearance.name ?? "";
+      this.buildControls();
+      this.rebuild();
+      this.note(`Loaded “${e.target.value}”.`);
+    });
+
+    this.$("ccConfirm").addEventListener("click", () => {
+      if (!this.appearance.name?.trim()) {
+        this.appearance.name = this.appearance.culture === "aurean" ? "Nameless" : "Unspoken";
+      }
+      this.onConfirm(this.appearance);
+    });
+
+    this.refreshPresets();
+  }
+
+  refreshPresets() {
+    const sel = this.$("ccPresets");
+    const all = loadPresets();
+    const keys = Object.keys(all);
+    sel.innerHTML = `<option value="">${keys.length ? "Load preset…" : "No saved presets"}</option>`
+      + keys.map((k) => `<option value="${k}">${k}</option>`).join("");
+  }
+
+  note(text) {
+    const el = this.$("ccNote");
+    el.textContent = text;
+    clearTimeout(this._noteTimer);
+    this._noteTimer = setTimeout(() => { el.textContent = ""; }, 3200);
+  }
+
+  bindStage() {
+    const canvas = this.$("ccCanvas");
+    canvas.addEventListener("pointerdown", (e) => {
+      this.dragging = true;
+      canvas.setPointerCapture(e.pointerId);
+    });
+    canvas.addEventListener("pointerup", (e) => {
+      this.dragging = false;
+      if (canvas.hasPointerCapture?.(e.pointerId)) canvas.releasePointerCapture(e.pointerId);
+    });
+    canvas.addEventListener("pointermove", (e) => {
+      if (!this.dragging) return;
+      this.orbit -= e.movementX * 0.008;
+      this.$("ccOrbit").value = ((this.orbit % 6.28) + 6.28) % 6.28;
+    });
+    canvas.addEventListener("wheel", (e) => {
+      e.preventDefault();
+      this.camDistance = THREE.MathUtils.clamp(this.camDistance + e.deltaY * 0.003, 1.1, 6);
+      this.$("ccZoom").value = this.camDistance;
+    }, { passive: false });
+
+    this.$("ccOrbit").addEventListener("input", (e) => { this.orbit = parseFloat(e.target.value); });
+    this.$("ccZoom").addEventListener("input", (e) => { this.camDistance = parseFloat(e.target.value); });
+    this.$("ccHeight").addEventListener("input", (e) => { this.camHeight = parseFloat(e.target.value); });
+    this.$("ccLight").addEventListener("input", (e) => {
+      this.lightAngle = parseFloat(e.target.value);
+      this.placeKeyLight();
+    });
+  }
+
+  /* ----------------------------------------------------------------- scene */
+
+  buildScene() {
+    const canvas = this.$("ccCanvas");
+    this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    this.renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    this.renderer.toneMappingExposure = 1.18;
+
+    this.scene = new THREE.Scene();
+    this.scene.background = new THREE.Color("#4a4b50");
+    this.scene.environment = buildStudioEnvironment(this.renderer);
+    this.camera = new THREE.PerspectiveCamera(38, 1, 0.05, 60);
+
+    // Three-point lighting: a warm key (firelight), a cold rim (ice sky), and
+    // a low fill so the underside of the jaw is not a black hole.
+    this.key = new THREE.DirectionalLight("#ffe0bd", 3.0);
+    this.key.castShadow = true;
+    this.key.shadow.mapSize.set(1024, 1024);
+    this.key.shadow.camera.near = 0.5;
+    this.key.shadow.camera.far = 14;
+    Object.assign(this.key.shadow.camera, { left: -2, right: 2, top: 3, bottom: -1 });
+    this.key.shadow.camera.updateProjectionMatrix();
+    this.scene.add(this.key);
+
+    // Soft frontal fill: without it the eye sockets read as empty holes.
+    this.fill = new THREE.DirectionalLight("#fff2e2", 1.1);
+    this.scene.add(this.fill);
+
+    this.rim = new THREE.DirectionalLight("#9fc4e8", 1.5);
+    this.rim.position.set(-2.4, 2.2, -3);
+    this.scene.add(this.rim);
+
+    this.scene.add(new THREE.HemisphereLight("#b9cde0", "#443a2c", 1.15));
+    this.placeKeyLight();
+
+    // A plinth of packed earth, so the figure is standing on something.
+    const plinth = new THREE.Mesh(
+      new THREE.CylinderGeometry(1.15, 1.3, 0.12, 28),
+      new THREE.MeshStandardMaterial({ color: "#3a352c", roughness: 1 }),
+    );
+    plinth.position.y = -0.06;
+    plinth.receiveShadow = true;
+    this.scene.add(plinth);
+
+    this.avatarHolder = new THREE.Group();
+    this.scene.add(this.avatarHolder);
+  }
+
+  placeKeyLight() {
+    const r = 4;
+    this.key.position.set(
+      Math.sin(this.lightAngle) * r,
+      1.9,
+      Math.cos(this.lightAngle) * r,
+    );
+    if (this.fill) {
+      this.fill.position.set(
+        Math.sin(this.lightAngle + 1.5) * 3,
+        1.5,
+        Math.cos(this.lightAngle + 1.5) * 3,
+      );
+    }
+  }
+
+  /** Full rebuild: body plus every panel that depends on culture or class. */
+  rebuild() {
+    this.rebuildBodyOnly();
+    this.syncChoices();
+  }
+
+  rebuildBodyOnly() {
+    if (this.humanoid) {
+      this.humanoid.dispose();
+      this.avatarHolder.remove(this.humanoid.root);
+    }
+    this.humanoid = new Humanoid(this.appearance);
+    this.humanoid.root.traverse((o) => { if (o.isMesh) o.castShadow = true; });
+    this.avatarHolder.add(this.humanoid.root);
+  }
+
+  syncChoices() {
+    const culture = CULTURES[this.appearance.culture];
+    const archetype = CLASSES[this.appearance.archetype];
+
+    this.container.querySelectorAll("[data-culture]").forEach((b) =>
+      b.classList.toggle("is-on", b.dataset.culture === this.appearance.culture));
+    this.container.querySelectorAll("[data-class]").forEach((b) =>
+      b.classList.toggle("is-on", b.dataset.class === this.appearance.archetype));
+
+    this.$("ccCultureLore").textContent = culture.lore;
+    this.$("ccCultureFuture").innerHTML = `
+      <span class="cc-future-label">What they may become</span>
+      <p>${culture.mythicFuture}</p>`;
+
+    this.$("ccClassLore").innerHTML = `${archetype.description}
+      <em class="cc-readas">Among the ${culture.name.replace("The ", "")}: ${archetype.readAs[this.appearance.culture]}</em>`;
+
+    this.$("ccClassAbilities").innerHTML = `
+      <dt class="cc-ab cc-ab--passive">${archetype.passive.name}<span>passive</span></dt>
+      <dd>${archetype.passive.description}</dd>
+      <dt class="cc-ab">${archetype.basic.glyph} ${archetype.basic.name}<span>basic</span></dt>
+      <dd>${archetype.basic.desc}</dd>
+      <dt class="cc-ab cc-ab--godlike">${archetype.godlike.glyph} ${archetype.godlike.name}<span>godlike</span></dt>
+      <dd>${archetype.godlike.desc}</dd>`;
+  }
+
+  /* ------------------------------------------------------------------ loop */
+
+  resize() {
+    const canvas = this.$("ccCanvas");
+    const w = canvas.clientWidth || 1;
+    const h = canvas.clientHeight || 1;
+    if (canvas.width !== w * devicePixelRatio || canvas.height !== h * devicePixelRatio) {
+      this.renderer.setSize(w, h, false);
+      this.camera.aspect = w / h;
+      this.camera.updateProjectionMatrix();
+    }
+  }
+
+  renderLoop() {
+    const tick = () => {
+      this.raf = requestAnimationFrame(tick);
+      if (!this.container.classList.contains("show")) return;
+
+      this.resize();
+      const H = this.humanoid?.totalHeight ?? 1.74;
+      this.avatarHolder.rotation.y = this.orbit + Math.PI;
+      this.humanoid?.poseForPreview();
+
+      const focusY = H * this.camHeight;
+      this.camera.position.set(0, focusY + this.camDistance * 0.16, this.camDistance);
+      this.camera.lookAt(0, focusY, 0);
+
+      this.renderer.render(this.scene, this.camera);
+    };
+    tick();
+  }
+
+  show() {
+    this.container.classList.add("show");
+    this.syncChoices();
+  }
+
+  hide() {
+    this.container.classList.remove("show");
+  }
+}
