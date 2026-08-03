@@ -11,6 +11,34 @@ import { getAssetPath } from "../utils/assetPath";
 // gallery -> optional grouped stills, rendered under the row with a lightbox
 const projects = [
   {
+    id: "tesseraxis",
+    featured: true,
+    categories: ["Simulation", "AI", "Data", "Web", "UX", "3D"],
+    role: "Simulation architecture · Control systems · Physics · Product design",
+    problem:
+      "Engineering simulations are often either opaque specialist tools or attractive demos that hide the mathematics driving them.",
+    outcome:
+      "A browser-native engineering laboratory with deterministic physics, inspectable controllers, replayable runs, and two complete simulation plugins.",
+    title: "Tesseraxis",
+    year: "2026",
+    tagline: "Engineering systems you can see",
+    image: getAssetPath("/images/projects/tesseraxis.svg"),
+    href: getAssetPath("/tesseraxis/index.html"),
+    external: true,
+    cta: "Open Tesseraxis",
+    stack: ["JavaScript", "Three.js", "WebGL", "ECS", "Control Theory", "Numerical Simulation"],
+    description:
+      "Tesseraxis is a modular engineering simulation platform built around a deterministic fixed-timestep engine. Its Powered Descent Lab exposes six-degree-of-freedom rocket dynamics, variable mass, atmospheric forces, gimballed thrust, PID guidance, telemetry, replay, and seeded wind. Its Swarm Intelligence Lab uses spatial hashing and distributed local sensing to model flocking, search-and-rescue, formation control, communication loss, and obstacle avoidance across thousands of agents.",
+    highlights: [
+      "Reusable plugin SDK—the rocket and swarm laboratories use the same engine, inspector, timeline, graphing, replay, sharing, and export contracts",
+      "Deterministic 120 Hz simulation loop with seeded disturbances and journaled control inputs",
+      "Powered landing with variable mass, fuel consumption, aerodynamic instability, engine gimbal, actuator limits, and live PID tuning",
+      "Swarm intelligence with separation, alignment, cohesion, search coverage, packet loss, and approximately O(n) spatial-neighbor discovery",
+      "Instanced Three.js rendering, force vectors, flight trails, mission objectives, and scalable telemetry views",
+      "Headless regression harnesses verify collective swarm behavior and exact seeded reproduction without requiring a renderer",
+    ],
+  },
+  {
     id: "trade-assistant",
     featured: true,
     categories: ["AI", "Data", "Web", "UX"],

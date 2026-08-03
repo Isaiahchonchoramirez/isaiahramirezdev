@@ -186,7 +186,7 @@ const Projects = () => {
   const revealRef = useReveal({ selector: ".project-row", stagger: 0, variant: "alternate" });
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
-  const categories = ["All", "AI", "Data", "C++", "Web", "UX", "Design", "3D"];
+  const categories = ["All", "Simulation", "AI", "Data", "C++", "Web", "UX", "Design", "3D"];
   const requested = searchParams.get("category") || "All";
   const active = categories.includes(requested) ? requested : "All";
   const visible = active === "All"
