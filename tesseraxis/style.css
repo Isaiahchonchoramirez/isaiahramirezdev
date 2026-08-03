@@ -1,0 +1,469 @@
+/* Tesseraxis — workspace styling.
+ *
+ * The look is borrowed from flight control rooms rather than from dashboards:
+ * a dark plane, hairline separations instead of boxes, and numerals in a
+ * monospaced face so a changing value does not shift the ones beside it.
+ *
+ * The colour values here mirror src/ui/theme.js, which is what the canvas
+ * layers draw with. Canvas cannot read custom properties, so the two are kept
+ * in step by hand — change one, change the other.
+ */
+
+:root {
+  --plane:      #070b11;
+  --surface:    #0b1119;
+  --surface-2:  #101927;
+  --raised:     #16202e;
+
+  --ink:        #eef4fb;
+  --ink-2:      #9fb0c4;
+  --ink-3:      #6c7f95;
+
+  --line:       rgba(255, 255, 255, 0.08);
+  --line-2:     rgba(255, 255, 255, 0.14);
+  --accent:     #78e8ff;
+  --accent-dim: rgba(120, 232, 255, 0.14);
+
+  --good:     #0ca30c;
+  --warning:  #fab219;
+  --serious:  #ec835a;
+  --critical: #d03b3b;
+
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  --rail-left: 264px;
+  --rail-right: 330px;
+  --topbar: 58px;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: var(--plane);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 13px;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+button, input, select { font: inherit; color: inherit; }
+
+h1, h2, h3, h4 { margin: 0; font-weight: 600; }
+
+#app {
+  display: grid;
+  grid-template-columns: var(--rail-left) minmax(0, 1fr) var(--rail-right);
+  grid-template-rows: var(--topbar) minmax(0, 1fr);
+  grid-template-areas:
+    "topbar topbar topbar"
+    "left   stage  right";
+  height: 100dvh;
+}
+
+/* ── Top bar ────────────────────────────────────────────────────────── */
+
+#topbar {
+  grid-area: topbar;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 0 14px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+
+.brand { display: flex; align-items: center; gap: 9px; }
+.brand-mark { color: var(--accent); font-size: 15px; }
+.brand-text { display: flex; flex-direction: column; line-height: 1.15; }
+.brand-text strong { font-size: 14px; letter-spacing: 0.06em; }
+.brand-text em { font-style: normal; font-size: 9.5px; color: var(--ink-3); letter-spacing: 0.13em; text-transform: uppercase; }
+
+.sim-identity { min-width: 0; border-left: 1px solid var(--line); padding-left: 20px; }
+.sim-identity h1 { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sim-identity p { margin: 1px 0 0; font-size: 11px; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.transport { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+
+.tbtn {
+  width: 30px; height: 30px;
+  display: grid; place-items: center;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.tbtn:hover { background: var(--raised); border-color: var(--line-2); }
+.tbtn-primary { color: var(--accent); }
+.tbtn-primary.is-playing { background: var(--accent-dim); border-color: rgba(120, 232, 255, 0.4); }
+
+.field { display: flex; align-items: center; gap: 6px; font-size: 10.5px; color: var(--ink-3); }
+.field span { text-transform: uppercase; letter-spacing: 0.09em; }
+.field select, .field input {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 5px 7px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink);
+}
+.field input[type="number"] { width: 84px; }
+.field select:focus-visible, .field input:focus-visible,
+.tbtn:focus-visible, .ghost:focus-visible, .tab:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.toolbar-actions { display: flex; align-items: center; gap: 8px; }
+
+.ghost {
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  padding: 6px 11px;
+  font-size: 11.5px;
+  color: var(--ink-2);
+  cursor: pointer;
+}
+.ghost:hover { color: var(--ink); border-color: var(--line-2); }
+
+.menu { position: relative; }
+.menu-body {
+  position: absolute;
+  right: 0; top: calc(100% + 6px);
+  display: none;
+  flex-direction: column;
+  min-width: 190px;
+  padding: 5px;
+  background: var(--raised);
+  border: 1px solid var(--line-2);
+  border-radius: 9px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.6);
+  z-index: 40;
+}
+/* Hover-and-focus-within rather than a click handler: the menu has three
+   items, none destructive, and keeping it in CSS means no state to desync. */
+.menu:hover .menu-body, .menu:focus-within .menu-body { display: flex; }
+.menu-body button {
+  background: none; border: 0; border-radius: 6px;
+  padding: 7px 9px; text-align: left; font-size: 11.5px;
+  color: var(--ink-2); cursor: pointer;
+}
+.menu-body button:hover { background: var(--surface-2); color: var(--ink); }
+
+/* ── Rails ──────────────────────────────────────────────────────────── */
+
+#left, #right {
+  background: var(--surface);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+#left { grid-area: left; border-right: 1px solid var(--line); display: flex; flex-direction: column; }
+#right { grid-area: right; border-left: 1px solid var(--line); }
+
+.panel { padding: 12px 12px 14px; border-bottom: 1px solid var(--line); }
+.panel-grow { flex: 1; min-height: 90px; }
+.panel h3, .panel-head h3 {
+  margin-bottom: 9px;
+  font-size: 9.5px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.panel-head { padding: 12px 12px 9px; border-bottom: 1px solid var(--line); }
+
+.plugin-entry {
+  display: flex; flex-direction: column; gap: 2px;
+  width: 100%; margin-bottom: 5px; padding: 9px 10px;
+  background: var(--surface-2);
+  border: 1px solid transparent;
+  border-radius: 8px;
+  text-align: left; cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.plugin-entry:hover { background: var(--raised); }
+.plugin-entry strong { font-size: 12.5px; font-weight: 600; }
+.plugin-entry span { font-size: 10.5px; color: var(--ink-3); }
+.plugin-entry.is-active { border-color: rgba(120, 232, 255, 0.45); background: var(--accent-dim); }
+.plugin-entry.is-active strong { color: var(--accent); }
+
+.tree { font-family: var(--mono); font-size: 11px; }
+.tree-row { display: flex; align-items: center; gap: 7px; padding: 3px 0; color: var(--ink-2); }
+.tree-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--ink-3); flex: none; }
+.tree-dot.is-active { background: var(--accent); }
+.tree-dot.is-good { background: var(--good); }
+.tree-dot.is-warning { background: var(--warning); }
+.tree-dot.is-critical { background: var(--critical); }
+.tree-label { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tree-detail { color: var(--ink-3); font-variant-numeric: tabular-nums; }
+
+.key-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 3px 0; font-size: 11px; color: var(--ink-2); }
+.key-row-transport { margin-top: 7px; padding-top: 7px; border-top: 1px solid var(--line); color: var(--ink-3); }
+.key-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.key-caps { display: flex; gap: 3px; flex: none; }
+kbd {
+  min-width: 19px; padding: 2px 5px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  font-family: var(--mono); font-size: 9.5px;
+  text-align: center; color: var(--ink-2);
+}
+
+/* ── Stage ──────────────────────────────────────────────────────────── */
+
+#stage { grid-area: stage; display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+
+#viewport-wrap { position: relative; flex: 1; min-height: 0; background: #05080d; }
+#viewport { display: block; width: 100%; height: 100%; }
+
+#hud {
+  position: absolute; top: 12px; left: 12px;
+  display: flex; gap: 8px; flex-wrap: wrap;
+  pointer-events: none;
+}
+.hud-cell {
+  display: flex; flex-direction: column; gap: 1px;
+  min-width: 86px; padding: 7px 10px;
+  background: rgba(7, 11, 17, 0.72);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  backdrop-filter: blur(9px);
+}
+.hud-cell span { font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3); }
+/* Proportional figures on the large readouts — tabular digits make a big
+   number look gappy — but the unit beside them stays fixed-width. */
+.hud-cell b { font-size: 19px; font-weight: 600; line-height: 1.05; }
+.hud-cell b.is-good { color: var(--good); }
+.hud-cell b.is-warning { color: var(--warning); }
+.hud-cell b.is-serious { color: var(--serious); }
+.hud-cell b.is-critical { color: var(--critical); }
+.hud-cell em { font-style: normal; font-family: var(--mono); font-size: 9.5px; color: var(--ink-3); }
+
+#stats {
+  position: absolute; right: 12px; bottom: 10px;
+  padding: 5px 9px;
+  background: rgba(7, 11, 17, 0.7);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font-family: var(--mono); font-size: 10px;
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+#stats.is-behind { color: var(--warning); border-color: rgba(250, 178, 25, 0.4); }
+
+#toast {
+  position: absolute; left: 50%; bottom: 18px;
+  transform: translate(-50%, 8px);
+  padding: 9px 15px;
+  background: var(--raised);
+  border: 1px solid var(--line-2);
+  border-radius: 9px;
+  font-size: 12px;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+#toast.is-visible { opacity: 1; transform: translate(-50%, 0); }
+
+#dock-resizer { height: 5px; background: var(--surface); border-top: 1px solid var(--line); cursor: ns-resize; }
+#dock-resizer:hover, #dock-resizer.is-dragging { background: var(--accent-dim); }
+
+#dock {
+  height: 292px;
+  display: flex; flex-direction: column;
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+  min-height: 0;
+}
+
+/* ── Timeline ───────────────────────────────────────────────────────── */
+
+.timeline { display: flex; align-items: center; gap: 12px; padding: 8px 14px; border-bottom: 1px solid var(--line); }
+.timeline-clock, .timeline-tick { font-family: var(--mono); font-size: 11px; font-variant-numeric: tabular-nums; color: var(--ink-2); flex: none; }
+.timeline-tick { color: var(--ink-3); }
+.timeline-track-wrap { position: relative; flex: 1; }
+.timeline-track { position: relative; height: 22px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 5px; cursor: pointer; overflow: hidden; }
+.timeline-fill { position: absolute; inset: 0 auto 0 0; background: linear-gradient(90deg, rgba(120,232,255,0.06), rgba(120,232,255,0.14)); }
+.timeline-marks { position: absolute; inset: 0; }
+.timeline-mark { position: absolute; top: 3px; bottom: 3px; width: 2px; border-radius: 1px; transform: translateX(-1px); }
+.timeline-head { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--accent); transform: translateX(-1px); }
+.timeline-tip {
+  position: absolute; top: -25px; transform: translateX(-50%);
+  padding: 3px 6px; background: var(--raised); border: 1px solid var(--line-2); border-radius: 5px;
+  font-family: var(--mono); font-size: 10px; white-space: nowrap; pointer-events: none;
+}
+
+/* ── Dock tabs ──────────────────────────────────────────────────────── */
+
+.tabs { display: flex; align-items: center; gap: 3px; padding: 6px 12px; border-bottom: 1px solid var(--line); }
+.tab {
+  background: none; border: 0; border-radius: 6px;
+  padding: 5px 11px; font-size: 11.5px; color: var(--ink-3); cursor: pointer;
+}
+.tab:hover { color: var(--ink-2); }
+.tab.is-active { background: var(--surface-2); color: var(--accent); }
+.field-right { margin-left: auto; }
+
+.dock-body { flex: 1; min-height: 0; overflow: hidden; }
+.tab-panel { height: 100%; overflow-y: auto; overscroll-behavior: contain; }
+
+/* ── Graphs ─────────────────────────────────────────────────────────── */
+
+#graphs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 10px;
+  padding: 10px 12px 14px;
+}
+.graph-card { background: var(--surface); border: 1px solid var(--line); border-radius: 9px; overflow: hidden; }
+.graph-head { display: flex; align-items: baseline; gap: 8px; padding: 8px 11px 5px; }
+.graph-head h4 { font-size: 11.5px; }
+.graph-unit { font-family: var(--mono); font-size: 10px; color: var(--ink-3); }
+.graph-legend { display: flex; gap: 10px; margin-left: auto; flex-wrap: wrap; }
+.legend-item { display: inline-flex; align-items: center; gap: 5px; font-size: 10px; color: var(--ink-2); }
+.legend-item i { width: 9px; height: 2px; border-radius: 1px; }
+/* The card's height includes the axis band, so the labels are never cropped
+   into a nested scrollbar. */
+.graph-body { position: relative; height: 148px; padding: 0 4px 4px; }
+.graph-canvas { width: 100%; height: 100%; display: block; }
+.graph-tooltip {
+  position: absolute; z-index: 5;
+  min-width: 128px; padding: 6px 8px;
+  background: rgba(16, 25, 39, 0.96);
+  border: 1px solid var(--line-2);
+  border-radius: 7px;
+  font-size: 10.5px; pointer-events: none;
+  transform: translateY(-50%);
+}
+.graph-tooltip em { display: block; margin-bottom: 4px; font-style: normal; font-family: var(--mono); color: var(--ink-3); }
+.tip-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 1px 0; color: var(--ink-2); }
+.tip-row i { display: inline-block; width: 8px; height: 2px; margin-right: 6px; border-radius: 1px; }
+.tip-row b { font-family: var(--mono); font-variant-numeric: tabular-nums; color: var(--ink); font-weight: 500; }
+
+/* ── Telemetry table ────────────────────────────────────────────────── */
+
+#telemetry { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 14px; padding: 12px 14px; }
+.telemetry-group h4 { margin-bottom: 6px; font-size: 9.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); }
+.telemetry-table { width: 100%; border-collapse: collapse; font-size: 11.5px; }
+.telemetry-table td { padding: 4px 6px; border-bottom: 1px solid var(--line); color: var(--ink-2); }
+.telemetry-table td.num { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; color: var(--ink); }
+.telemetry-table td.unit { width: 46px; font-family: var(--mono); font-size: 10px; color: var(--ink-3); }
+.swatch { display: inline-block; width: 8px; height: 2px; margin-right: 7px; border-radius: 1px; vertical-align: middle; }
+
+/* ── Console & explain ──────────────────────────────────────────────── */
+
+#console { padding: 10px 14px; font-family: var(--mono); font-size: 11px; }
+.log-line { display: flex; gap: 10px; padding: 2px 0; color: var(--ink-2); }
+.log-time { color: var(--ink-3); flex: none; font-variant-numeric: tabular-nums; }
+.log-line.is-warn .log-message { color: var(--warning); }
+.log-line.is-error .log-message { color: var(--critical); }
+.log-line.is-good .log-message { color: var(--good); }
+
+#explain { max-width: 78ch; padding: 14px 16px; }
+.explain-note { margin-bottom: 15px; }
+.explain-note h4 { margin-bottom: 5px; font-size: 12px; color: var(--accent); }
+.explain-note p { margin: 0; font-size: 12px; line-height: 1.6; color: var(--ink-2); }
+.explain-note code { padding: 1px 4px; background: var(--surface-2); border-radius: 3px; font-family: var(--mono); font-size: 11px; }
+.empty { color: var(--ink-3); font-size: 12px; }
+
+/* ── Inspector ──────────────────────────────────────────────────────── */
+
+#inspector { padding-bottom: 24px; }
+
+.verdict-slot:empty { display: none; }
+.verdict { margin: 12px; padding: 11px 12px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 9px; }
+.verdict.is-good { border-color: rgba(12, 163, 12, 0.45); }
+.verdict.is-critical { border-color: rgba(208, 59, 59, 0.45); }
+.verdict.is-warning { border-color: rgba(250, 178, 25, 0.45); }
+.verdict-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.verdict-glyph { font-size: 13px; }
+.verdict-head strong { font-size: 12.5px; }
+.verdict-criteria { margin: 8px 0 0; font-size: 10.5px; line-height: 1.5; color: var(--ink-3); }
+
+.inspect-section { padding: 11px 12px; border-bottom: 1px solid var(--line); }
+.inspect-section h4 { margin-bottom: 7px; font-size: 9.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); }
+
+.readout { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; padding: 2.5px 0; font-size: 11.5px; }
+.readout-label { color: var(--ink-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.readout-value { font-family: var(--mono); font-variant-numeric: tabular-nums; color: var(--ink); flex: none; }
+.readout-value.is-good { color: var(--good); }
+.readout-value.is-warning { color: var(--warning); }
+.readout-value.is-serious { color: var(--serious); }
+.readout-value.is-critical { color: var(--critical); }
+
+.param-group { border-bottom: 1px solid var(--line); }
+.param-group > summary {
+  padding: 10px 12px;
+  font-size: 9.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3);
+  cursor: pointer; list-style: none;
+}
+.param-group > summary::-webkit-details-marker { display: none; }
+.param-group > summary::before { content: "▾ "; color: var(--ink-3); }
+.param-group:not([open]) > summary::before { content: "▸ "; }
+.param-group-body { padding: 0 12px 12px; }
+
+.param { margin-bottom: 11px; }
+.param-head { display: flex; align-items: baseline; gap: 7px; margin-bottom: 5px; }
+.param-label { font-size: 11.5px; color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.param-unit { font-family: var(--mono); font-size: 9.5px; color: var(--ink-3); }
+.param-number {
+  width: 74px; margin-left: auto; padding: 3px 6px;
+  background: var(--surface-2); border: 1px solid var(--line); border-radius: 5px;
+  font-family: var(--mono); font-size: 10.5px; text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.param-note { display: block; margin-top: 3px; font-size: 9.5px; color: var(--ink-3); }
+.param-help { margin: 4px 0 0; font-size: 10.5px; line-height: 1.45; color: var(--ink-3); }
+
+.param-slider { width: 100%; height: 16px; -webkit-appearance: none; appearance: none; background: transparent; cursor: pointer; }
+.param-slider::-webkit-slider-runnable-track { height: 3px; background: var(--line-2); border-radius: 2px; }
+.param-slider::-moz-range-track { height: 3px; background: var(--line-2); border-radius: 2px; }
+.param-slider::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 12px; height: 12px; margin-top: -4.5px;
+  background: var(--accent); border-radius: 50%;
+}
+.param-slider::-moz-range-thumb { width: 12px; height: 12px; background: var(--accent); border: 0; border-radius: 50%; }
+
+.param-toggle, .param-select { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 11px; }
+.param-select select { flex: none; width: 130px; padding: 4px 6px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 5px; font-size: 11px; }
+.param-toggle input { width: 15px; height: 15px; accent-color: var(--accent); }
+
+/* ── Scrollbars ─────────────────────────────────────────────────────── */
+
+::-webkit-scrollbar { width: 9px; height: 9px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 5px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.18); }
+
+/* ── Narrow layouts ─────────────────────────────────────────────────── */
+
+/* Below roughly a laptop width the three-column workspace stops being a
+   workspace. The rails move under the stage rather than shrinking, because a
+   160px inspector is worse than one you scroll to. */
+@media (max-width: 1180px) {
+  #app {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(360px, 1fr) auto auto;
+    grid-template-areas: "topbar" "stage" "right" "left";
+    height: auto;
+    min-height: 100dvh;
+  }
+  html, body { overflow: auto; }
+  #topbar { flex-wrap: wrap; height: auto; padding: 10px 12px; gap: 12px; }
+  .sim-identity { border-left: 0; padding-left: 0; }
+  .transport { margin-left: 0; }
+  #left, #right { border: 0; border-top: 1px solid var(--line); overflow: visible; }
+  #stage { min-height: 70dvh; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition-duration: 0.01ms !important; }
+}
