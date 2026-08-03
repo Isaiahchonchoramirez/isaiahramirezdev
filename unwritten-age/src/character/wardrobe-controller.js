@@ -3,6 +3,38 @@ import { EQUIPMENT_SLOTS, WARDROBE_BY_ID, appearanceLoadout } from "./wardrobe-c
 
 const SLOT_SET = new Set(EQUIPMENT_SLOTS);
 
+/** Coverage test: cell size, search radius, and how far to pull the seam in. */
+const COVERAGE_CELL = 0.06;
+const COVERAGE_RADIUS = 0.05;
+const MASK_EROSION_PASSES = 4;
+
+const cellKey = (x, y, z) => `${Math.floor(x / COVERAGE_CELL)},`
+  + `${Math.floor(y / COVERAGE_CELL)},${Math.floor(z / COVERAGE_CELL)}`;
+
+/** Is any garment vertex within `COVERAGE_RADIUS` of this point? */
+function nearCloth(grid, x, y, z) {
+  if (grid.size === 0) return false;
+  const limit = COVERAGE_RADIUS * COVERAGE_RADIUS;
+  const cx = Math.floor(x / COVERAGE_CELL);
+  const cy = Math.floor(y / COVERAGE_CELL);
+  const cz = Math.floor(z / COVERAGE_CELL);
+  for (let dx = -1; dx <= 1; dx += 1) {
+    for (let dy = -1; dy <= 1; dy += 1) {
+      for (let dz = -1; dz <= 1; dz += 1) {
+        const bucket = grid.get(`${cx + dx},${cy + dy},${cz + dz}`);
+        if (!bucket) continue;
+        for (let i = 0; i < bucket.length; i += 3) {
+          const ax = bucket[i] - x;
+          const ay = bucket[i + 1] - y;
+          const az = bucket[i + 2] - z;
+          if (ax * ax + ay * ay + az * az < limit) return true;
+        }
+      }
+    }
+  }
+  return false;
+}
+
 function regionForBone(name = "") {
   const side = name.endsWith("_l") ? "Left" : name.endsWith("_r") ? "Right" : "";
   if (name === "head") return "head";
@@ -47,6 +79,41 @@ export class WardrobeController {
     if (this.debug) this.inspect();
   }
 
+  /**
+   * Hash every active covering garment's vertices into coarse cells.
+   *
+   * Bone regions alone are far too blunt to mask against: "torso" runs from the
+   * waist to the base of the skull, so a sleeveless tunic that hides the torso
+   * also punched a hole through the collarbone and neck well above its own
+   * neckline. Proximity to the cloth itself respects whatever silhouette the
+   * art actually has — necklines, hems, cuffs and all.
+   */
+  buildCoverageGrid(active) {
+    const grid = new Map();
+    const regions = new Set();
+    for (const itemId of active) {
+      const item = WARDROBE_BY_ID.get(itemId);
+      if (!item?.hideBodyParts?.length) continue;
+      for (const region of item.hideBodyParts) regions.add(region);
+      for (const node of this.nodesByItem.get(itemId) ?? []) {
+        // Headless equip/suppression tests drive the controller with plain stub
+        // nodes; anything without real geometry simply contributes no coverage.
+        const position = node.geometry?.attributes?.position;
+        if (!position) continue;
+        for (let i = 0; i < position.count; i += 1) {
+          const x = position.getX(i);
+          const y = position.getY(i);
+          const z = position.getZ(i);
+          const cell = cellKey(x, y, z);
+          let bucket = grid.get(cell);
+          if (!bucket) grid.set(cell, bucket = []);
+          bucket.push(x, y, z);
+        }
+      }
+    }
+    return { grid, regions };
+  }
+
   registerBody(node) {
     const geometry = node.geometry;
     if (!geometry.index || !geometry.attributes.skinIndex || !node.skeleton) return;
@@ -64,7 +131,7 @@ export class WardrobeController {
       const bone = node.skeleton.bones[component(skinIndex, vertex, best)];
       regions[vertex] = regionForBone(bone?.name);
     }
-    this.bodyMasks.push({ node, original, regions });
+    this.bodyMasks.push({ node, original, regions, height: geometry.attributes.position });
   }
 
   unequipSlot(slot, refresh = true) {
@@ -119,16 +186,40 @@ export class WardrobeController {
   }
 
   recalculateBodyMask(active) {
-    const hidden = new Set();
-    for (const itemId of active) {
-      for (const region of WARDROBE_BY_ID.get(itemId)?.hideBodyParts ?? []) hidden.add(region);
-    }
-    for (const { node, original, regions } of this.bodyMasks) {
+    const { grid, regions: hidden } = this.buildCoverageGrid(active);
+
+    for (const { node, original, regions, height } of this.bodyMasks) {
+      let covered = new Uint8Array(regions.length);
+      for (let vertex = 0; vertex < regions.length; vertex += 1) {
+        if (!hidden.has(regions[vertex])) continue;
+        const x = height.getX(vertex);
+        const y = height.getY(vertex);
+        const z = height.getZ(vertex);
+        covered[vertex] = nearCloth(grid, x, y, z) ? 1 : 0;
+      }
+
+      // Pull the boundary inward. Cloth sits a few millimetres off the skin, so
+      // proximity alone puts the cut right at the hem and the seam shows as a
+      // torn dark fringe. Releasing every rim vertex a few times over moves the
+      // cut safely under the garment, whatever shape its edge is.
+      for (let pass = 0; pass < MASK_EROSION_PASSES; pass += 1) {
+        const next = covered.slice();
+        for (let i = 0; i < original.length; i += 3) {
+          const a = original[i];
+          const b = original[i + 1];
+          const c = original[i + 2];
+          if (covered[a] && covered[b] && covered[c]) continue;
+          next[a] = 0; next[b] = 0; next[c] = 0;
+        }
+        covered = next;
+      }
+
       const kept = [];
       for (let i = 0; i < original.length; i += 3) {
-        const votes = [regions[original[i]], regions[original[i + 1]], regions[original[i + 2]]]
-          .filter((region) => region && hidden.has(region)).length;
-        if (votes < 2) kept.push(original[i], original[i + 1], original[i + 2]);
+        const a = original[i];
+        const b = original[i + 1];
+        const c = original[i + 2];
+        if (!(covered[a] && covered[b] && covered[c])) kept.push(a, b, c);
       }
       node.geometry.setIndex(kept);
       node.geometry.index.needsUpdate = true;
