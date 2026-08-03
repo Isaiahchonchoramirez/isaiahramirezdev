@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">Tesseraxis engineering simulation platform</title>
+  <desc id="desc">A dark engineering interface showing rocket telemetry and a coordinated swarm.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#060a10"/><stop offset="1" stop-color="#0b1620"/></linearGradient>
+    <filter id="glow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="9" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse"><path d="M48 0H0V48" fill="none" stroke="#173040" opacity=".45"/></pattern>
+  </defs>
+  <rect width="1600" height="900" fill="url(#bg)"/><rect width="1600" height="900" fill="url(#grid)"/>
+  <path d="M0 82H1600M310 82V900M1268 82V900" stroke="#294453" opacity=".8"/>
+  <g font-family="Inter,Arial,sans-serif">
+    <text x="52" y="52" fill="#8af2ff" font-size="24" font-weight="700" letter-spacing="5">◆ TESSERAXIS</text>
+    <text x="1315" y="50" fill="#6f8998" font-size="15" letter-spacing="2">SIMULATION PLATFORM</text>
+    <text x="52" y="127" fill="#66808f" font-size="14" letter-spacing="2">LABORATORIES</text>
+    <rect x="34" y="151" width="242" height="68" rx="8" fill="#102532" stroke="#56dcef"/><text x="52" y="181" fill="#d9f8ff" font-size="17" font-weight="700">Powered Descent</text><text x="52" y="204" fill="#6f95a5" font-size="13">6-DOF · gimballed thrust</text>
+    <rect x="34" y="231" width="242" height="68" rx="8" fill="#0b151d" stroke="#263b47"/><text x="52" y="261" fill="#c4d2d9" font-size="17" font-weight="700">Swarm Intelligence</text><text x="52" y="284" fill="#6f95a5" font-size="13">distributed autonomy</text>
+  </g>
+  <g transform="translate(790 410)">
+    <ellipse cy="320" rx="195" ry="34" fill="none" stroke="#48ffa8" stroke-width="3" opacity=".65"/><ellipse cy="320" rx="86" ry="15" fill="none" stroke="#6be5ff" stroke-width="2" opacity=".55"/>
+    <path d="M0-215L-37 184H37Z" fill="#b8c8cf" stroke="#e9faff" stroke-width="3"/><path d="M-32-80H32M-35 24H35M-31 126H31" stroke="#263b47" stroke-width="11"/><path d="M-37 184L-66 226M37 184L66 226" stroke="#9db4be" stroke-width="10"/>
+    <path d="M-23 188L0 296L23 188Z" fill="#ff9a3c" opacity=".9" filter="url(#glow)"/><path d="M0-250V-340M-160 320H160" stroke="#6be5ff" stroke-width="2" stroke-dasharray="8 10" opacity=".55"/>
+  </g>
+  <g fill="#6be5ff" filter="url(#glow)"><circle cx="1010" cy="212" r="5"/><circle cx="1080" cy="274" r="5"/><circle cx="1143" cy="198" r="5"/><circle cx="1190" cy="342" r="5"/><circle cx="1041" cy="385" r="5"/><circle cx="1134" cy="466" r="5"/><circle cx="970" cy="520" r="5"/><circle cx="1210" cy="560" r="5"/><circle cx="1100" cy="620" r="5"/></g>
+  <g stroke="#6be5ff" opacity=".26"><path d="M1010 212L1080 274L1143 198M1080 274L1190 342L1041 385L1134 466L970 520M1134 466L1210 560L1100 620"/></g>
+  <g font-family="Inter,Arial,sans-serif">
+    <text x="1310" y="130" fill="#66808f" font-size="14" letter-spacing="2">LIVE TELEMETRY</text>
+    <g fill="#cfe4ec" font-size="14"><text x="1310" y="176">ALTITUDE</text><text x="1530" y="176" text-anchor="end" fill="#8af2ff">1,284 m</text><text x="1310" y="219">VERTICAL</text><text x="1530" y="219" text-anchor="end" fill="#8af2ff">−92.4 m/s</text><text x="1310" y="262">THROTTLE</text><text x="1530" y="262" text-anchor="end" fill="#48ffa8">74%</text><text x="1310" y="305">CONSENSUS</text><text x="1530" y="305" text-anchor="end" fill="#48ffa8">96.1%</text></g>
+    <text x="350" y="845" fill="#eefaff" font-size="44" font-weight="700">Engineering systems you can see.</text><text x="1310" y="845" fill="#678493" font-size="14" letter-spacing="2">DETERMINISTIC · INSPECTABLE · REPLAYABLE</text>
+  </g>
+</svg>
