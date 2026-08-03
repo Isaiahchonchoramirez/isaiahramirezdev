@@ -35,3 +35,7 @@ training/
 # Generated MPFB/Blender source scenes stay local; regenerate with the tools script.
 art/characters/*.blend
 art/characters/*.blend1
+
+# Python bytecode from the Blender tooling
+__pycache__/
+*.pyc
