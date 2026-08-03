@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Tesseraxis — Engineering Simulation Platform</title>
+<meta name="description" content="A browser-native engineering laboratory. Deterministic physics, live telemetry, replayable runs, and exportable data — every force, controller and decision visible." />
+<link rel="stylesheet" href="./style.css?v=1" />
+<script type="importmap">
+{ "imports": { "three": "./vendor/three.module.min.js" } }
+</script>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ── Top bar ─────────────────────────────────────────────────────── -->
+  <header id="topbar">
+    <div class="brand">
+      <span class="brand-mark">◆</span>
+      <div class="brand-text">
+        <strong>Tesseraxis</strong>
+        <em>Simulation Platform</em>
+      </div>
+    </div>
+
+    <div class="sim-identity">
+      <h1 id="sim-title">Loading</h1>
+      <p id="sim-subtitle"></p>
+    </div>
+
+    <div class="transport">
+      <button id="btn-play" type="button" class="tbtn tbtn-primary" title="Play (Space)">▶</button>
+      <button id="btn-step" type="button" class="tbtn" title="Single step (.)">⏭</button>
+      <button id="btn-restart" type="button" class="tbtn" title="Restart run (R)">↺</button>
+
+      <label class="field">
+        <span>Speed</span>
+        <select id="speed-select">
+          <option value="0.1">0.1×</option>
+          <option value="0.25">0.25×</option>
+          <option value="0.5">0.5×</option>
+          <option value="1" selected>1×</option>
+          <option value="2">2×</option>
+          <option value="4">4×</option>
+        </select>
+      </label>
+
+      <label class="field">
+        <span>Seed</span>
+        <input id="seed-input" type="number" min="1" step="1" value="1" />
+      </label>
+      <button id="btn-dice" type="button" class="tbtn" title="New random seed">⚄</button>
+    </div>
+
+    <div class="toolbar-actions">
+      <button id="btn-share" type="button" class="ghost">Share run</button>
+      <div class="menu">
+        <button type="button" class="ghost">Export ▾</button>
+        <div class="menu-body">
+          <button id="btn-csv" type="button">Telemetry · CSV</button>
+          <button id="btn-json" type="button">Full run · JSON</button>
+          <button id="btn-journal" type="button">Journal · replayable</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── Left rail ───────────────────────────────────────────────────── -->
+  <aside id="left">
+    <section class="panel">
+      <h3>Laboratories</h3>
+      <div id="plugin-list"></div>
+    </section>
+
+    <section class="panel panel-grow">
+      <h3>Scene</h3>
+      <div id="hierarchy" class="tree"></div>
+    </section>
+
+    <section class="panel">
+      <h3>Controls</h3>
+      <div id="keymap"></div>
+    </section>
+  </aside>
+
+  <!-- ── Viewport ────────────────────────────────────────────────────── -->
+  <main id="stage">
+    <div id="viewport-wrap">
+      <canvas id="viewport"></canvas>
+      <div id="hud"></div>
+      <div id="stats"></div>
+      <div id="toast"></div>
+    </div>
+
+    <div id="dock-resizer" title="Drag to resize"></div>
+
+    <div id="dock">
+      <div id="timeline-slot"></div>
+
+      <nav class="tabs">
+        <button class="tab is-active" data-tab="graphs" type="button">Graphs</button>
+        <button class="tab" data-tab="telemetry" type="button">Telemetry</button>
+        <button class="tab" data-tab="console" type="button">Console</button>
+        <button class="tab" data-tab="explain" type="button">Explain</button>
+        <label class="field field-right">
+          <span>Window</span>
+          <select id="window-select">
+            <option value="10">10 s</option>
+            <option value="30" selected>30 s</option>
+            <option value="60">60 s</option>
+            <option value="120">120 s</option>
+            <option value="all">Whole run</option>
+          </select>
+        </label>
+      </nav>
+
+      <div class="dock-body">
+        <div class="tab-panel" data-panel="graphs"><div id="graphs"></div></div>
+        <div class="tab-panel" data-panel="telemetry" hidden><div id="telemetry"></div></div>
+        <div class="tab-panel" data-panel="console" hidden><div id="console"></div></div>
+        <div class="tab-panel" data-panel="explain" hidden><div id="explain"></div></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ── Inspector ───────────────────────────────────────────────────── -->
+  <aside id="right">
+    <div class="panel-head"><h3>Inspector</h3></div>
+    <div id="inspector"></div>
+  </aside>
+
+</div>
+
+<noscript>
+  <p style="padding:2rem;color:#eef4fb">Tesseraxis is a real-time simulation platform and needs JavaScript.</p>
+</noscript>
+
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>
