@@ -135,6 +135,11 @@ export const BODY_SLIDERS = [
   { key: "armLength", name: "Arm proportion", min: 0, max: 1, step: 0.01, affects: "body" },
   { key: "legLength", name: "Leg proportion", min: 0, max: 1, step: 0.01, affects: "body" },
   { key: "neckLength", name: "Neck length", min: 0, max: 1, step: 0.01, affects: "body" },
+  // Driven by authored morph targets rather than bone scale, so they swell and
+  // shrink the surface instead of stretching a whole segment.
+  { key: "bust", name: "Bust", min: 0, max: 1, step: 0.01, affects: "body" },
+  { key: "glutes", name: "Seat", min: 0, max: 1, step: 0.01, affects: "body" },
+  { key: "belly", name: "Belly", min: 0, max: 1, step: 0.01, affects: "body" },
 ];
 
 export const HEAD_SLIDERS = [
@@ -183,6 +188,9 @@ export function defaultAppearance() {
     armLength: 0.5,
     legLength: 0.5,
     neckLength: 0.5,
+    bust: 0.5,
+    glutes: 0.5,
+    belly: 0.5,
 
     // head
     headSize: 0.5,

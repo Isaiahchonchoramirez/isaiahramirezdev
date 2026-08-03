@@ -24,6 +24,40 @@ def mpfb_symbol(module_suffix, symbol):
 
 HumanService = mpfb_symbol("mpfb.services.humanservice", "HumanService")
 AssetService = mpfb_symbol("mpfb.services.assetservice", "AssetService")
+TargetService = mpfb_symbol("mpfb.services.targetservice", "TargetService")
+
+# MPFB stores the macro sliders as custom properties on the basemesh and only
+# rebuilds the shape when told to. `create_human(macro_detail_dict=...)` accepts
+# the dict and silently discards it — gender 0.0 and gender 1.0 came out as the
+# same vertices, which is why every character was the same androgynous body no
+# matter what the spec asked for.
+MACRO_PROPERTY = {
+    "gender": "MPFB_HUM_gender", "age": "MPFB_HUM_age", "muscle": "MPFB_HUM_muscle",
+    "weight": "MPFB_HUM_weight", "proportions": "MPFB_HUM_proportions",
+    "height": "MPFB_HUM_height", "cupsize": "MPFB_HUM_cupsize",
+    "firmness": "MPFB_HUM_firmness",
+}
+RACE_PROPERTY = {"asian": "MPFB_HUM_asian", "caucasian": "MPFB_HUM_caucasian",
+                 "african": "MPFB_HUM_african"}
+
+
+def apply_macro_details(human, macro):
+    """Write the spec's macro sliders onto the body and rebuild it."""
+    for key, value in macro.items():
+        if key == "race":
+            for race, share in value.items():
+                human[RACE_PROPERTY[race]] = share
+        elif key in MACRO_PROPERTY:
+            human[MACRO_PROPERTY[key]] = value
+    TargetService.reapply_macro_details(human)
+    # Macros arrive as shape keys layered over the base mesh. The rest-pose bake
+    # later clears shape keys wholesale, which silently threw the whole macro
+    # away and left every character on the same androgynous base — so bake them
+    # into the vertices now, while they still exist.
+    TargetService.bake_targets(human)
+    height = max(v.co.z for v in human.data.vertices) - min(v.co.z for v in human.data.vertices)
+    print(f"MACRO gender={macro.get('gender'):.2f} cup={macro.get('cupsize'):.2f}"
+          f" -> body height {height:.3f} m")
 
 PROJECT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(PROJECT, "public", "unwritten-age", "assets", "characters")
@@ -256,59 +290,118 @@ def create_mantle(spec, human, body_height, cloth, rig):
     mantle["variant"] = "shoulder-mantle"
     bind_to_rig(mantle, rig)
 
-def create_fur_boots(spec, body_height, cloth, rig):
-    """Close tapered hide gaiters with overlapping binding bands."""
-    for side, x in (("l", 0.105 * body_height), ("r", -0.105 * body_height)):
-        bpy.ops.mesh.primitive_cone_add(
-            vertices=40, radius1=0.042 * body_height, radius2=0.052 * body_height,
-            depth=0.14 * body_height, location=(x, 0, 0.17 * body_height))
-        gaiter = bpy.context.object
-        gaiter.name = f'{spec["id"]}-calf-gaiter-{side}'
-        gaiter.scale.y = 0.84
-        gaiter.data.materials.append(cloth)
-        shade_smooth(gaiter)
-        gaiter["role"] = "garment"
-        gaiter["slot"] = "feet"
-        gaiter["variant"] = "fur-boots"
-        bind_to_rig(gaiter, rig, single_bone=f"calf_{side}")
+def shell_from_body(human, rig, *, name, material, keep, lift, thickness,
+                    relief=None, relax=None, props=None):
+    """Cut a garment out of the body's own surface and lift it clear.
 
-        for band, z_ratio in enumerate((0.125, 0.170, 0.215)):
-            bpy.ops.mesh.primitive_torus_add(
-                major_radius=(0.045 + band * 0.004) * body_height,
-                minor_radius=0.006 * body_height,
-                major_segments=32, minor_segments=8,
-                location=(x, 0, z_ratio * body_height))
-            wrap = bpy.context.object
-            wrap.name = f'{spec["id"]}-calf-wrap-{side}-{band + 1}'
-            wrap.scale.y = 0.82
-            wrap.rotation_euler.x = math.radians(-6 if band % 2 else 6)
-            wrap.data.materials.append(cloth)
-            shade_smooth(wrap)
-            wrap["role"] = "garment"
-            wrap["slot"] = "feet"
-            wrap["variant"] = "fur-boots"
-            bind_to_rig(wrap, rig, single_bone=f"calf_{side}")
+    Primitives placed by ratio cannot fit a body they have never seen: the
+    armor plates were flat cubes parked at a guessed front/back depth and the
+    gaiters were cones parked at a guessed leg spacing, so both floated with
+    gaps no matter which character wore them. A shell taken off the skin fits
+    every body by construction, and — because it inherits the body's vertex
+    groups — it scales with the same bones when the proportion sliders move,
+    which is what stops the wearer growing back out through it.
 
-def create_armor_bands(spec, body_height, hide, rig):
-    """Overlapping worked-hide plates that give armor a distinct silhouette."""
-    for index, z_ratio in enumerate((0.575, 0.625, 0.675, 0.725)):
-        for face, y in (("front", -0.145 * body_height), ("back", 0.13 * body_height)):
-            bpy.ops.mesh.primitive_cube_add(size=1, location=(0, y, z_ratio * body_height))
-            plate = bpy.context.object
-            plate.name = f'{spec["id"]}-armor-{face}-plate-{index + 1}'
-            plate.scale = (0.158 * body_height, 0.018 * body_height,
-                           0.032 * body_height)
-            bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
-            plate.data.materials.append(hide)
-            bevel = plate.modifiers.new("soft hide plate edges", "BEVEL")
-            bevel.width = 0.009 * body_height
-            bevel.segments = 3
-            shade_smooth(plate)
-            plate["role"] = "garment"
-            plate["slot"] = "torso"
-            plate["variant"] = "hide-armor"
-            bone = "spine_01" if index < 2 else ("spine_02" if index == 2 else "spine_03")
-            bind_to_rig(plate, rig, single_bone=bone)
+    `keep(co, height, owner)` chooses the region; `owner` is the name of the
+    bone that holds most of that vertex, so regions can be named anatomically
+    rather than guessed from coordinates.
+    """
+    depsgraph = bpy.context.evaluated_depsgraph_get()
+    mesh = bpy.data.meshes.new_from_object(human.evaluated_get(depsgraph))
+    obj = bpy.data.objects.new(name, mesh)
+    bpy.context.scene.collection.objects.link(obj)
+    for group in human.vertex_groups:
+        obj.vertex_groups.new(name=group.name)
+
+    # Only bones may own a vertex. MPFB's `extra_vertex_groups` also hangs
+    # region groups ("body", "legs") off the mesh at full weight, and those beat
+    # every bone in a plain maximum — which silently emptied the gaiters and
+    # gave the armor sleeves down to the elbow.
+    bones = {bone.name for bone in rig.data.bones}
+    names = [group.name if group.name in bones else None for group in obj.vertex_groups]
+    owners = []
+    for vertex in mesh.vertices:
+        best, weight = None, 0.0
+        for entry in vertex.groups:
+            if entry.group >= len(names) or names[entry.group] is None:
+                continue
+            if entry.weight > weight:
+                best, weight = names[entry.group], entry.weight
+        owners.append(best or "")
+
+    height = max(v.co.z for v in mesh.vertices)
+    bm = bmesh.new()
+    bm.from_mesh(mesh)
+    bm.verts.ensure_lookup_table()
+    bmesh.ops.delete(
+        bm,
+        geom=[v for v in bm.verts if not keep(v.co, height, owners[v.index])],
+        context="VERTS")
+    bm.normal_update()
+    for vert in bm.verts:
+        extra = relief(vert.co, height) if relief else 0.0
+        vert.co += vert.normal * (lift * height + extra)
+    bm.to_mesh(mesh)
+    bm.free()
+
+    mesh.materials.clear()
+    mesh.materials.append(material)
+    for polygon in mesh.polygons:
+        polygon.material_index = 0
+    for slot in obj.material_slots:
+        slot.link = "DATA"
+
+    if relax:
+        smooth = obj.modifiers.new("hangs like cloth", "SMOOTH")
+        smooth.factor, smooth.iterations = relax
+    solid = obj.modifiers.new("thickness", "SOLIDIFY")
+    solid.thickness = thickness * height
+    solid.offset = 1.0
+    shade_smooth(obj)
+    for key, value in (props or {}).items():
+        obj[key] = value
+    bind_to_rig(obj, rig)
+    return obj
+
+
+def create_fur_boots(spec, human, cloth, rig):
+    """Hide gaiters cut from the shin itself, so they wrap every leg."""
+    for side in ("l", "r"):
+        calf = f"calf_{side}"
+        shell_from_body(
+            human, rig,
+            name=f'{spec["id"]}-calf-gaiter-{side}',
+            material=cloth,
+            # The shin, ankle and instep — whatever the leg's actual shape is.
+            keep=lambda co, height, owner, calf=calf: owner in (calf, f"foot_{side}")
+            and co.z < 0.30 * height,
+            lift=0.006,
+            thickness=0.004,
+            # Binding bands: raised rings up the shin rather than free-floating
+            # tori that never touched the leg.
+            relief=lambda co, height: max(0.0, math.sin(co.z / height * 150.0)) ** 3
+            * 0.004 * height,
+            props={"role": "garment", "slot": "feet", "variant": "fur-boots"})
+
+
+def create_armor_bands(spec, human, hide, rig):
+    """Worked-hide plating taken off the torso, so it closes around the ribs."""
+    shell_from_body(
+        human, rig,
+        name=f'{spec["id"]}-layered-hide-plating',
+        material=hide,
+        keep=lambda co, height, owner: not owner.startswith(
+            ("upperarm", "lowerarm", "hand", "thumb", "index", "middle", "ring", "pinky"))
+        and 0.55 * height <= co.z <= 0.80 * height
+        and abs(co.x) <= 0.30 * height,
+        # Sits proud of the woven tunic underneath rather than inside it.
+        lift=0.022,
+        thickness=0.007,
+        # Overlapping horizontal courses, the silhouette the plates were after.
+        relief=lambda co, height: max(0.0, math.sin(co.z / height * 96.0)) ** 2
+        * 0.008 * height,
+        relax=(0.6, 4),
+        props={"role": "garment", "slot": "torso", "variant": "hide-armor"})
 
 
 def mask_skin_under_clothes(human, body_height):
@@ -345,7 +438,7 @@ def mask_skin_under_clothes(human, body_height):
     print(f"MASKED {len(removable)} hidden skin faces beneath clothing")
 
 
-def ground_and_align(human, rig):
+def ground_and_align(human, rig, rig_reference_height):
     """Stand the character on z=0 with its skeleton actually inside its body.
 
     MPFB's `feet_on_ground` moves the mesh vertices up but leaves the armature
@@ -358,23 +451,39 @@ def ground_and_align(human, rig):
     So the human is built unshifted, where MPFB's rig does line up, and mesh and
     bones are then lifted together by the same amount.
     """
-    offset = -min(vert.co.z for vert in human.data.vertices)
+    lowest = min(vert.co.z for vert in human.data.vertices)
+    body_height = max(vert.co.z for vert in human.data.vertices) - lowest
+    offset = -lowest
     for vert in human.data.vertices:
         vert.co.z += offset
     human.data.update()
+
+    # `add_builtin_rig` always emits the same skeleton, sized for MPFB's stock
+    # body — so once the macros make a character shorter or taller, the bones
+    # stop matching it. Scale the rig by the same amount the body changed before
+    # lifting it, or the shoulder joint of a 1.53 m character sits at the height
+    # of a 1.69 m one's.
+    growth = body_height / max(1e-6, rig_reference_height)
 
     bpy.ops.object.select_all(action="DESELECT")
     rig.select_set(True)
     bpy.context.view_layer.objects.active = rig
     bpy.ops.object.mode_set(mode="EDIT")
     for edit_bone in rig.data.edit_bones:
+        # Ground the skeleton first, then scale about the feet. Scaling about
+        # the rig's own origin — which sits near the hips — stretched the legs
+        # and shortened the spine, leaving a short character's shoulder at 85%
+        # of her height instead of the ~79% a person's actually is.
         edit_bone.head.z += offset
         edit_bone.tail.z += offset
+        edit_bone.head *= growth
+        edit_bone.tail *= growth
     bpy.ops.object.mode_set(mode="OBJECT")
 
     shoulder = rig.data.bones["upperarm_l"].head_local.z
-    print(f"ALIGNED lifted {offset:.3f} m; shoulder now z={shoulder:.3f} "
-          f"of body {max(v.co.z for v in human.data.vertices):.3f}")
+    top = max(v.co.z for v in human.data.vertices)
+    print(f"ALIGNED scaled rig x{growth:.3f}, lifted {offset:.3f} m; shoulder "
+          f"z={shoulder:.3f} of body {top:.3f} ({shoulder / top:.0%})")
 
 
 def aim_pose_bone(rig, name, target):
@@ -504,6 +613,30 @@ def bake_pose_as_rest(rig):
         len(meshes)))
 
 
+def bake_helper_mask(human):
+    """Delete MPFB's helper geometry for real, rather than hiding it.
+
+    MakeHuman bodies carry a low-poly helper shell used for fitting clothes.
+    `mask_helpers=True` hides it behind a Mask modifier, which was enough while
+    the exporter ran with `export_apply=True`. Now that morph targets have to
+    survive export, modifiers are left unevaluated — so the helper shell ships
+    with the body and renders as flat panels across the face and shoulders.
+
+    Applying the mask needs a mesh with no shape keys, so this has to run after
+    the rest-pose bake clears them and before the face morphs are authored.
+    """
+    masks = [m for m in human.modifiers if m.type == "MASK"]
+    if not masks:
+        return
+    bpy.ops.object.select_all(action="DESELECT")
+    human.select_set(True)
+    bpy.context.view_layer.objects.active = human
+    before = len(human.data.vertices)
+    for modifier in masks:
+        bpy.ops.object.modifier_apply(modifier=modifier.name)
+    print(f"HELPERS stripped {before} -> {len(human.data.vertices)} verts")
+
+
 def create_face_morphs(human):
     """Author a compact, game-safe facial morph set after the rest-pose bake."""
     height = max(v.co.z for v in human.data.vertices)
@@ -535,6 +668,69 @@ def create_face_morphs(human):
                 key.data[index].co.x += co.x * 0.10
             elif name == "mouthWidth":
                 key.data[index].co.x += co.x * 0.12
+
+    create_body_morphs(human, height)
+
+
+def create_body_morphs(human, height):
+    """Chest, seat and belly, as morphs the player can actually move.
+
+    MPFB's own `cupsize` macro is baked at generation and did not survive to the
+    export in any case, so these are authored directly: a soft falloff from the
+    centre of each region means the shape swells and shrinks rather than a block
+    of vertices sliding as one. Blender -Y is forward.
+    """
+    def falloff(value, centre, reach):
+        return max(0.0, 1.0 - abs(value - centre) / reach) ** 2
+
+    regions = {
+        # Bust: forward and a little apart, strongest at the fullest point.
+        "bust": {
+            "test": lambda co: co.y < 0 and 0.66 * height < co.z < 0.80 * height
+            and abs(co.x) < 0.17 * height,
+            "move": lambda co: (
+                math.copysign(falloff(abs(co.x), 0.062 * height, 0.11 * height)
+                              * falloff(co.z, 0.725 * height, 0.075 * height)
+                              * 0.030 * height, co.x) * 0.45,
+                -falloff(abs(co.x), 0.062 * height, 0.11 * height)
+                * falloff(co.z, 0.725 * height, 0.075 * height) * 0.030 * height,
+                0.0),
+        },
+        # Seat: back and slightly down, so it reads as weight rather than a shelf.
+        "glutes": {
+            "test": lambda co: co.y > 0 and 0.44 * height < co.z < 0.60 * height
+            and abs(co.x) < 0.22 * height,
+            "move": lambda co: (
+                math.copysign(falloff(abs(co.x), 0.085 * height, 0.13 * height)
+                              * falloff(co.z, 0.515 * height, 0.075 * height)
+                              * 0.034 * height, co.x) * 0.35,
+                falloff(abs(co.x), 0.085 * height, 0.13 * height)
+                * falloff(co.z, 0.515 * height, 0.075 * height) * 0.034 * height,
+                -falloff(co.z, 0.515 * height, 0.075 * height) * 0.006 * height),
+        },
+        # Belly: forward and round, centred on the navel.
+        "belly": {
+            "test": lambda co: co.y < 0 and 0.52 * height < co.z < 0.68 * height
+            and abs(co.x) < 0.16 * height,
+            "move": lambda co: (
+                0.0,
+                -falloff(abs(co.x), 0.0, 0.15 * height)
+                * falloff(co.z, 0.60 * height, 0.085 * height) * 0.030 * height,
+                0.0),
+        },
+    }
+
+    for name, region in regions.items():
+        key = human.shape_key_add(name=name)
+        key.slider_min, key.slider_max = -1.0, 1.0
+        for index, vertex in enumerate(human.data.vertices):
+            co = vertex.co
+            if not region["test"](co):
+                continue
+            dx, dy, dz = region["move"](co)
+            key.data[index].co.x += dx
+            key.data[index].co.y += dy
+            key.data[index].co.z += dz
 
 
 def limit_skin_weights(obj, limit=4):
@@ -658,30 +854,17 @@ def add_period_clothing(spec, human, rig):
     torso["variant"] = "tunic"
     bind_to_rig(torso, rig)
 
-    # A second fitted shell is authored as a separate equipment variant. It
-    # sits farther out and uses worked hide, so switching torso slots changes
-    # silhouette/material rather than merely recolouring the tunic.
-    armor = torso.copy()
-    armor.data = torso.data.copy()
-    armor.name = f'{spec["id"]}-layered-hide-armor'
-    bpy.context.scene.collection.objects.link(armor)
-    armor.data.materials.clear()
-    armor.data.materials.append(hide)
-    for polygon in armor.data.polygons:
-        polygon.material_index = 0
-    armor.scale.x = 1.018
-    armor.scale.y = 1.025
-    armor["role"] = "garment"
-    armor["slot"] = "torso"
-    armor["variant"] = "hide-armor"
-    create_armor_bands(spec, body_height, hide, rig)
+    # The armor variant is its own shell off the same body, not a copy of the
+    # tunic pushed outward by object scale — that scaled about the origin at the
+    # feet, so the gap grew the further up the body you looked.
+    create_armor_bands(spec, human, hide, rig)
 
     create_flowing_lower_wrap(spec, body_height, cloth, rig, variant="wrap")
     create_flowing_lower_wrap(
         spec, body_height, cloth, rig, variant="robe",
         bottom_ratio=0.10, bottom_radius_ratio=0.20, flow=0.065)
     create_mantle(spec, human, body_height, hide, rig)
-    create_fur_boots(spec, body_height, hide, rig)
+    create_fur_boots(spec, human, hide, rig)
 
     bpy.ops.mesh.primitive_torus_add(
         major_radius=0.134 * body_height, minor_radius=0.0085 * body_height,
@@ -710,8 +893,12 @@ def export_character(spec):
         # Grounding is done in ground_and_align, which moves the skeleton too.
         feet_on_ground=False,
         scale=0.1,
-        macro_detail_dict=spec["macro"],
     )
+    # The height the stock rig is authored against, captured before the macros
+    # move it, so ground_and_align can scale the skeleton to match.
+    rig_reference_height = (max(v.co.z for v in human.data.vertices)
+                            - min(v.co.z for v in human.data.vertices))
+    apply_macro_details(human, spec["macro"])
     human.name = f'{spec["id"]}-body'
     human.data.name = f'{spec["id"]}-mesh'
     skin_path = AssetService.find_asset_absolute_path(spec["skin_asset"], asset_subdir="skins")
@@ -726,14 +913,13 @@ def export_character(spec):
 
     # Put the skeleton inside the body before posing it — every joint pivots in
     # the wrong place until this runs.
-    ground_and_align(human, rig)
+    ground_and_align(human, rig, rig_reference_height)
 
     # Drop the arms and bake that in before anything is fitted to the body, so
     # eyes, hair and clothing are all cut against the pose the character stands
     # in rather than against MPFB's splayed rigging pose.
     relax_arms(rig)
     bake_pose_as_rest(rig)
-    create_face_morphs(human)
 
     # Each part carries a `role`, exported as glTF extras and read back as
     # `userData.role`. The creator recolours by role, so it never has to guess
@@ -768,6 +954,13 @@ def export_character(spec):
                 added["variant"] = variant
 
     add_period_clothing(spec, human, rig)
+
+    # Only here do both constraints hold. MPFB fits every .mhclo asset by
+    # indexing into the full basemesh, so the helper shell has to survive until
+    # the last attachment is bound; and a mesh carrying shape keys cannot have a
+    # modifier applied, so the shell has to go before the morphs are authored.
+    bake_helper_mask(human)
+    create_face_morphs(human)
 
     # Keep the editable scene readable: render the default outfit while all
     # alternative slot meshes remain present and exportable.
