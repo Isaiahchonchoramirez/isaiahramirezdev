@@ -43,3 +43,4 @@ __pycache__/
 # Submissions captured by the local Bløm service — someone's order history,
 # not source. Recreate by running the service and using the site.
 server/blom/data/
+.gstack/

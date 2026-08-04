@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Tesseraxis — Engineering Simulation Platform</title>
 <meta name="description" content="A browser-native engineering laboratory. Deterministic physics, live telemetry, replayable runs, and exportable data — every force, controller and decision visible." />
-<link rel="stylesheet" href="./style.css?v=1" />
+<link rel="stylesheet" href="./style.css?v=2" />
 <script type="importmap">
 { "imports": { "three": "./vendor/three.module.min.js" } }
 </script>
@@ -24,15 +24,24 @@
       </div>
     </div>
 
+    <label class="project-field" title="Project name">
+      <span>Project</span>
+      <input id="project-name" value="Untitled simulation" aria-label="Project name" />
+    </label>
+
     <div class="sim-identity">
       <h1 id="sim-title">Loading</h1>
       <p id="sim-subtitle"></p>
     </div>
 
     <div class="transport">
-      <button id="btn-play" type="button" class="tbtn tbtn-primary" title="Play (Space)">▶</button>
-      <button id="btn-step" type="button" class="tbtn" title="Single step (.)">⏭</button>
-      <button id="btn-restart" type="button" class="tbtn" title="Restart run (R)">↺</button>
+      <div id="engine-state" class="engine-state" data-state="paused" role="status" aria-live="polite">
+        <i></i><span>Paused</span>
+      </div>
+      <button id="btn-play" type="button" class="tbtn tbtn-primary" title="Play (Space)" aria-label="Play simulation">▶</button>
+      <button id="btn-stop" type="button" class="tbtn" title="Stop and return to editing" aria-label="Stop simulation">■</button>
+      <button id="btn-step" type="button" class="tbtn" title="Single tick (.)" aria-label="Step one tick">⏭</button>
+      <button id="btn-restart" type="button" class="tbtn" title="Reset run (R)" aria-label="Reset simulation">↺</button>
 
       <label class="field">
         <span>Speed</span>
@@ -54,6 +63,35 @@
     </div>
 
     <div class="toolbar-actions">
+      <div class="menu">
+        <button type="button" class="ghost" aria-haspopup="true">Project ▾</button>
+        <div class="menu-body menu-body-left">
+          <button id="btn-new-project" type="button">New project <kbd>⌘N</kbd></button>
+          <button id="btn-open-project" type="button">Open project</button>
+          <button id="btn-save-project" type="button">Save project <kbd>⌘S</kbd></button>
+        </div>
+      </div>
+      <button id="btn-undo" type="button" class="icon-command" title="Undo (Cmd/Ctrl+Z)" aria-label="Undo" disabled>↶</button>
+      <button id="btn-redo" type="button" class="icon-command" title="Redo (Cmd/Ctrl+Shift+Z)" aria-label="Redo" disabled>↷</button>
+      <label class="command-search">
+        <span aria-hidden="true">⌕</span>
+        <input id="global-search" type="search" placeholder="Search workspace" aria-label="Search workspace" />
+        <kbd>⌘K</kbd>
+      </label>
+      <label class="layout-field">
+        <span>Layout</span>
+        <select id="layout-select" aria-label="Workspace layout">
+          <option value="simulation">Simulation</option>
+          <option value="analysis">Data analysis</option>
+          <option value="debugging">Debugging</option>
+          <option value="presentation">Presentation</option>
+          <option value="beginner">Beginner</option>
+          <option value="engineering">Engineering</option>
+          <option value="custom" disabled>Custom</option>
+        </select>
+      </label>
+      <button id="btn-settings" type="button" class="icon-command" title="Workspace settings" aria-label="Workspace settings">⚙</button>
+      <button id="btn-help" type="button" class="icon-command" title="Help and shortcuts" aria-label="Help and shortcuts">?</button>
       <button id="btn-share" type="button" class="ghost">Share run</button>
       <div class="menu">
         <button type="button" class="ghost">Export ▾</button>
@@ -68,6 +106,7 @@
 
   <!-- ── Left rail ───────────────────────────────────────────────────── -->
   <aside id="left">
+    <button id="btn-left-panel" class="rail-toggle rail-toggle-left" type="button" aria-pressed="true" aria-label="Toggle hierarchy panel">‹</button>
     <section class="panel">
       <h3>Laboratories</h3>
       <div id="plugin-list"></div>
@@ -88,6 +127,12 @@
   <main id="stage">
     <div id="viewport-wrap">
       <canvas id="viewport"></canvas>
+      <div class="viewport-tools" aria-label="Viewport tools">
+        <button id="btn-left-panel-mini" type="button" title="Toggle hierarchy" aria-label="Toggle hierarchy">☰</button>
+        <span></span>
+        <button id="btn-dock" type="button" title="Toggle data workspace" aria-label="Toggle data workspace" aria-pressed="true">▤</button>
+        <button id="btn-right-panel" type="button" title="Toggle inspector" aria-label="Toggle inspector" aria-pressed="true">◫</button>
+      </div>
       <div id="hud"></div>
       <div id="stats"></div>
       <div id="toast"></div>
@@ -99,9 +144,12 @@
       <div id="timeline-slot"></div>
 
       <nav class="tabs">
+        <button class="tab" data-tab="events" type="button">Events</button>
         <button class="tab is-active" data-tab="graphs" type="button">Graphs</button>
         <button class="tab" data-tab="telemetry" type="button">Telemetry</button>
         <button class="tab" data-tab="console" type="button">Console</button>
+        <button class="tab" data-tab="profiler" type="button">Profiler</button>
+        <button class="tab" data-tab="data" type="button">Data table</button>
         <button class="tab" data-tab="explain" type="button">Explain</button>
         <label class="field field-right">
           <span>Window</span>
@@ -116,9 +164,12 @@
       </nav>
 
       <div class="dock-body">
+        <div class="tab-panel" data-panel="events" hidden><div id="events-browser" class="empty-panel"><strong>No filtered events</strong><span>Run the simulation to populate the event browser.</span></div></div>
         <div class="tab-panel" data-panel="graphs"><div id="graphs"></div></div>
         <div class="tab-panel" data-panel="telemetry" hidden><div id="telemetry"></div></div>
         <div class="tab-panel" data-panel="console" hidden><div id="console"></div></div>
+        <div class="tab-panel" data-panel="profiler" hidden><div id="profiler-panel" class="empty-panel"><strong>Profiler ready</strong><span>Frame, simulation, render, and draw-call statistics remain visible over the viewport.</span></div></div>
+        <div class="tab-panel" data-panel="data" hidden><div id="data-table-panel" class="empty-panel"><strong>No data selection</strong><span>Select telemetry channels to build a table.</span></div></div>
         <div class="tab-panel" data-panel="explain" hidden><div id="explain"></div></div>
       </div>
     </div>
@@ -126,7 +177,7 @@
 
   <!-- ── Inspector ───────────────────────────────────────────────────── -->
   <aside id="right">
-    <div class="panel-head"><h3>Inspector</h3></div>
+    <div class="panel-head"><h3>Inspector</h3><button id="btn-right-panel-close" type="button" aria-label="Hide inspector">›</button></div>
     <div id="inspector"></div>
   </aside>
 

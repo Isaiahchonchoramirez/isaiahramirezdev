@@ -10,6 +10,7 @@ import { Timeline } from './timeline.js';
 import { GraphPanel } from './graphs.js';
 import { STATUS, STATUS_GLYPH, seriesColor } from './theme.js';
 import { exportCsv, exportJson, exportJournal, buildShareLink } from '../engine/export.js';
+import { WorkspaceController } from './workspace.js';
 
 // Reserved by the shell. Plugins are documented not to bind these, because a
 // simulation that steals the pause key is a simulation you cannot stop.
@@ -40,11 +41,17 @@ export class Shell {
       playBtn: root.querySelector('#btn-play'),
       keymap: root.querySelector('#keymap'),
       toast: root.querySelector('#toast'),
+      engineState: root.querySelector('#engine-state'),
+      globalSearch: root.querySelector('#global-search'),
     };
 
     this.inspector = new Inspector(this.nodes.inspector, sim);
     this.timeline = new Timeline(this.nodes.timeline, sim);
     this.graphs = new GraphPanel(this.nodes.graphs);
+    this.workspace = new WorkspaceController(root, {
+      onToast: (message) => this.toast(message),
+      onResize: () => this.viewport.resize(),
+    });
 
     this.keyBindings = new Map();
     this.toggleState = new Map();
@@ -56,6 +63,7 @@ export class Shell {
     this._bindKeyboard();
     this._bindTabs();
     this._bindResizer();
+    this._bindWorkspaceCommands();
 
     sim.events.on('sim:loaded', ({ plugin }) => this._onPluginLoaded(plugin));
     sim.events.on('sim:restarted', () => this._onRestart());
@@ -112,6 +120,7 @@ export class Shell {
     this._logCount = 0;
     clear(this.nodes.console);
     this._updatePlayButton();
+    this._setEngineState('paused');
   }
 
   _onRestart() {
@@ -119,6 +128,7 @@ export class Shell {
     this._logCount = 0;
     clear(this.nodes.console);
     this._updatePlayButton();
+    this._setEngineState('paused');
   }
 
   // -----------------------------------------------------------------------
@@ -131,12 +141,21 @@ export class Shell {
     this.nodes.playBtn.addEventListener('click', () => {
       sim.loop.toggle();
       this._updatePlayButton();
+      this._setEngineState(sim.loop.paused ? 'paused' : 'running');
+    });
+
+    this.root.querySelector('#btn-stop').addEventListener('click', () => {
+      sim.loop.pause();
+      sim.restart();
+      this._updatePlayButton();
+      this._setEngineState('editing');
     });
 
     this.root.querySelector('#btn-step').addEventListener('click', () => {
       sim.loop.pause();
       sim.loop.requestSteps(1);
       this._updatePlayButton();
+      this._setEngineState('paused');
     });
 
     this.root.querySelector('#btn-restart').addEventListener('click', () => sim.restart());
@@ -192,6 +211,51 @@ export class Shell {
     this.nodes.playBtn.textContent = paused ? '▶' : '❚❚';
     this.nodes.playBtn.title = paused ? 'Play (Space)' : 'Pause (Space)';
     this.nodes.playBtn.classList.toggle('is-playing', !paused);
+  }
+
+  _setEngineState(state) {
+    if (!this.nodes.engineState) return;
+    const label = state.charAt(0).toUpperCase() + state.slice(1);
+    this.nodes.engineState.dataset.state = state;
+    this.nodes.engineState.querySelector('span').textContent = label;
+  }
+
+  _bindWorkspaceCommands() {
+    const action = (id, message) => this.root.querySelector(id)?.addEventListener('click', () => this.toast(message));
+    action('#btn-open-project', 'Project browser arrives in the persistence milestone');
+    action('#btn-save-project', 'Project configuration saved for this workspace session');
+    action('#btn-settings', 'Workspace settings arrive with viewport preferences');
+    action('#btn-help', 'Keyboard shortcuts are listed in the left Controls panel');
+
+    this.root.querySelector('#btn-new-project')?.addEventListener('click', () => {
+      this.sim.restart({ seed: 1 });
+      this.workspace.state.projectName = 'Untitled simulation';
+      this.workspace.apply(this.workspace.state);
+      this._setEngineState('editing');
+      this.toast('Created a clean project from the current laboratory');
+    });
+
+    this.nodes.globalSearch?.addEventListener('input', (event) => {
+      const query = event.target.value.trim().toLowerCase();
+      for (const entry of this.nodes.pluginList.children) {
+        entry.hidden = query && !entry.textContent.toLowerCase().includes(query);
+      }
+      for (const row of this.nodes.hierarchy.querySelectorAll('.tree-row, .tree-node')) {
+        row.classList.toggle('search-match', Boolean(query) && row.textContent.toLowerCase().includes(query));
+      }
+    });
+
+    window.addEventListener('keydown', (event) => {
+      if (!(event.metaKey || event.ctrlKey)) return;
+      if (event.code === 'KeyS') {
+        event.preventDefault();
+        this.workspace.save();
+        this.toast('Workspace saved locally');
+      } else if (event.code === 'KeyK') {
+        event.preventDefault();
+        this.nodes.globalSearch?.focus();
+      }
+    });
   }
 
   // -----------------------------------------------------------------------
@@ -263,11 +327,13 @@ export class Shell {
       case 'Space':
         sim.loop.toggle();
         this._updatePlayButton();
+        this._setEngineState(sim.loop.paused ? 'paused' : 'running');
         break;
       case 'Period':
         sim.loop.pause();
         sim.loop.requestSteps(1);
         this._updatePlayButton();
+        this._setEngineState('paused');
         break;
       case 'KeyR':
         sim.restart();
@@ -371,6 +437,7 @@ export class Shell {
       if (!handle.hasPointerCapture(event.pointerId)) return;
       const next = Math.max(120, Math.min(window.innerHeight * 0.7, startHeight - (event.clientY - startY)));
       dock.style.height = `${next}px`;
+      this.workspace.setDockHeight(next);
       // The viewport shares a grid row with the dock, so it has to be told the
       // canvas changed size — ResizeObserver fires, but not before the next
       // frame renders at the stale aspect ratio.
