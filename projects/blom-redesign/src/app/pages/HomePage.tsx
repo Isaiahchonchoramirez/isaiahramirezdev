@@ -1,50 +1,199 @@
 import { Link } from "react-router";
 import { motion } from "motion/react";
-import { ChevronDown, Play } from "lucide-react";
-import { useState } from "react";
+import { ChevronDown, Volume2, VolumeX } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import meadCiderPhoto from "../../imports/Bløm_Mead&Cider.webp";
 import aperitivoPhoto from "../../imports/Bløm_Aperitivo.webp";
 import videoThumbnail from "../../imports/BlømVideoThumbs2.webp";
 
+// How far the pointer has to travel inside the hero before the copy comes
+// forward. A distance rather than a single mousemove: one stray jog on the way
+// to the nav should not flash the headline at you, but moving the mouse around
+// brings it up almost at once. 140px is roughly a shake of the wrist.
+const REVEAL_TRAVEL = 140; // px
+const HIDE_AFTER = 3400; // ms of stillness before it recedes again
+
+/**
+ * Reveal-on-movement for the hero.
+ *
+ * The film carries the hero on its own; the words are there when you go
+ * looking for them. Movement inside `scopeRef` brings them up, stillness lets
+ * them fade back, and hovering or tabbing into the copy pins it open so it
+ * never disappears out from under a hand that is reaching for a button.
+ */
+function useShakeReveal(scopeRef: React.RefObject<HTMLElement | null>) {
+  const [revealed, setRevealed] = useState(false);
+  const [pinned, setPinned] = useState(false);
+  const [gated, setGated] = useState(true);
+  // Bumped every time the pointer clears the threshold, which restarts the
+  // countdown below without re-attaching the listener.
+  const [nudge, setNudge] = useState(0);
+
+  useEffect(() => {
+    const node = scopeRef.current;
+    if (!node) return;
+
+    // A pointer that cannot hover never fires the movement this is gated on,
+    // and someone who has asked their OS for less motion should not have to
+    // wave at a page to read it. Both get the copy outright.
+    const exempt = window.matchMedia("(hover: none), (pointer: coarse), (prefers-reduced-motion: reduce)");
+    if (exempt.matches) {
+      setGated(false);
+      setRevealed(true);
+      return;
+    }
+
+    const trail = { x: 0, y: 0, travelled: 0, tracking: false };
+
+    const onMove = (event: PointerEvent) => {
+      // The first sample only establishes where the pointer is; distance needs
+      // two points.
+      if (!trail.tracking) {
+        trail.tracking = true;
+        trail.x = event.clientX;
+        trail.y = event.clientY;
+        return;
+      }
+
+      trail.travelled += Math.hypot(event.clientX - trail.x, event.clientY - trail.y);
+      trail.x = event.clientX;
+      trail.y = event.clientY;
+
+      if (trail.travelled >= REVEAL_TRAVEL) {
+        trail.travelled = 0;
+        setRevealed(true);
+        setNudge((n) => n + 1);
+      }
+    };
+
+    // Leaving the hero drops the anchor point, so coming back in does not
+    // count the jump across the page as travel.
+    const onLeave = () => {
+      trail.tracking = false;
+      trail.travelled = 0;
+    };
+
+    node.addEventListener("pointermove", onMove);
+    node.addEventListener("pointerleave", onLeave);
+    return () => {
+      node.removeEventListener("pointermove", onMove);
+      node.removeEventListener("pointerleave", onLeave);
+    };
+  }, [scopeRef]);
+
+  useEffect(() => {
+    if (!gated || !revealed || pinned) return;
+    const id = window.setTimeout(() => setRevealed(false), HIDE_AFTER);
+    return () => window.clearTimeout(id);
+  }, [gated, revealed, pinned, nudge]);
+
+  return { revealed, gated, setPinned, reveal: () => setRevealed(true) };
+}
+
 export default function HomePage() {
-  // The film is opt-in rather than an autoplaying background. It used to be a
-  // full-screen YouTube iframe that loaded on arrival, which meant the first
-  // thing a visitor saw was a black rectangle with a spinner — and, once it
-  // did load, a hero carrying no words at all: no headline, no description of
-  // what Bløm makes, and nothing to click. The usability study found all three
-  // participants unclear on what the Aperitivo even was, and a wordless hero
-  // is where that starts.
-  const [playing, setPlaying] = useState(false);
+  const heroRef = useRef<HTMLElement>(null);
+  const { revealed, gated, setPinned, reveal } = useShakeReveal(heroRef);
+
+  // The poster paints first and the film mounts a beat later, so the largest
+  // element on the page is a 100 kB image rather than a black rectangle with a
+  // spinner in it — which is what the old autoplaying iframe gave you.
+  const [filmMounted, setFilmMounted] = useState(false);
+  // ...and the film only fades over the poster once it is genuinely playing.
+  // An embed that is still buffering is an opaque black square, so revealing
+  // it on mount just moves the black rectangle later rather than removing it.
+  const [filmPlaying, setFilmPlaying] = useState(false);
+  const [muted, setMuted] = useState(true);
+
+  useEffect(() => {
+    const id = window.setTimeout(() => setFilmMounted(true), 500);
+    return () => window.clearTimeout(id);
+  }, []);
+
+  useEffect(() => {
+    if (!filmMounted) return;
+
+    // The player reports its state over postMessage once asked to. If it never
+    // answers — blocked embed, no autoplay, offline — the poster simply stays,
+    // which is a perfectly good hero rather than a broken one.
+    const onMessage = (event: MessageEvent) => {
+      if (!event.origin.includes("youtube")) return;
+      try {
+        const data = typeof event.data === "string" ? JSON.parse(event.data) : event.data;
+        if (data?.info?.playerState === 1) setFilmPlaying(true);
+      } catch {
+        // Not a message meant for us.
+      }
+    };
+
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
+  }, [filmMounted]);
 
   const scrollToContent = () => {
     window.scrollTo({ top: window.innerHeight, behavior: "smooth" });
   };
 
+  const toggleSound = () => {
+    const frame = document.querySelector<HTMLIFrameElement>("#hero-film");
+    const command = muted ? "unMute" : "mute";
+    frame?.contentWindow?.postMessage(`{"event":"command","func":"${command}","args":""}`, "*");
+    setMuted(!muted);
+  };
+
   return (
     <div className="pt-20">
       {/* Hero */}
-      <section className="relative min-h-[calc(100vh-5rem)] flex items-center">
+      <section ref={heroRef} className="relative min-h-[calc(100vh-5rem)] flex items-center">
         <div className="absolute inset-0 overflow-hidden">
-          {playing ? (
+          <img src={videoThumbnail} alt="" className="absolute inset-0 w-full h-full object-cover" />
+          {filmMounted && (
             <iframe
-              className="absolute top-1/2 left-1/2 w-[100vw] h-[56.25vw] min-h-full min-w-[177.77vh] -translate-x-1/2 -translate-y-1/2"
-              src="https://www.youtube-nocookie.com/embed/ZOubh0mNxpA?autoplay=1&loop=1&playlist=ZOubh0mNxpA&rel=0&modestbranding=1&playsinline=1"
+              id="hero-film"
+              // pointer-events-none is load-bearing, not cosmetic: an iframe
+              // captures the pointer, so with it interactive the mousemove the
+              // copy depends on would never reach this page once the film
+              // covers the hero. It also keeps YouTube's own title and share
+              // chrome from appearing on hover.
+              className={`absolute top-1/2 left-1/2 w-[100vw] h-[56.25vw] min-h-full min-w-[177.77vh] -translate-x-1/2 -translate-y-1/2 pointer-events-none transition-opacity duration-1000 ${
+                filmPlaying ? "opacity-100" : "opacity-0"
+              }`}
+              src="https://www.youtube-nocookie.com/embed/ZOubh0mNxpA?autoplay=1&mute=1&loop=1&playlist=ZOubh0mNxpA&controls=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1"
               title="Bløm: farm to Fourth Ave"
               allow="autoplay; encrypted-media; fullscreen"
+              onLoad={(event) => {
+                // Opt in to the player's state messages; without this it never
+                // volunteers them.
+                event.currentTarget.contentWindow?.postMessage('{"event":"listening"}', "*");
+              }}
             />
-          ) : (
-            <img src={videoThumbnail} alt="" className="w-full h-full object-cover" />
           )}
-          {/* Dark on the left where the copy sits, clearing toward the right. */}
-          <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/55 to-black/25" />
+
+          {/* Barely there while the film has the stage; the dark left-hand wash
+              fades in with the copy so the headline has something to sit on. */}
+          <div className="absolute inset-0 bg-black/20" />
+          <motion.div
+            aria-hidden
+            animate={{ opacity: revealed ? 1 : 0 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/55 to-black/20"
+          />
         </div>
 
         <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7 }}
-            className="max-w-2xl"
+            animate={{ opacity: revealed ? 1 : 0, y: revealed ? 0 : 18 }}
+            initial={false}
+            transition={{ duration: 0.55, ease: "easeOut" }}
+            // Hidden copy must not be a set of invisible click targets, but it
+            // stays in the tab order: tabbing into it brings it up.
+            className={`max-w-2xl ${revealed ? "" : "pointer-events-none"}`}
+            onPointerEnter={() => setPinned(true)}
+            onPointerLeave={() => setPinned(false)}
+            onFocusCapture={() => {
+              reveal();
+              setPinned(true);
+            }}
+            onBlurCapture={() => setPinned(false)}
           >
             <p className="text-orange-300 font-semibold tracking-[0.2em] uppercase text-sm mb-4">
               Ann Arbor, Michigan
@@ -78,18 +227,30 @@ export default function HomePage() {
               >
                 Visit the taproom
               </Link>
-              {!playing && (
-                <button
-                  onClick={() => setPlaying(true)}
-                  className="px-6 py-4 text-white font-semibold rounded-md transition-colors inline-flex items-center gap-2 hover:bg-white/10"
-                >
-                  <Play size={18} fill="currentColor" />
-                  Watch the film
-                </button>
-              )}
+              <button
+                onClick={toggleSound}
+                className="px-6 py-4 text-white font-semibold rounded-md transition-colors inline-flex items-center gap-2 hover:bg-white/10"
+              >
+                {muted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+                {muted ? "Sound on" : "Sound off"}
+              </button>
             </div>
           </motion.div>
         </div>
+
+        {/* Without this, copy that only exists on movement is copy most people
+            never find. It goes away for good after the first reveal. */}
+        {gated && (
+          <motion.p
+            aria-hidden
+            animate={{ opacity: revealed ? 0 : 1 }}
+            initial={{ opacity: 0 }}
+            transition={{ duration: 0.6, delay: revealed ? 0 : 1.6 }}
+            className="absolute bottom-10 right-6 sm:right-8 z-10 text-white/50 text-xs tracking-[0.2em] uppercase pointer-events-none"
+          >
+            Move your mouse
+          </motion.p>
+        )}
 
         <button
           onClick={scrollToContent}
