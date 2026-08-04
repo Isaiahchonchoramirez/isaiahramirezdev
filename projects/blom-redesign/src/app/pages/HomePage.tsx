@@ -1,7 +1,7 @@
 import { Link } from "react-router";
 import { motion } from "motion/react";
 import { ChevronDown, Volume2, VolumeX } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import meadCiderPhoto from "../../imports/Bløm_Mead&Cider.webp";
 import aperitivoPhoto from "../../imports/Bløm_Aperitivo.webp";
 import videoThumbnail from "../../imports/BlømVideoThumbs2.webp";
@@ -12,6 +12,10 @@ import videoThumbnail from "../../imports/BlømVideoThumbs2.webp";
 // brings it up almost at once. 140px is roughly a shake of the wrist.
 const REVEAL_TRAVEL = 140; // px
 const HIDE_AFTER = 3400; // ms of stillness before it recedes again
+// After a click dismisses the copy, movement is ignored for a moment. Without
+// this, the hand that just clicked twitches, clears the threshold again and
+// puts the words straight back — the dismissal would not appear to work.
+const DISMISS_COOLDOWN = 900; // ms
 
 /**
  * Reveal-on-movement for the hero.
@@ -20,14 +24,21 @@ const HIDE_AFTER = 3400; // ms of stillness before it recedes again
  * looking for them. Movement inside `scopeRef` brings them up, stillness lets
  * them fade back, and hovering or tabbing into the copy pins it open so it
  * never disappears out from under a hand that is reaching for a button.
+ * Clicking the film away from the copy puts it away at once.
  */
 function useShakeReveal(scopeRef: React.RefObject<HTMLElement | null>) {
   const [revealed, setRevealed] = useState(false);
   const [pinned, setPinned] = useState(false);
   const [gated, setGated] = useState(true);
+  // Whether the copy has ever been up. The prompt to move the mouse is only
+  // worth showing to someone who has not yet found out what it does.
+  const [seen, setSeen] = useState(false);
   // Bumped every time the pointer clears the threshold, which restarts the
   // countdown below without re-attaching the listener.
   const [nudge, setNudge] = useState(0);
+
+  const trail = useRef({ x: 0, y: 0, travelled: 0, tracking: false });
+  const suppressUntil = useRef(0);
 
   useEffect(() => {
     const node = scopeRef.current;
@@ -43,25 +54,36 @@ function useShakeReveal(scopeRef: React.RefObject<HTMLElement | null>) {
       return;
     }
 
-    const trail = { x: 0, y: 0, travelled: 0, tracking: false };
-
     const onMove = (event: PointerEvent) => {
+      const here = trail.current;
+
       // The first sample only establishes where the pointer is; distance needs
       // two points.
-      if (!trail.tracking) {
-        trail.tracking = true;
-        trail.x = event.clientX;
-        trail.y = event.clientY;
+      if (!here.tracking) {
+        here.tracking = true;
+        here.x = event.clientX;
+        here.y = event.clientY;
         return;
       }
 
-      trail.travelled += Math.hypot(event.clientX - trail.x, event.clientY - trail.y);
-      trail.x = event.clientX;
-      trail.y = event.clientY;
+      // Inside the cooldown the anchor still follows the pointer, so travel
+      // once it lifts is measured from where the pointer actually is rather
+      // than from wherever it was when the click landed.
+      if (performance.now() < suppressUntil.current) {
+        here.travelled = 0;
+        here.x = event.clientX;
+        here.y = event.clientY;
+        return;
+      }
 
-      if (trail.travelled >= REVEAL_TRAVEL) {
-        trail.travelled = 0;
+      here.travelled += Math.hypot(event.clientX - here.x, event.clientY - here.y);
+      here.x = event.clientX;
+      here.y = event.clientY;
+
+      if (here.travelled >= REVEAL_TRAVEL) {
+        here.travelled = 0;
         setRevealed(true);
+        setSeen(true);
         setNudge((n) => n + 1);
       }
     };
@@ -69,8 +91,8 @@ function useShakeReveal(scopeRef: React.RefObject<HTMLElement | null>) {
     // Leaving the hero drops the anchor point, so coming back in does not
     // count the jump across the page as travel.
     const onLeave = () => {
-      trail.tracking = false;
-      trail.travelled = 0;
+      trail.current.tracking = false;
+      trail.current.travelled = 0;
     };
 
     node.addEventListener("pointermove", onMove);
@@ -87,12 +109,35 @@ function useShakeReveal(scopeRef: React.RefObject<HTMLElement | null>) {
     return () => window.clearTimeout(id);
   }, [gated, revealed, pinned, nudge]);
 
-  return { revealed, gated, setPinned, reveal: () => setRevealed(true) };
+  const dismiss = useCallback(() => {
+    setRevealed(false);
+    setPinned(false);
+    trail.current.travelled = 0;
+    suppressUntil.current = performance.now() + DISMISS_COOLDOWN;
+  }, []);
+
+  const reveal = useCallback(() => {
+    setRevealed(true);
+    setSeen(true);
+  }, []);
+
+  return { revealed, gated, seen, setPinned, reveal, dismiss };
 }
 
 export default function HomePage() {
   const heroRef = useRef<HTMLElement>(null);
-  const { revealed, gated, setPinned, reveal } = useShakeReveal(heroRef);
+  const copyRef = useRef<HTMLDivElement>(null);
+  const { revealed, gated, seen, setPinned, reveal, dismiss } = useShakeReveal(heroRef);
+
+  // Click the film — to the right of the headline, above it, anywhere that is
+  // not the copy itself — and the words get out of the way, leaving the film
+  // and whatever you have done with the sound. Moving the mouse brings them
+  // back.
+  const onHeroClick = (event: React.MouseEvent) => {
+    if (!revealed) return;
+    if (copyRef.current?.contains(event.target as Node)) return;
+    dismiss();
+  };
 
   // The poster paints first and the film mounts a beat later, so the largest
   // element on the page is a 100 kB image rather than a black rectangle with a
@@ -143,7 +188,11 @@ export default function HomePage() {
   return (
     <div className="pt-20">
       {/* Hero */}
-      <section ref={heroRef} className="relative min-h-[calc(100vh-5rem)] flex items-center">
+      <section
+        ref={heroRef}
+        onClick={onHeroClick}
+        className="relative min-h-[calc(100vh-5rem)] flex items-center"
+      >
         <div className="absolute inset-0 overflow-hidden">
           <img src={videoThumbnail} alt="" className="absolute inset-0 w-full h-full object-cover" />
           {filmMounted && (
@@ -181,6 +230,7 @@ export default function HomePage() {
 
         <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <motion.div
+            ref={copyRef}
             animate={{ opacity: revealed ? 1 : 0, y: revealed ? 0 : 18 }}
             initial={false}
             transition={{ duration: 0.55, ease: "easeOut" }}
@@ -239,13 +289,15 @@ export default function HomePage() {
         </div>
 
         {/* Without this, copy that only exists on movement is copy most people
-            never find. It goes away for good after the first reveal. */}
-        {gated && (
+            never find. It goes for good once they have seen it work — repeating
+            the instruction to someone who has already dismissed the words on
+            purpose is just nagging. */}
+        {gated && !seen && (
           <motion.p
             aria-hidden
-            animate={{ opacity: revealed ? 0 : 1 }}
+            animate={{ opacity: 1 }}
             initial={{ opacity: 0 }}
-            transition={{ duration: 0.6, delay: revealed ? 0 : 1.6 }}
+            transition={{ duration: 0.6, delay: 1.6 }}
             className="absolute bottom-10 right-6 sm:right-8 z-10 text-white/50 text-xs tracking-[0.2em] uppercase pointer-events-none"
           >
             Move your mouse
