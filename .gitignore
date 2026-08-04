@@ -39,3 +39,7 @@ art/characters/*.blend1
 # Python bytecode from the Blender tooling
 __pycache__/
 *.pyc
+
+# Submissions captured by the local Bløm service — someone's order history,
+# not source. Recreate by running the service and using the site.
+server/blom/data/

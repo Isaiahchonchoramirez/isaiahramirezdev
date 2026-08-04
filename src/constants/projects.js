@@ -18,7 +18,7 @@ const projects = [
     problem:
       "Engineering simulations are often either opaque specialist tools or attractive demos that hide the mathematics driving them.",
     outcome:
-      "A browser-native engineering laboratory with deterministic physics, inspectable controllers, replayable runs, and two complete simulation plugins.",
+      "A browser-native engineering laboratory with deterministic physics, inspectable controllers, replayable runs, and three complete simulation plugins.",
     title: "Tesseraxis",
     year: "2026",
     tagline: "Engineering systems you can see",
@@ -28,14 +28,16 @@ const projects = [
     cta: "Open Tesseraxis",
     stack: ["JavaScript", "Three.js", "WebGL", "ECS", "Control Theory", "Numerical Simulation"],
     description:
-      "Tesseraxis is a modular engineering simulation platform built around a deterministic fixed-timestep engine. Its Powered Descent Lab exposes six-degree-of-freedom rocket dynamics, variable mass, atmospheric forces, gimballed thrust, PID guidance, telemetry, replay, and seeded wind. Its Swarm Intelligence Lab uses spatial hashing and distributed local sensing to model flocking, search-and-rescue, formation control, communication loss, and obstacle avoidance across thousands of agents.",
+      "Tesseraxis is a modular engineering simulation platform built around a deterministic fixed-timestep engine. Its Powered Descent Lab exposes six-degree-of-freedom rocket dynamics and PID guidance; its Swarm Intelligence Lab models distributed coordination across thousands of agents; and its Vehicle Dynamics Lab exposes tire saturation, load transfer, suspension response, braking, weather, collisions, and autonomous path tracking.",
     highlights: [
       "Reusable plugin SDK—the rocket and swarm laboratories use the same engine, inspector, timeline, graphing, replay, sharing, and export contracts",
       "Deterministic 120 Hz simulation loop with seeded disturbances and journaled control inputs",
       "Powered landing with variable mass, fuel consumption, aerodynamic instability, engine gimbal, actuator limits, and live PID tuning",
       "Swarm intelligence with separation, alignment, cohesion, search coverage, packet loss, and approximately O(n) spatial-neighbor discovery",
+      "Vehicle dynamics with nonlinear tire saturation, longitudinal load transfer, spring-damper body response, wet-road braking, collision constraints, and curvature-aware autonomous driving",
       "Instanced Three.js rendering, force vectors, flight trails, mission objectives, and scalable telemetry views",
       "Headless regression harnesses verify collective swarm behavior and exact seeded reproduction without requiring a renderer",
+      "Research primitives compile deterministic scenario scripts and run seeded parameter sweeps locally, with a FastAPI boundary designed for isolated optimization, RL, and collaboration workers",
     ],
   },
   {
@@ -169,6 +171,99 @@ const projects = [
     href: getAssetPath("/unwritten-age/index.html"),
     external: true,
     cta: "Enter the Unwritten Age",
+  },
+  {
+    id: "datagate",
+    categories: ["Data", "Web", "UX"],
+    role: "Product design · Statistics engine · Frontend development · Node service",
+    problem:
+      "A data profiler is easy to fake — charts and percentages look convincing whether or not anything was measured. The version I designed in Figma had exactly that problem: it advertised stock prediction and phone lookups, and its upload zone ran a timer.",
+    outcome:
+      "A profiler that reads your file in the tab, types every column, measures every distribution, and names each duplicate, gap and outlier with the reason it matters — verified by 55 tests against hand-computed statistics.",
+    title: "DataGate",
+    year: "2026",
+    tagline: "Profiling your data without uploading it",
+    image: getAssetPath("/images/projects/datagate.jpg"),
+    href: getAssetPath("/datagate/index.html"),
+    external: true,
+    cta: "Scan a dataset",
+    stack: ["TypeScript", "React", "Statistics", "Node", "Vite"],
+    description:
+      "Drop in a CSV, TSV, JSON or JSONL file and DataGate returns a real profile — no upload, no parsing library, no charting library. I wrote the RFC 4180 parser, the type-inference rules, the distribution statistics and the quality audit; the design started as a Figma Make export and the engine underneath it is new. The premise is that a tool making claims about your data should be checkable, so every number it reports is computed from the file in front of you and the tests assert them against values worked out by hand.",
+    highlights: [
+      "Dependency-free parser — RFC 4180 quoting, newlines inside quoted fields, delimiter sniffing that a prose column full of commas cannot fool, ragged rows, and one-level JSON flattening",
+      "Type inference across seven kinds, with two rules that matter: a zero-padded value like 007 stays text rather than becoming 7, and a near-unique column is an identifier, so it is kept out of the statistics instead of being averaged",
+      "Per-column min, quartiles, median, mean, sample standard deviation and a histogram — integer columns spanning 20 values or fewer get one bar per value, so the shape shown is the data's and not the binning rule's",
+      "Pearson correlation on pairwise-complete rows, ranked by strength, flagging collinear pairs — and stating plainly that it measures straight-line association only and is not evidence of causation",
+      "Quality audit that explains consequences rather than just counting: why a 60%-missing column makes an average describe the rows that happened to be filled in, why a constant column adds noise to a model",
+      "Exports the profile as Markdown or JSON, plus a cleaned CSV whose every removal is one the findings list already justified",
+      "55 tests over the parser and the maths, including a seeded demo dataset whose planted duplicates and negative shipping-to-satisfaction correlation are asserted rather than assumed",
+      "URL scanning runs against a small Node service rather than pretending the browser can read another origin — it refuses private and loopback addresses, and the interface says whether the service is up instead of faking a result",
+    ],
+  },
+  {
+    id: "rave-io",
+    categories: ["Web", "UX", "Design"],
+    role: "Audio engineering · DSP · Interaction design · Frontend development",
+    problem:
+      "My Figma draft looked like a DAW and was mostly a screenshot: the 56-instrument sound library changed nothing when you clicked it, there were no pitched instruments at all, the generate button wrote one hardcoded pattern regardless of genre, and the master meter was twelve numbers typed into an array.",
+    outcome:
+      "A working beat machine — 56 synthesised instruments across seven genres, a melody roll locked to the selected scale, per-genre rhythm generation, and a WAV render of the arrangement you actually heard.",
+    title: "RAVE.IO",
+    year: "2026",
+    tagline: "Every sound built from an oscillator up",
+    image: getAssetPath("/images/projects/rave-io.jpg"),
+    href: getAssetPath("/rave/index.html"),
+    external: true,
+    cta: "Open the studio",
+    stack: ["TypeScript", "Web Audio API", "React", "DSP", "Canvas"],
+    description:
+      "A step sequencer and melody roll that ships no samples — every instrument is synthesised in the browser from oscillators, filters and envelopes. I built the eight synthesis archetypes and the 56 voices on top of them, the scheduler that runs ahead of the audio clock, the per-genre rhythm generation, and the offline renderer. The interesting constraint was honesty: the sound library had to actually change the sound, and the exported file had to be the arrangement you heard rather than a second implementation of it.",
+    highlights: [
+      "Eight synthesis archetypes — plucked and bowed string, blown pipe, struck bell, membrane, metal, pad, lead, sub — each an instrument definition rather than a bespoke function, so a new voice costs a line of data",
+      "Harmonic instruments run on a single oscillator carrying a PeriodicWave built from their partials; bells and struck metal keep discrete oscillators because their partials sit at non-integer ratios, which is exactly why a bell sounds like a bell",
+      "Melody roll whose rows are degrees of the selected genre's scale — natural minor, Phrygian, Raga Bhairav, minor and major pentatonic, Maqam Hijaz, Dorian — so there is no wrong note to click",
+      "Per-genre rhythm generation taken from how each style is actually played: half-time trap hats, techno's offbeat open hat, a teentaal-flavoured tabla cycle, a country train beat, a maqsum, a jig grouped in threes",
+      "Scheduler runs 120 ms ahead of the audio clock outside React, and the playhead is read back from AudioContext.currentTime — so the highlight lines up with what you hear and a dropped frame is not an audible glitch",
+      "Export walks the same voice code against an OfflineAudioContext, so the WAV is the arrangement that played rather than an approximation of it",
+      "Two profiling fixes took a sixteen-bar render from over thirty seconds to about seven — one channel strip per track instead of per hit, and noise percussion filtered once per context rather than through a pair of biquads on every hi-hat",
+      "Real AnalyserNode metering on log-spaced bands, a working recorder, keyboard and touch on every knob, and a hero canvas that stops animating when it scrolls out of view",
+    ],
+    related: {
+      id: "lyrx",
+      title: "Lyrx",
+      blurb: "the full 26-tool DAW this shares a lineage with",
+      href: getAssetPath("/lyrx/index.html"),
+    },
+  },
+  {
+    id: "blom-redesign",
+    categories: ["UX", "Web", "Design"],
+    role: "UX research · Information architecture · Full-stack development",
+    problem:
+      "A moderated study of drinkblom.com found all three participants unable to say what the Aperitivo was, and wandering through unrelated sections to finish basic tasks. The redesign I built in Figma restructured the navigation but shipped as a prototype: the cart, the search, and all four forms did nothing.",
+    outcome:
+      "A working storefront — cart with correct tax and shipping rules, checkout, site search, and four validated forms — served by a small Node service, with every submission surviving an unreachable server.",
+    title: "Bløm Redesign",
+    year: "2026",
+    tagline: "A usability study, carried through to working software",
+    image: getAssetPath("/images/projects/blom.jpg"),
+    href: getAssetPath("/blom/index.html"),
+    external: true,
+    cta: "Open the site",
+    stack: ["React", "TypeScript", "Node", "Usability Testing", "Tailwind"],
+    description:
+      "A redesign of an Ann Arbor meadery's website, starting from a ten-task moderated study with three participants. The research named four problems — navigation that did not match how people think, an unexplained flagship product, a missing search, and no way to actually buy anything. This build answers all four. I restructured the information architecture, wrote the commerce layer and the search index, and built the taproom service that receives orders and enquiries.",
+    highlights: [
+      "Every participant asked for search and the original shipped a dead magnifying glass — there is now a ⌘K dialog indexing products and pages by the words people actually type, so “where to buy”, “hours” and “book a party” each resolve to one page",
+      "Cart and checkout with the rules a real order has: Michigan sales tax, free shipping over $75, and growler fills correctly forced to taproom pickup because they are poured to order",
+      "Prices, copy and search results all read from one catalogue module — the shop and the products page had been separate hand-written markup that could disagree about what a bottle costs",
+      "Every submission is written to the browser before it is posted, so an unreachable service degrades to a queue with a reference number rather than to a silent failure — and the confirmation says which of the two happened",
+      "The service validates independently of the browser and recomputes each order's subtotal from its line items, rejecting any total that disagrees",
+      "Rewrote the homepage hero, which had been a full-screen autoplaying video carrying no headline, no description and nothing to click — the first thing a visitor saw was a black rectangle loading, which is where the Aperitivo confusion starts",
+      "Deliberately takes no payment: the checkout and the club signup both say the taproom confirms the order and handles payment, rather than implying a transaction that never happens",
+      "Cut the Figma export's 32 MB of PNGs to 2.1 MB of WebP — one menu photo alone had been 12 MB, more than the rest of the portfolio combined",
+    ],
   },
   {
     id: "maya-3d",

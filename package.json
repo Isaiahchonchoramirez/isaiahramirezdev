@@ -8,15 +8,19 @@
     "dev": "vite",
     "crawler": "node server/crawler.mjs",
     "collect": "node server/collect.mjs",
-    "build": "vite build",
-    "build:github": "GITHUB_PAGES=true vite build",
+    "build": "npm run build:apps && vite build",
+    "build:github": "npm run build:apps && GITHUB_PAGES=true vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "preview:github": "GITHUB_PAGES=true vite build && vite preview",
     "predeploy": "npm run build:github",
     "deploy": "gh-pages -d dist --add",
     "dataset": "node server/dataset.mjs",
-    "validate:wardrobe": "node tools/validate_wardrobe.mjs && node tools/test_wardrobe_runtime.mjs"
+    "validate:wardrobe": "node tools/validate_wardrobe.mjs && node tools/test_wardrobe_runtime.mjs",
+    "build:apps": "npm --prefix projects/datagate run build && npm --prefix projects/rave-io run build && npm --prefix projects/blom-redesign run build",
+    "relay:datagate": "node server/datagate/relay.mjs",
+    "service:blom": "node server/blom/service.mjs",
+    "test:datagate": "npm --prefix projects/datagate test"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
