@@ -5,6 +5,8 @@ import { Shell } from './ui/shell.js';
 import rocketLanding from './plugins/rocket-landing/index.js';
 import swarm from './plugins/swarm/index.js';
 import vehicleDynamics from './plugins/vehicle/index.js';
+import ballistics from './plugins/ballistics/index.js';
+import chemistry from './plugins/chemistry/index.js';
 
 const root = document.querySelector('#app');
 const canvas = document.querySelector('#viewport');
@@ -12,6 +14,8 @@ const simulation = new Simulation({ hz: 120 });
 simulation.register(rocketLanding);
 simulation.register(swarm);
 simulation.register(vehicleDynamics);
+simulation.register(ballistics);
+simulation.register(chemistry);
 
 const viewport = new Viewport(canvas);
 simulation.viewport = viewport;

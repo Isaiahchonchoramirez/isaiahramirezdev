@@ -16,58 +16,162 @@ export function createRocketView(ctx, state) {
   const metal = new THREE.MeshStandardMaterial({ color: 0xd9e1e8, metalness: 0.72, roughness: 0.3 });
   const dark = new THREE.MeshStandardMaterial({ color: 0x111820, metalness: 0.8, roughness: 0.34 });
   const accent = new THREE.MeshStandardMaterial({ color: 0x223746, metalness: 0.55, roughness: 0.42 });
+  const soot = new THREE.MeshStandardMaterial({ color: 0x0b0e12, metalness: 0.45, roughness: 0.72 });
 
-  const body = new THREE.Mesh(
-    new THREE.CylinderGeometry(params.radius, params.radius * 0.97, params.length, 32, 1),
-    metal,
-  );
-  body.castShadow = true;
-  body.receiveShadow = true;
-  vehicle.add(body);
+  const R = params.radius;
+  const L = params.length;
 
-  const nose = new THREE.Mesh(
-    new THREE.CylinderGeometry(params.radius * 0.91, params.radius, params.length * 0.1, 32),
-    accent,
-  );
-  nose.position.y = params.length * 0.45;
-  nose.castShadow = true;
+  // The silhouette is what makes a rocket read as a rocket, and a silhouette is
+  // set by its profile curve. Body, nose and nozzle are therefore lathed from
+  // explicit profiles rather than assembled from cylinders — the previous nose
+  // was a cylinder tapering from 0.91R to R over a tenth of the length, which
+  // is a barely-bevelled can lid rather than a nose cone.
+  const lathe = (profile, material, segments = 36) => {
+    const mesh = new THREE.Mesh(
+      new THREE.LatheGeometry(profile.map((p) => new THREE.Vector2(p[0], p[1])), segments),
+      material,
+    );
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    return mesh;
+  };
+
+  // Tangent ogive: the standard nose profile. For nose length h and base radius
+  // R the generating circle has radius rho, and the curve is the arc of that
+  // circle that meets the body wall exactly parallel — which is what stops the
+  // join from showing as a crease.
+  const noseHeight = L * 0.17;
+  const rho = (R * R + noseHeight * noseHeight) / (2 * R);
+  const noseProfile = [];
+  const NOSE_STEPS = 18;
+  // Built base-upward so the profile's y ascends, which is what the lathe wants.
+  // With y measured up from the body join, the tangent-ogive radius is
+  // sqrt(rho² - y²) + R - rho: that is R at y=0 and exactly 0 at y=noseHeight,
+  // meeting the body wall parallel so the join does not show as a crease.
+  for (let i = 0; i <= NOSE_STEPS; i++) {
+    const y = (i / NOSE_STEPS) * noseHeight;
+    const radiusAt = Math.sqrt(Math.max(0, rho * rho - y * y)) + R - rho;
+    noseProfile.push([Math.max(0, radiusAt), y]);
+  }
+  const nose = lathe(noseProfile, metal);
+  nose.position.y = L * 0.5;
   vehicle.add(nose);
 
-  const engine = new THREE.Mesh(
-    new THREE.CylinderGeometry(params.radius * 0.46, params.radius * 0.78, params.length * 0.075, 24, 1, true),
-    dark,
-  );
-  engine.position.y = -params.length * 0.53;
-  vehicle.add(engine);
+  // Body: a long tank with a subtle taper, an interstage band, and a boat-tail
+  // at the base where the thrust structure narrows.
+  const body = lathe([
+    [R * 0.88, 0],
+    [R, L * 0.06],
+    [R, L * 0.94],
+    [R * 0.985, L],
+  ], metal);
+  body.position.y = -L * 0.5;
+  vehicle.add(body);
+
+  const interstage = lathe([
+    [R * 1.004, 0],
+    [R * 1.004, L * 0.085],
+  ], accent);
+  interstage.position.y = L * 0.39;
+  vehicle.add(interstage);
+
+  // Two raceway conduits running the length of the tank. Small, but they break
+  // the untextured cylinder up and give roll a visible reference.
+  for (const side of [-1, 1]) {
+    const raceway = new THREE.Mesh(
+      new THREE.BoxGeometry(R * 0.13, L * 0.74, R * 0.09),
+      accent,
+    );
+    raceway.position.set(side * R * 0.99, L * 0.02, 0);
+    raceway.castShadow = true;
+    vehicle.add(raceway);
+  }
+
+  // Engine bell: a flared de Laval nozzle. The throat pinches to ~0.2R and the
+  // exit cone opens back out, which is the shape the eye recognises as an
+  // engine — the old part was a straight cylinder that read as a pipe stub.
+  // Profile runs bottom-up: the wide exit is the lowest point and the throat
+  // pinches above it, so the bell opens downward toward the exhaust.
+  const bellLength = L * 0.11;
+  const bell = lathe([
+    [R * 0.58, -bellLength],
+    [R * 0.45, -bellLength * 0.78],
+    [R * 0.30, -bellLength * 0.5],
+    [R * 0.19, -bellLength * 0.28],
+    [R * 0.30, 0],
+  ], soot, 28);
+  bell.position.y = -L * 0.5;
+  vehicle.add(bell);
+
+  const thrustPlate = lathe([
+    [0, 0],
+    [R * 0.86, 0],
+    [R * 0.8, L * 0.022],
+  ], dark);
+  thrustPlate.position.y = -L * 0.5;
+  vehicle.add(thrustPlate);
 
   // Four grid fins and four landing legs make attitude readable even when the
-  // cylindrical body itself has no obvious roll reference.
+  // cylindrical body itself has no obvious roll reference. Each is built once
+  // and cloned, so the lattice costs four draw calls rather than forty.
+  // Cross-section furniture is sized from the radius, not the length. This
+  // vehicle defaults to 47 m on a 1.83 m radius — a 25:1 fineness ratio — so
+  // anything scaled off L comes out as a wire or a mast rather than a part.
+  const finSpan = R * 1.15;
+  const finHeight = R * 1.3;
+  const finThickness = R * 0.12;
+  const gridFin = new THREE.Group();
+  const finFrame = new THREE.Mesh(new THREE.BoxGeometry(finThickness, finHeight, finSpan), dark);
+  gridFin.add(finFrame);
+  // The lattice itself: a few crossing slats standing proud of the frame is
+  // enough to read as a grid fin at flight distances.
+  for (let i = -1; i <= 1; i++) {
+    const rib = new THREE.Mesh(new THREE.BoxGeometry(finThickness * 1.5, finHeight * 0.92, finSpan * 0.06), accent);
+    rib.position.z = (i / 2) * finSpan * 0.62;
+    gridFin.add(rib);
+    const chord = new THREE.Mesh(new THREE.BoxGeometry(finThickness * 1.5, finHeight * 0.07, finSpan * 0.92), accent);
+    chord.position.y = (i / 2) * finHeight * 0.62;
+    gridFin.add(chord);
+  }
+  const finStalk = new THREE.Mesh(new THREE.BoxGeometry(R * 0.22, finHeight * 0.34, finSpan * 0.16), dark);
+  finStalk.position.x = -R * 0.16;
+  gridFin.add(finStalk);
+
+  // One leg: an A-frame strut angled out from the base to a footpad, which is
+  // how a landing leg actually carries load — the old version was a lone
+  // cylinder floating beside the hull.
+  const legLength = R * 3.1;
+  const legSplay = 0.62; // radians from vertical
+  const landingLeg = new THREE.Group();
+  const strut = new THREE.Mesh(new THREE.CylinderGeometry(R * 0.13, R * 0.2, legLength, 10), dark);
+  strut.position.set(Math.sin(legSplay) * legLength * 0.5, -Math.cos(legSplay) * legLength * 0.5, 0);
+  strut.rotation.z = -legSplay;
+  strut.castShadow = true;
+  landingLeg.add(strut);
+  // The pusher rod braces the strut back to the hull at a shallower angle,
+  // which is what makes the pair read as a load path rather than two sticks.
+  const pusher = new THREE.Mesh(new THREE.CylinderGeometry(R * 0.07, R * 0.07, legLength * 0.66, 8), accent);
+  pusher.position.set(Math.sin(legSplay) * legLength * 0.34, -Math.cos(legSplay) * legLength * 0.2, 0);
+  pusher.rotation.z = -legSplay * 1.9;
+  landingLeg.add(pusher);
+  const footpad = new THREE.Mesh(new THREE.CylinderGeometry(R * 0.42, R * 0.36, R * 0.12, 14), dark);
+  footpad.position.set(Math.sin(legSplay) * legLength, -Math.cos(legSplay) * legLength, 0);
+  footpad.castShadow = true;
+  landingLeg.add(footpad);
+
   for (let i = 0; i < 4; i++) {
-    const angle = i * Math.PI * 0.5;
-    const fin = new THREE.Mesh(
-      new THREE.BoxGeometry(params.radius * 1.1, params.length * 0.09, params.radius * 0.1),
-      dark,
-    );
-    fin.position.set(
-      Math.cos(angle) * params.radius * 1.15,
-      params.length * 0.32,
-      Math.sin(angle) * params.radius * 1.15,
-    );
+    const angle = i * Math.PI * 0.5 + Math.PI * 0.25;
+
+    const fin = gridFin.clone();
+    fin.position.set(Math.cos(angle) * R * 1.16, L * 0.335, Math.sin(angle) * R * 1.16);
     fin.rotation.y = -angle;
-    fin.castShadow = true;
+    fin.traverse((part) => { part.castShadow = true; });
     vehicle.add(fin);
 
-    const leg = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.09, 0.13, params.length * 0.23, 8),
-      dark,
-    );
-    leg.position.set(
-      Math.cos(angle) * params.radius * 1.28,
-      -params.length * 0.43,
-      Math.sin(angle) * params.radius * 1.28,
-    );
-    leg.rotation.z = Math.cos(angle) * -0.28;
-    leg.rotation.x = Math.sin(angle) * 0.28;
+    const leg = landingLeg.clone();
+    leg.position.set(Math.cos(angle) * R * 0.9, -L * 0.5 + R * 0.35, Math.sin(angle) * R * 0.9);
+    leg.rotation.y = -angle;
+    leg.traverse((part) => { part.castShadow = true; });
     vehicle.add(leg);
   }
 
@@ -75,11 +179,13 @@ export function createRocketView(ctx, state) {
     color: 0xffa43b, transparent: true, opacity: 0.78, depthWrite: false,
   });
   const flame = new THREE.Mesh(
-    new THREE.ConeGeometry(params.radius * 0.62, params.length * 0.32, 20, 1, true),
+    new THREE.ConeGeometry(params.radius * 0.5, params.length * 0.32, 20, 1, true),
     flameMaterial,
   );
   flame.geometry.rotateX(Math.PI);
-  flame.position.y = -params.length * 0.72;
+  // Hangs from the nozzle exit rather than from the old stub's position: the
+  // cone's origin is its midpoint, so half its length below the bell mouth.
+  flame.position.y = -L * 0.5 - bellLength - L * 0.16;
   vehicle.add(flame);
 
   const pad = createLandingPad({ radius: Math.max(12, params.limitOffset + 5), tolerance: params.limitOffset });

@@ -70,11 +70,26 @@ h1, h2, h3, h4 { margin: 0; font-weight: 600; }
   grid-area: topbar;
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 14px;
   padding: 0 14px;
   background: var(--surface);
   border-bottom: 1px solid var(--line);
 }
+
+.project-field {
+  display: flex; flex-direction: column; gap: 2px;
+  min-width: 132px; max-width: 190px;
+  border-left: 1px solid var(--line); padding-left: 14px;
+}
+.project-field span, .layout-field span {
+  font-size: 8.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3);
+}
+.project-field input {
+  width: 100%; padding: 1px 0;
+  background: transparent; border: 0; border-bottom: 1px solid transparent;
+  font-size: 11.5px; color: var(--ink-2); outline: 0;
+}
+.project-field input:hover, .project-field input:focus { border-color: var(--line-2); color: var(--ink); }
 
 .brand { display: flex; align-items: center; gap: 9px; }
 .brand-mark { color: var(--accent); font-size: 15px; }
@@ -87,6 +102,21 @@ h1, h2, h3, h4 { margin: 0; font-weight: 600; }
 .sim-identity p { margin: 1px 0 0; font-size: 11px; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .transport { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+
+.engine-state {
+  display: inline-flex; align-items: center; gap: 6px;
+  min-width: 82px; padding: 5px 8px;
+  border: 1px solid var(--line); border-radius: 999px;
+  font-family: var(--mono); font-size: 9.5px; color: var(--ink-2);
+  text-transform: uppercase; letter-spacing: 0.06em;
+}
+.engine-state i { width: 6px; height: 6px; border-radius: 50%; background: var(--ink-3); }
+.engine-state[data-state="running"] { border-color: rgba(12, 163, 12, 0.45); color: #8bd78b; }
+.engine-state[data-state="running"] i { background: var(--good); box-shadow: 0 0 0 3px rgba(12, 163, 12, 0.13); }
+.engine-state[data-state="paused"] { border-color: rgba(250, 178, 25, 0.35); color: #f0c96f; }
+.engine-state[data-state="paused"] i { background: var(--warning); }
+.engine-state[data-state="replaying"] { border-color: rgba(120, 232, 255, 0.4); color: var(--accent); }
+.engine-state[data-state="error"] { border-color: rgba(208, 59, 59, 0.5); color: #ef8b8b; }
 
 .tbtn {
   width: 30px; height: 30px;
@@ -120,6 +150,32 @@ h1, h2, h3, h4 { margin: 0; font-weight: 600; }
 }
 
 .toolbar-actions { display: flex; align-items: center; gap: 8px; }
+
+.icon-command, .viewport-tools button, #btn-right-panel-close, .rail-toggle {
+  display: grid; place-items: center;
+  background: transparent; border: 1px solid var(--line); border-radius: 6px;
+  color: var(--ink-2); cursor: pointer;
+}
+.icon-command { width: 27px; height: 27px; }
+.icon-command:hover, .viewport-tools button:hover, #btn-right-panel-close:hover, .rail-toggle:hover {
+  border-color: var(--line-2); color: var(--ink); background: var(--surface-2);
+}
+.icon-command:disabled { opacity: 0.35; cursor: not-allowed; }
+.command-search {
+  height: 30px; min-width: 150px; max-width: 230px;
+  display: flex; align-items: center; gap: 6px; padding: 0 7px;
+  background: var(--surface-2); border: 1px solid var(--line); border-radius: 7px; color: var(--ink-3);
+}
+.command-search:focus-within { border-color: rgba(120, 232, 255, 0.55); }
+.command-search input { min-width: 0; flex: 1; background: transparent; border: 0; outline: 0; font-size: 11px; }
+.command-search kbd { border: 0; background: transparent; padding: 0; }
+.layout-field { display: flex; flex-direction: column; gap: 1px; }
+.layout-field select {
+  width: 108px; padding: 1px 3px; background: transparent; border: 0;
+  font-size: 10.5px; color: var(--ink-2); outline: 0;
+}
+.menu-body-left { left: 0; right: auto; }
+.menu-body button { display: flex; justify-content: space-between; align-items: center; gap: 18px; }
 
 .ghost {
   background: transparent;
@@ -165,6 +221,11 @@ h1, h2, h3, h4 { margin: 0; font-weight: 600; }
 }
 #left { grid-area: left; border-right: 1px solid var(--line); display: flex; flex-direction: column; }
 #right { grid-area: right; border-left: 1px solid var(--line); }
+.rail-toggle { position: sticky; top: 6px; z-index: 3; width: 24px; height: 24px; margin: 6px 7px -30px auto; }
+.panel-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.panel-head h3 { margin-bottom: 0; }
+#btn-right-panel-close { width: 24px; height: 24px; }
+.search-match { background: rgba(120, 232, 255, 0.1); color: var(--accent); }
 
 .panel { padding: 12px 12px 14px; border-bottom: 1px solid var(--line); }
 .panel-grow { flex: 1; min-height: 90px; }
@@ -222,6 +283,15 @@ kbd {
 
 #viewport-wrap { position: relative; flex: 1; min-height: 0; background: #05080d; }
 #viewport { display: block; width: 100%; height: 100%; }
+
+.viewport-tools {
+  position: absolute; z-index: 8; top: 12px; right: 12px;
+  display: flex; align-items: center; gap: 5px;
+  padding: 4px; background: rgba(7, 11, 17, 0.8); border: 1px solid var(--line); border-radius: 8px;
+  backdrop-filter: blur(8px);
+}
+.viewport-tools button { width: 27px; height: 25px; }
+.viewport-tools span { width: 1px; height: 17px; background: var(--line); }
 
 #hud {
   position: absolute; top: 12px; left: 12px;
@@ -313,6 +383,16 @@ kbd {
 
 .dock-body { flex: 1; min-height: 0; overflow: hidden; }
 .tab-panel { height: 100%; overflow-y: auto; overscroll-behavior: contain; }
+.empty-panel { height: 100%; display: grid; place-content: center; gap: 5px; text-align: center; color: var(--ink-3); }
+.empty-panel strong { color: var(--ink-2); font-size: 12px; font-weight: 600; }
+.empty-panel span { font-size: 11px; }
+
+/* Workspace regions are independently persisted by WorkspaceController. */
+#app.left-collapsed { grid-template-columns: 0 minmax(0, 1fr) var(--rail-right); }
+#app.right-collapsed { grid-template-columns: var(--rail-left) minmax(0, 1fr) 0; }
+#app.left-collapsed.right-collapsed { grid-template-columns: 0 minmax(0, 1fr) 0; }
+#app.left-collapsed #left, #app.right-collapsed #right { display: none; }
+#app.dock-collapsed #dock, #app.dock-collapsed #dock-resizer { display: none; }
 
 /* ── Graphs ─────────────────────────────────────────────────────────── */
 
@@ -445,25 +525,50 @@ kbd {
 
 /* ── Narrow layouts ─────────────────────────────────────────────────── */
 
-/* Below roughly a laptop width the three-column workspace stops being a
-   workspace. The rails move under the stage rather than shrinking, because a
-   160px inspector is worse than one you scroll to. */
-@media (max-width: 1180px) {
+@media (max-width: 1480px) {
+  .sim-identity p, .project-field span, .layout-field span, #btn-share { display: none; }
+  .project-field { min-width: 112px; max-width: 140px; }
+  .command-search { min-width: 110px; }
+  #topbar { gap: 9px; padding-inline: 10px; }
+  .transport { gap: 5px; }
+  .toolbar-actions { gap: 5px; }
+}
+
+/* Laptop and tablet inspection mode keeps the viewport fixed and presents the
+   hierarchy and inspector as overlay drawers. */
+@media (max-width: 1100px) {
   #app {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto minmax(360px, 1fr) auto auto;
-    grid-template-areas: "topbar" "stage" "right" "left";
-    height: auto;
-    min-height: 100dvh;
+    grid-template-rows: var(--topbar) minmax(0, 1fr);
+    grid-template-areas: "topbar" "stage";
+    height: 100dvh;
   }
-  html, body { overflow: auto; }
-  #topbar { flex-wrap: wrap; height: auto; padding: 10px 12px; gap: 12px; }
-  .sim-identity { border-left: 0; padding-left: 0; }
-  .transport { margin-left: 0; }
-  #left, #right { border: 0; border-top: 1px solid var(--line); overflow: visible; }
-  #stage { min-height: 70dvh; }
+  #left, #right {
+    position: fixed; top: var(--topbar); bottom: 0; z-index: 25;
+    width: min(340px, 84vw); box-shadow: 18px 0 50px rgba(0, 0, 0, 0.48);
+  }
+  #left { left: 0; }
+  #right { right: 0; box-shadow: -18px 0 50px rgba(0, 0, 0, 0.48); }
+  .brand-text em, .project-field, .sim-identity, .command-search, .layout-field,
+  #btn-undo, #btn-redo, #btn-settings, #btn-help, .toolbar-actions .menu { display: none; }
+  .transport { margin-left: auto; }
+  #stage { min-height: 0; }
+}
+
+@media (max-width: 720px) {
+  :root { --topbar: 52px; }
+  .brand-text em, .field, #btn-dice, #btn-stop { display: none; }
+  .engine-state { min-width: 0; }
+  #topbar { padding-inline: 8px; }
+  #dock { height: min(42dvh, 300px) !important; }
+  .tabs { overflow-x: auto; }
+  .tab { white-space: nowrap; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   * { transition-duration: 0.01ms !important; }
+}
+
+@media (prefers-contrast: more) {
+  :root { --line: rgba(255, 255, 255, 0.2); --line-2: rgba(255, 255, 255, 0.36); --ink-3: #a8b7c8; }
 }
