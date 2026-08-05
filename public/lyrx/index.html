@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="./support.js"></script>
 <script src="../shared/lyrx-vault.js"></script>
+<script src="./promo-wave.js"></script>
+<script src="./promo-motion.js"></script>
 </head>
 <body>
 <x-dc>
@@ -54,15 +56,177 @@
     .lx-xlink .xl-name { font-family: var(--font-heading); font-weight: 700; font-size: 13px; letter-spacing: 0.02em; }
     .lx-xlink .xl-arrow { font-family: var(--font-mono); font-size: 12px; color: var(--color-neutral-400); transition: transform .2s, color .2s; }
     .lx-xlink:hover .xl-arrow { color: var(--dc-green); transform: translate(3px,-3px); }
-    .lx-xband { display: flex; align-items: center; gap: 20px; width: 100%; padding: 20px 22px; }
+    .lx-xband { display: flex; align-items: center; gap: 20px; width: 100%; box-sizing: border-box; padding: 20px 22px; }
     .dc-mark path { transform-origin: 50% 100%; transition: transform .55s cubic-bezier(.2,.7,.3,1), opacity .55s; }
     .lx-xlink:hover .dc-mark .a1 { transform: scale(1.18); opacity: .35; }
     .lx-xlink:hover .dc-mark .a2 { transform: scale(1.45); opacity: .18; }
     .lx-xlink:hover .dc-mark .a3 { transform: scale(1.9); opacity: 0; }
+    /* ——— scroll reveal ————————————————————————————————————————
+       The hidden state is scoped to .lx-motion, which promo-motion.js sets on
+       <html> as it parses. If that script ever fails to load, nothing hides. */
+    .lx-motion [data-rise] { opacity: 0; transform: translateY(28px); will-change: opacity, transform; }
+    [data-rise][data-seen] { opacity: 1; transform: none;
+      transition: opacity .95s cubic-bezier(.16,.7,.3,1), transform .95s cubic-bezier(.16,.7,.3,1); }
+    [data-rise][data-d="1"][data-seen] { transition-delay: .10s; }
+    [data-rise][data-d="2"][data-seen] { transition-delay: .20s; }
+    [data-rise][data-d="3"][data-seen] { transition-delay: .30s; }
+    [data-rise="fade"] { transform: none; }
+    [data-rise="wipe"] { opacity: 1; transform: none; clip-path: inset(0 100% 0 0); }
+    [data-rise="wipe"][data-seen] { clip-path: inset(0 0 0 0); transition: clip-path 1.1s cubic-bezier(.16,.7,.3,1); }
+
+    /* ——— section rhythm ————————————————————————————————————— */
+    .lx-eyebrow { display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
+      color: var(--color-accent); font: 600 11px/1 var(--font-mono); letter-spacing: .16em; text-transform: uppercase; }
+    .lx-eyebrow::before { content: ''; width: 26px; height: 1px; background: var(--color-accent); opacity: .5; flex: 0 0 auto; }
+
+    .lx-home-hero { min-height: min(880px, calc(100vh - 58px)); isolation: isolate;
+      background:
+        radial-gradient(1100px 620px at 74% 44%, rgba(96,74,232,.20), transparent 58%),
+        radial-gradient(700px 420px at 12% 78%, rgba(28,38,6,.34), transparent 62%); }
+    .lx-home-hero::after { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: .035; mix-blend-mode: screen; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.72' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.8'/%3E%3C/svg%3E"); }
+    /* Beams and waveform paint over the synth, under the copy and the play button.
+       .lx-hero-object deliberately has no z-index, so it stays at auto and its
+       play cluster can still sit above the canvas. screen blend makes the strokes
+       add light to the object instead of masking it. */
+    .lx-home-hero > canvas { z-index: 2; pointer-events: none; mix-blend-mode: screen; }
+    .lx-hero-inner { min-height: 690px; }
+    .lx-hero-copy { position: relative; z-index: 3; }
+    .lx-hero-object { position: relative; flex: 1 1 500px; min-height: 500px; align-self: stretch; }
+    /* violet bloom the object appears to be sitting inside */
+    .lx-hero-object::before { content: ''; position: absolute; inset: -14% -22% -10% -14%;
+      background: radial-gradient(ellipse 62% 54% at 52% 48%, rgba(108,86,255,.30), rgba(56,44,150,.12) 44%, transparent 72%);
+      filter: blur(34px); pointer-events: none; }
+    /* screen blend drops the render's black ground, so the synth floats in the page
+       instead of sitting in a visible rectangle; the mask feathers what's left */
+    .lx-hero-object img { position: absolute; top: 50%; left: 0; width: 122%; height: 122%;
+      transform: translateY(-50%) translateX(var(--lx-par, 0px)); object-fit: contain;
+      mix-blend-mode: screen; filter: saturate(1.12) contrast(1.24) brightness(1.1);
+      -webkit-mask-image: radial-gradient(ellipse 68% 66% at 50% 50%, #000 54%, transparent 86%);
+              mask-image: radial-gradient(ellipse 68% 66% at 50% 50%, #000 54%, transparent 86%);
+      will-change: transform; }
+    /* set by promo-motion.js when the source image has real transparency */
+    .lx-hero-object[data-cut] img { mix-blend-mode: normal; filter: saturate(1.04) contrast(1.05);
+      -webkit-mask-image: none; mask-image: none; }
+    .lx-scroll-cue { display: flex; align-items: center; gap: 12px; margin-top: 52px;
+      color: var(--color-neutral-500); font: 600 10px/1 var(--font-mono); letter-spacing: .18em; text-transform: uppercase; }
+    .lx-scroll-cue i { display: block; width: 1px; height: 34px; background: linear-gradient(to bottom, var(--color-accent), transparent);
+      animation: lxCue 2.4s cubic-bezier(.5,0,.5,1) infinite; transform-origin: top; }
+    @keyframes lxCue { 0%,100% { transform: scaleY(.35); opacity: .45 } 50% { transform: scaleY(1); opacity: 1 } }
+    .lx-play-cluster { position: absolute; right: 2%; bottom: 4%; width: 170px; display: flex; flex-direction: column; align-items: center; gap: 8px; z-index: 4; }
+    .lx-play-disc { position: relative; width: 150px; height: 150px; border-radius: 50%; background: rgba(8,8,11,.46); border: 1px solid rgba(200,255,46,.24); backdrop-filter: blur(12px); box-shadow: 0 20px 60px rgba(0,0,0,.5), 0 0 36px rgba(200,255,46,.08); }
+    .lx-seq-stage { position: relative; overflow: hidden; background: #0b0b10; }
+    /* feather both edges so the band dissolves into the sections either side */
+    .lx-seq-stage::after { content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 2;
+      background: linear-gradient(to bottom, #08080B, transparent 12%, transparent 88%, #08080B); }
+    /* Selected by tag, not class: the template layer rewrites `class` to `classname`
+       on custom elements, so .lx-seq-wave never matches. !important because the
+       component writes an inline position when it finds itself statically placed. */
+    .lx-seq-stage lyrx-wave { position: absolute !important; inset: 0; height: auto; opacity: .9;
+      -webkit-mask-image: linear-gradient(to right, transparent, #000 18%, #000 82%, transparent);
+              mask-image: linear-gradient(to right, transparent, #000 18%, #000 82%, transparent); pointer-events: none; }
+    .lx-seq-wrap { position: relative; z-index: 3; max-width: 1200px; margin: 0 auto; padding: 108px clamp(20px,5vw,72px); display: grid; grid-template-columns: minmax(230px,.72fr) minmax(360px,1.28fr); align-items: center; gap: clamp(36px,7vw,100px); }
+    .lx-seq-copy h2, .lx-plate-copy h2, .lx-tactile-copy h2 { margin: 0; font-size: clamp(32px,4.4vw,58px); line-height: 1.0; letter-spacing: -0.035em; font-weight: 500; }
+    .lx-seq-copy p, .lx-plate-copy p, .lx-tactile-copy p { margin: 20px 0 0; color: var(--color-neutral-300); font-size: 15px; line-height: 25px; max-width: 46ch; }
+    .lx-seq { position: relative; display: grid; gap: 5px; padding: 18px; border: 1px solid rgba(255,255,255,.09);
+      background: rgba(8,8,11,.78); box-shadow: 0 24px 70px rgba(0,0,0,.55), 0 0 70px rgba(200,255,46,.05); }
+    .lx-seq-row { display: grid; grid-template-columns: repeat(16,1fr); gap: 4px; }
+    .lx-seq i { aspect-ratio: 1; min-width: 0; border-radius: 2px; background: #1a1a20; box-shadow: inset 0 0 0 1px rgba(255,255,255,.025); }
+    .lx-seq i.on { background: var(--color-accent); box-shadow: 0 0 13px rgba(200,255,46,.38); }
+    .lx-seq::before { content: ''; position: absolute; z-index: 2; top: 12px; bottom: 12px; left: 18px; width: calc((100% - 36px - 60px) / 16); border-left: 1px solid rgba(200,255,46,.72); background: rgba(200,255,46,.07); animation: lxSweep 3.2s steps(16) infinite; pointer-events: none; }
+    @keyframes lxSweep { to { transform: translateX(calc(1600% + 64px)); } }
+    /* ——— full-bleed photography bands ——————————————————————— */
+    .lx-photo-plate { position: relative; min-height: min(760px, 88vh); display: flex; align-items: center; overflow: hidden; background: #08080b; }
+    .lx-photo-plate > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+      transform: scale(1.06); transition: transform 1.6s cubic-bezier(.16,.7,.3,1); }
+    .lx-photo-plate[data-seen] > img { transform: scale(1); }
+    .lx-photo-plate::after { content: ''; position: absolute; inset: 0; background:
+      linear-gradient(90deg, rgba(8,8,11,.97) 0%, rgba(8,8,11,.80) 36%, rgba(8,8,11,.12) 68%, rgba(8,8,11,.42) 100%),
+      linear-gradient(0deg, #08080b, transparent 20%), linear-gradient(180deg, #08080b, transparent 16%); }
+    .lx-plate-copy { position: relative; z-index: 2; width: min(500px, calc(100% - 40px)); margin-left: max(20px, calc((100% - 1200px)/2 + 72px)); }
+
+    /* drum pad promoted to its own bleed band, copy sitting on the right */
+    .lx-tactile { position: relative; min-height: min(720px, 84vh); display: flex; align-items: center;
+      justify-content: flex-end; overflow: hidden; background: #08080b; }
+    .lx-tactile > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 28% 50%;
+      transform: scale(1.06); transition: transform 1.6s cubic-bezier(.16,.7,.3,1); }
+    .lx-tactile[data-seen] > img { transform: scale(1); }
+    .lx-tactile::after { content: ''; position: absolute; inset: 0; background:
+      linear-gradient(270deg, rgba(8,8,11,.97) 0%, rgba(8,8,11,.82) 34%, rgba(8,8,11,.10) 66%, rgba(8,8,11,.40) 100%),
+      linear-gradient(0deg, #08080b, transparent 20%), linear-gradient(180deg, #08080b, transparent 16%); }
+    .lx-tactile-copy { position: relative; z-index: 2; width: min(480px, calc(100% - 40px)); margin-right: max(20px, calc((100% - 1200px)/2 + 72px)); }
+
+    /* vinyl as a wide cinematic strip */
+    /* centred with flex, not a transform: the reveal sets transform:none and would
+       otherwise cancel a translate(-50%,-50%) */
+    .lx-vinyl { position: relative; height: clamp(280px, 34vw, 420px); overflow: hidden; background: #08080b;
+      display: flex; align-items: center; justify-content: center; }
+    .lx-vinyl img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .82;
+      transform: scale(1.08); transition: transform 2s cubic-bezier(.16,.7,.3,1); }
+    .lx-vinyl[data-seen] img { transform: scale(1); }
+    .lx-vinyl::after { content: ''; position: absolute; inset: 0; background:
+      linear-gradient(90deg, #08080b 4%, rgba(8,8,11,.35) 34%, rgba(8,8,11,.35) 66%, #08080b 96%),
+      linear-gradient(0deg, rgba(8,8,11,.9), transparent 42%), linear-gradient(180deg, #08080b, transparent 22%); }
+    .lx-vinyl span { position: relative; z-index: 2; padding: 0 24px;
+      text-align: center; color: var(--color-neutral-100); font: 500 clamp(15px,1.8vw,22px)/1.7 var(--font-mono);
+      letter-spacing: .04em; text-shadow: 0 2px 34px rgba(0,0,0,.95), 0 0 70px rgba(0,0,0,.8); }
+
+    /* ——— the film ————————————————————————————————————————— */
+    .lx-film { position: relative; max-width: 1320px; margin: 0 auto; padding: 110px clamp(20px,5vw,72px) 118px; }
+    .lx-film-head { display: flex; align-items: end; justify-content: space-between; gap: 40px; margin-bottom: 34px; }
+    .lx-film-head h2 { margin: 0; font-size: clamp(32px,4.4vw,58px); line-height: 1.0; letter-spacing: -0.035em; font-weight: 500; }
+    .lx-film-head p { max-width: 42ch; margin: 0; color: var(--color-neutral-300); font-size: 14px; line-height: 23px; }
+    .lx-film-frame { position: relative; overflow: hidden; border: 1px solid rgba(200,255,46,.14); background: #050507;
+      box-shadow: 0 50px 130px rgba(0,0,0,.7), 0 0 90px rgba(96,74,232,.10); }
+    .lx-film-frame::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; z-index: 2; pointer-events: none;
+      background: linear-gradient(to right, transparent, rgba(200,255,46,.6), transparent); }
+    .lx-film-frame video { display: block; width: 100%; aspect-ratio: 16/9; object-fit: cover; }
+    .lx-film-note { display: flex; justify-content: space-between; gap: 24px; margin-top: 14px; color: var(--color-neutral-500); font: 500 10px/1.5 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; }
+
+    /* ——— numbered feature grid ——————————————————————————— */
+    .lx-stats > div:first-child { border-left: 0 !important; padding-left: 0 !important; }
+    .lx-feats { counter-reset: lxf; display: grid; grid-template-columns: repeat(auto-fit, minmax(230px,1fr)); gap: 0; }
+    .lx-feats > div { counter-increment: lxf; position: relative; padding: 26px clamp(18px,2.2vw,32px) 6px;
+      border-top: 1px solid var(--color-divider); border-left: 1px solid var(--color-divider); }
+    .lx-feats > div:first-child { border-left: 0; padding-left: 0; }
+    .lx-feats > div::before { content: "0" counter(lxf); position: absolute; top: 26px; right: clamp(18px,2.2vw,32px);
+      color: var(--color-neutral-700); font: 600 11px/1 var(--font-mono); letter-spacing: .1em; }
+    @media (max-width: 760px) {
+      .lx-nav > a { display: none !important; }
+      .lx-nav { gap: 8px !important; }
+      .lx-stats { grid-template-columns: repeat(2, minmax(0,1fr)) !important; }
+      .lx-home-hero { min-height: auto; }
+      .lx-hero-inner { min-height: 0; padding-top: 76px !important; }
+      .lx-hero-object { flex-basis: 100%; min-height: 320px; }
+      .lx-hero-object img { width: 116%; height: 116%; left: -8%; }
+      .lx-play-cluster { right: 0; bottom: -8px; transform: scale(.82); transform-origin: bottom right; }
+      .lx-scroll-cue { display: none; }
+      .lx-seq-wrap { grid-template-columns: 1fr; padding-block: 72px; }
+      .lx-photo-plate { min-height: 560px; align-items: flex-end; padding-bottom: 58px; }
+      .lx-photo-plate::after { background: linear-gradient(0deg, rgba(8,8,11,.99) 0%, rgba(8,8,11,.76) 46%, rgba(8,8,11,.14) 100%); }
+      .lx-plate-copy { margin: 0 20px; width: calc(100% - 40px); }
+      .lx-tactile { min-height: 540px; align-items: flex-end; justify-content: flex-start; padding-bottom: 58px; }
+      .lx-tactile::after { background: linear-gradient(0deg, rgba(8,8,11,.99) 0%, rgba(8,8,11,.76) 46%, rgba(8,8,11,.14) 100%); }
+      .lx-tactile-copy { margin: 0 20px; width: calc(100% - 40px); }
+      .lx-vinyl { height: 240px; }
+      .lx-vinyl span { white-space: normal; width: calc(100% - 48px); }
+      .lx-feats > div { border-left: 0; padding-left: 0; padding-right: 0; }
+      .lx-feats > div::before { right: 0; }
+      .lx-film-head { align-items: flex-start; flex-direction: column; }
+      .lx-film { padding-block: 76px; }
+      .lx-film-note { align-items: flex-start; flex-direction: column; gap: 4px; }
+      .lx-xband { align-items: flex-start; flex-direction: column; }
+      .lx-xband .xl-arrow { align-self: flex-start; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .lx-seq::before { animation: none; transform: translateX(700%); }
+      .lx-scroll-cue i { animation: none; }
+      [data-rise] { opacity: 1 !important; transform: none !important; clip-path: none !important; }
+      .lx-photo-plate > img, .lx-tactile > img, .lx-vinyl img { transform: scale(1) !important; }
+    }
   </style>
 </helmet>
 <div style="min-height: 100vh; color: var(--color-text);">
-  <nav style="display:flex;align-items:center;gap:var(--space-3);padding:14px clamp(16px,3vw,40px);border-bottom:1px solid var(--color-divider);position: sticky; top: 0; z-index: 50; backdrop-filter: blur(12px); background: color-mix(in srgb, var(--color-bg) 78%, transparent);">
+  <nav class="lx-nav" style="display:flex;align-items:center;gap:var(--space-3);padding:14px clamp(16px,3vw,40px);border-bottom:1px solid var(--color-divider);position: sticky; top: 0; z-index: 50; backdrop-filter: blur(12px); background: color-mix(in srgb, var(--color-bg) 78%, transparent);">
     <span style="font-family:var(--font-heading);font-size:19px;font-weight:700;letter-spacing:-0.03em;margin-right:auto;letter-spacing: -0.02em;">Lyrx<span style="color: var(--color-accent);">.</span></span>
     <sc-for list="{{ navItems }}" as="nv" hint-placeholder-count="5">
       <a href="#" data-view="{{ nv.id }}" onClick="{{ goView }}" style="font-size: 14px; text-decoration: none; padding: 6px 10px; border-radius: var(--radius-sm); color: {{ nv.color }}; background: {{ nv.bg }};">{{ nv.label }}</a>
@@ -80,21 +244,24 @@
   </nav>
 
   <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
-    <section style="position: relative; overflow: hidden;">
+    <section class="lx-home-hero" style="position: relative; overflow: hidden;">
       <canvas ref="{{ laserRef }}" style="position: absolute; inset: 0; width: 100%; height: 100%;"></canvas>
-      <div style="position: relative; max-width: 1200px; margin: 0 auto; padding: 132px clamp(20px, 5vw, 72px) 96px; display: flex; align-items: center; gap: 56px; flex-wrap: wrap;">
-        <div style="flex: 1 1 480px; min-width: 0;">
+      <div class="lx-hero-inner" style="position: relative; max-width: 1200px; margin: 0 auto; padding: 104px clamp(20px, 5vw, 72px) 82px; display: flex; align-items: center; gap: 28px; flex-wrap: wrap;">
+        <div class="lx-hero-copy" style="flex: 1 1 480px; min-width: 0;">
           <h1 style="font-size: clamp(44px, 6.4vw, 84px); line-height: 1.08; letter-spacing: -0.015em; margin: 0 0 28px -0.06em; font-weight: 500;">
-            <span style="display: block;">Make the night.</span>
-            <span style="display: block; color: var(--color-accent-300);">Beats, in your browser.</span>
+            <span data-rise style="display: block;">Make the night.</span>
+            <span data-rise data-d="1" style="display: block; color: var(--color-accent-300);">Beats, in your browser.</span>
           </h1>
-          <p style="font-size: 17px; line-height: 28px; max-width: 58ch; margin: 0 0 28px; color: var(--color-neutral-200);">Lyrx is a full studio that opens in one tab. Program drums, draw melodies, twist a synth, mix with real effects — then describe a beat in plain words and let the AI producer lay it down. Nothing to install, nothing to learn first.</p>
-          <div style="display: flex; gap: var(--space-3); flex-wrap: wrap;">
+          <p data-rise data-d="2" style="font-size: 17px; line-height: 28px; max-width: 58ch; margin: 0 0 28px; color: var(--color-neutral-200);">Lyrx is a full studio that opens in one tab. Program drums, draw melodies, twist a synth, mix with real effects — then describe a beat in plain words and let the AI producer lay it down. Nothing to install, nothing to learn first.</p>
+          <div data-rise data-d="3" style="display: flex; gap: var(--space-3); flex-wrap: wrap;">
             <button style-hover="background:color-mix(in srgb, var(--color-accent) 16%, transparent);color:var(--color-accent);" style="border:1px solid var(--color-accent);background:transparent;color:var(--color-accent);font-family:var(--font-mono);font-size:12px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;padding:9px 16px;border-radius:2px;cursor:pointer;transition:background .12s,border-color .12s,color .12s;white-space: nowrap;" data-view="studio" onClick="{{ goView }}">Start making — it's free</button>
           </div>
+          <div class="lx-scroll-cue" data-rise data-d="3" aria-hidden="true"><i></i>Scroll</div>
         </div>
-        <div style="position: relative; flex: 0 0 auto; width: 220px; display: flex; flex-direction: column; align-items: center; gap: 16px;">
-          <div style="position: relative; width: 190px; height: 190px;">
+        <div class="lx-hero-object">
+          <img src="./assets/promo/hero-synth.png" alt="Matte-black analog synthesizer lit in blue and violet">
+          <div class="lx-play-cluster">
+          <div class="lx-play-disc">
             <sc-for list="{{ sparks }}" as="sp" hint-placeholder-count="0">
               <span style="position: absolute; left: 50%; top: 50%; width: {{ sp.size }}px; height: {{ sp.size }}px; border-radius: 50%; background: {{ sp.color }}; box-shadow: 0 0 8px {{ sp.color }}; transform: translate(-50%,-50%); animation: lyrxspark {{ sp.dur }}ms cubic-bezier(.12,.7,.3,1) forwards; --dx: {{ sp.dxpx }}; --dy: {{ sp.dypx }}; pointer-events: none;"></span>
             </sc-for>
@@ -111,38 +278,72 @@
               </span>
             </button>
           </div>
-          <span style="font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-neutral-400); text-align: center;">{{ discoLabel }}</span>
+          <span style="font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-neutral-300); text-align: center;">{{ discoLabel }}</span>
+          </div>
         </div>
       </div>
     </section>
-    <section style="background: radial-gradient(900px 420px at 85% -40%, color-mix(in srgb, var(--color-section-glow) 70%, transparent), transparent 64%), var(--color-section); padding: 70px 0;">
-      <div style="max-width: 1200px; margin: 0 auto; padding: 0 clamp(20px, 5vw, 72px); display: grid; grid-template-columns: repeat(4, auto); justify-content: space-between; gap: 42px 28px;">
+    <section class="lx-seq-stage" aria-label="Live sequencer preview">
+      <lyrx-wave class="lx-seq-wave" amp="1.15" speed="0.4" density="56" spikes="280" glow="1.4" spread="0.32" background="transparent" aria-hidden="true"></lyrx-wave>
+      <div class="lx-seq-wrap">
+        <div class="lx-seq-copy" data-rise><span class="lx-eyebrow">Built to move</span><h2>Start with one square.</h2><p>Tap out a rhythm, draw the notes, then let the playhead carry it forward. Every part of Lyrx stays visible, immediate, and yours to change.</p></div>
+        <div class="lx-seq" data-rise data-d="1" aria-hidden="true">
+          <div class="lx-seq-row"><i class="on"></i><i></i><i></i><i></i><i class="on"></i><i></i><i></i><i></i><i class="on"></i><i></i><i></i><i></i><i class="on"></i><i></i><i></i><i></i></div>
+          <div class="lx-seq-row"><i></i><i></i><i></i><i></i><i class="on"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="on"></i><i></i><i></i><i></i></div>
+          <div class="lx-seq-row"><i class="on"></i><i></i><i class="on"></i><i></i><i class="on"></i><i></i><i class="on"></i><i></i><i class="on"></i><i></i><i class="on"></i><i></i><i class="on"></i><i></i><i class="on"></i><i></i></div>
+          <div class="lx-seq-row"><i></i><i></i><i></i><i class="on"></i><i></i><i></i><i class="on"></i><i></i><i></i><i></i><i></i><i class="on"></i><i></i><i></i><i class="on"></i><i></i></div>
+        </div>
+      </div>
+    </section>
+    <section style="background: radial-gradient(1000px 460px at 85% -50%, color-mix(in srgb, var(--color-section-glow) 60%, transparent), transparent 62%), var(--color-section); padding: 92px 0;">
+      <div class="lx-stats" data-rise style="max-width: 1200px; margin: 0 auto; padding: 0 clamp(20px, 5vw, 72px); display: grid; grid-template-columns: repeat(4, 1fr);">
         <sc-for list="{{ stats }}" as="st" hint-placeholder-count="4">
-          <div>
-            <div style="font-size: clamp(36px, 3.6vw, 52px); line-height: 1.1; font-weight: 500; font-feature-settings: 'tnum' 1;">{{ st.num }}</div>
-            <div style="font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-section-ghost); margin-top: 6px;">{{ st.label }}</div>
+          <div style="padding: 0 clamp(14px, 2.2vw, 34px); border-left: 1px solid var(--color-divider);">
+            <div style="font-size: clamp(42px, 4.4vw, 64px); line-height: 1; font-weight: 500; letter-spacing: -0.04em; font-feature-settings: 'tnum' 1;">{{ st.num }}</div>
+            <div style="font-family: var(--font-mono); font-size: 10px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--color-section-ghost); margin-top: 14px;">{{ st.label }}</div>
           </div>
         </sc-for>
       </div>
     </section>
-    <section style="max-width: 1200px; margin: 0 auto; padding: 84px clamp(20px, 5vw, 72px);">
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--space-6);">
+    <section class="lx-photo-plate" data-rise="fade">
+      <img src="./assets/promo/studio-night.png" alt="Dark home studio with a laptop, MIDI keyboard, and headphones">
+      <div class="lx-plate-copy" data-rise data-d="1"><span class="lx-eyebrow">The whole room, one tab</span><h2>Stay in the feeling.</h2><p>No installs, plugin scans, or setup detours. Open the studio and shape drums, melody, synthesis, effects, vocals, and the final mix without leaving the browser.</p></div>
+    </section>
+    <section class="lx-film" aria-labelledby="lx-film-title">
+      <div class="lx-film-head" data-rise><div><span class="lx-eyebrow">Forty seconds inside Lyrx</span><h2 id="lx-film-title">Watch a track take shape.</h2></div><p>Real pointer moves, real studio controls, and a soundtrack rendered by Lyrx itself. Press play with sound on.</p></div>
+      <div class="lx-film-frame" data-rise data-d="1"><video controls preload="metadata" poster="./assets/promo/promo-poster.png" playsinline><source src="./assets/promo/lyrx-promo-40s.mp4" type="video/mp4">Your browser does not support embedded video.</video></div>
+      <div class="lx-film-note" data-rise data-d="2"><span>41 seconds · 1080p · 60 fps</span><span>Audio generated and exported in Lyrx</span></div>
+    </section>
+    <section style="max-width: 1200px; margin: 0 auto; padding: 104px clamp(20px, 5vw, 72px) 112px;">
+      <div class="lx-feats" data-rise>
         <sc-for list="{{ features }}" as="ft" hint-placeholder-count="4">
           <div>
-            <span style="display: block; font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-accent); margin-bottom: 12px;">{{ ft.kicker }}</span>
-            <h3 style="font-size: 20px; margin: 0 0 10px;">{{ ft.title }}</h3>
-            <p style="font-size: 15px; line-height: 24px; color: var(--color-neutral-300); margin: 0;">{{ ft.body }}</p>
+            <span style="display: block; font-family: var(--font-mono); font-size: 10px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--color-accent); margin-bottom: 16px;">{{ ft.kicker }}</span>
+            <h3 style="font-size: 21px; line-height: 1.2; letter-spacing: -0.025em; margin: 0 0 12px;">{{ ft.title }}</h3>
+            <p style="font-size: 14px; line-height: 23px; color: var(--color-neutral-300); margin: 0 0 26px;">{{ ft.body }}</p>
           </div>
         </sc-for>
       </div>
-      <hr style="height: 1px; border: 0; margin: 84px 0; background: linear-gradient(to right, transparent, var(--color-divider) 48px calc(100% - 48px), transparent);">
-      <div style="max-width: 620px;">
-        <h2 style="font-size: clamp(28px, 3vw, 40px); margin: 0 0 14px;">The floor is waiting.</h2>
+    </section>
+
+    <section class="lx-tactile" data-rise="fade">
+      <img src="./assets/promo/drum-pad.png" alt="Fingers striking a drum pad under blue and violet light">
+      <div class="lx-tactile-copy" data-rise data-d="1"><span class="lx-eyebrow">Tactile by design</span><h2>Fast enough for instinct.</h2><p>Build a beat directly, or describe the shape you hear and let the AI producer draft it into the same editable grid. Nothing is flattened into a black box.</p></div>
+    </section>
+
+    <section class="lx-vinyl" data-rise="fade" aria-label="Late-night record-room feeling">
+      <img src="./assets/promo/vinyl.png" alt="Macro view of vinyl grooves reflecting blue light">
+      <span data-rise data-d="1">Digital speed.<br>That late-night record-room feeling.</span>
+    </section>
+
+    <section style="max-width: 1200px; margin: 0 auto; padding: 112px clamp(20px, 5vw, 72px) 84px;">
+      <div style="max-width: 620px;" data-rise>
+        <h2 style="font-size: clamp(32px, 4.4vw, 58px); line-height: 1.0; letter-spacing: -0.035em; font-weight: 500; margin: 0 0 18px;">The floor is waiting.</h2>
         <p style="font-size: 16px; line-height: 26px; color: var(--color-neutral-300); margin: 0 0 24px;">Your first loop takes about ninety seconds. Everything saves in this browser automatically.</p>
         <button style-hover="background:color-mix(in srgb, var(--color-accent) 16%, transparent);color:var(--color-accent);" style="border:1px solid var(--color-accent);background:transparent;color:var(--color-accent);font-family:var(--font-mono);font-size:12px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;padding:9px 16px;border-radius:2px;cursor:pointer;transition:background .12s,border-color .12s,color .12s;white-space: nowrap;" data-view="studio" onClick="{{ goView }}">Open the studio</button>
       </div>
 
-      <a class="lx-xlink lx-xband" href="../datacore/index.html" style="margin-top: 64px; background: var(--color-section);">
+      <a class="lx-xlink lx-xband" data-rise href="../datacore/index.html" style="margin-top: 72px; background: var(--color-section);">
         <svg class="dc-mark" width="44" height="44" viewBox="0 0 32 32" aria-label="DataCore logo" style="flex: 0 0 auto;">
           <defs><linearGradient id="dcGradBand" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2CFF05"></stop><stop offset="1" stop-color="#BF00FF"></stop></linearGradient></defs>
           <path class="a3" d="M4 28 V15 A12 12 0 0 1 28 15 V28" fill="url(#dcGradBand)" fill-opacity="0.08" stroke="url(#dcGradBand)" stroke-width="2" stroke-linecap="square"></path>
@@ -2812,6 +3013,10 @@ class Component extends DCLogic {
       const amp = fx === 'subtle' ? 0.4 : 1;
       const m = this.mouse || { active: false };
       const mx = m.active ? m.x : -9999, my = m.active ? m.y : 0;
+      // Beam palette: green, blue, violet — the same three the section artwork uses.
+      // The canvas sits above the hero object and blends with screen, so these read
+      // as light thrown across the synth rather than paint covering it.
+      const BEAM = ['200,255,46', '96,150,255', '155,107,255', '120,200,255', '200,255,46'];
       // lasers bend toward the cursor when it's near
       for (let i = 0; i < 5; i++) {
         const x0 = w * (0.15 + i * 0.18);
@@ -2823,35 +3028,35 @@ class Component extends DCLogic {
         }
         const near = m.active ? Math.max(0, 1 - Math.abs(mx - x0) / (w * 0.3)) : 0;
         const grad = c.createLinearGradient(x0, h, x0 + Math.sin(ang) * h, 0);
-        grad.addColorStop(0, `rgba(200,255,46,${(0.2 + energy * 0.5 + near * 0.3) * amp})`);
-        grad.addColorStop(1, 'rgba(200,255,46,0)');
+        grad.addColorStop(0, `rgba(${BEAM[i]},${(0.2 + energy * 0.5 + near * 0.3) * amp})`);
+        grad.addColorStop(1, `rgba(${BEAM[i]},0)`);
         c.strokeStyle = grad; c.lineWidth = 2 + energy * 6 + near * 2;
         c.beginPath(); c.moveTo(x0, h); c.lineTo(x0 + Math.sin(ang) * h * 1.4, h - Math.cos(ang) * h * 1.4); c.stroke();
       }
-      // layered "mix" waveforms — each layer a different sound with its own character
-      const layers = [
-        { base: h - 20, amps: [[0.008, 1.3, 18], [0.02, 2.1, 7]], color: '255,46,122', alpha: 0.5, lw: 0, fill: true, label: 'sub' }, // sub bass: slow & fat
-        { base: h - 44, amps: [[0.016, 2.4, 11], [0.045, 3.8, 5]], color: '200,255,46', alpha: 0.5, lw: 1.6, fill: false, label: 'synth' },
-        { base: h - 62, amps: [[0.05, 5.2, 4], [0.13, 8.5, 2.4]], color: '33,229,229', alpha: 0.42, lw: 1, fill: false, label: 'hats' }, // hats: fast jitter
-        { base: h - 34, amps: [[0.028, 3.1, 8]], color: '155,107,255', alpha: 0.4, lw: 1.3, fill: false, label: 'delay' }
-      ];
-      for (const L of layers) {
-        c.beginPath();
-        if (L.fill) c.moveTo(0, h);
-        for (let x = 0; x <= w; x += 5) {
-          let y = 0;
-          for (const [fq, sp, a] of L.amps) y += Math.sin(x * fq + tm * sp) * a * (1 + energy * 2.2);
-          if (m.active) {
-            const d = Math.abs(x - mx), influence = Math.exp(-(d * d) / (2 * 90 * 90));
-            const heightPull = Math.max(0, 1 - Math.abs(my - L.base) / (h * 0.7));
-            y -= influence * (26 + Math.abs(m.vx || 0) * 1.2) * heightPull * Math.sin(x * 0.06 + tm * 6);
-            y -= influence * 14 * heightPull;
-          }
-          const py = L.base - Math.abs(y) * 0.4 - y;
-          if (L.fill) c.lineTo(x, py); else (x === 0 ? c.moveTo(x, py) : c.lineTo(x, py));
-        }
-        if (L.fill) { c.lineTo(w, h); c.closePath(); c.fillStyle = `rgba(${L.color},${L.alpha * amp})`; c.fill(); }
-        else { c.strokeStyle = `rgba(${L.color},${L.alpha * amp})`; c.lineWidth = L.lw; c.stroke(); }
+      // The mix waveform, rendered by the same field renderer <lyrx-wave> uses
+      // (promo-wave.js) so the hero and the sequencer band match. Unlike the
+      // standalone element this one is wired to the analyser: `energy` drives the
+      // amplitude, so it swells with whatever is actually playing.
+      if (window.LyrxWaveField) {
+        this._heroField = this._heroField || new window.LyrxWaveField();
+        const lively = fx !== 'subtle';
+        // Only the bottom band is drawn, so the buffer is sized to the band rather
+        // than the whole hero — a third of the pixels to stroke, blur and composite.
+        const bandH = Math.min(340, Math.round(h * 0.42));
+        const bandY = h - bandH;
+        this._heroField.render(c, {
+          w, h: bandH, offsetY: bandY, tm,
+          amp: (0.62 + energy * 1.7) * amp,
+          density: lively ? 34 : 18,
+          spikes: lively ? 170 : 80,
+          glow: 1.15,
+          spread: 0.34,
+          centerY: 0.68,
+          edges: 'x',                      // fade the sides; let it run off the base
+          composite: 'screen',
+          alpha: amp,
+          mouse: m.active ? { active: true, x: mx, y: my - bandY, vx: m.vx } : null
+        });
       }
       // cursor glow ripple
       if (m.active) {
