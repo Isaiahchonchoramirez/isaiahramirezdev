@@ -1,3 +1,10 @@
+> **ARCHIVED — HISTORICAL ONLY.**
+> This file is **not** implementation or validation authority and must not be
+> cited as the current process.
+> **Replaced by:** [`docs/validation/M0_PLAN.md`](../../../validation/M0_PLAN.md)
+> **Superseded because:** Sequence, participants and recruiting survive; its assumption register was superseded by the ID'd HYPOTHESES table.
+> **Consolidated under:** [ADR-002](../../../decisions/ADR-002-validation-package-consolidation.md) on 2026-08-05.
+
 # M0 plan
 
 ---

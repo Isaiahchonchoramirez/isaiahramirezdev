@@ -1,3 +1,10 @@
+> **ARCHIVED — HISTORICAL ONLY.**
+> This file is **not** implementation or validation authority and must not be
+> cited as the current process.
+> **Replaced by:** [`docs/validation/WORKFLOW_MAP.md`](../../../validation/WORKFLOW_MAP.md)
+> **Superseded because:** Its teaser-to-close context was kept as background; the owned-scope table from the other package was more precise.
+> **Consolidated under:** [ADR-002](../../../decisions/ADR-002-validation-package-consolidation.md) on 2026-08-05.
+
 # Workflow map
 
 Teaser → investment committee. **All time figures and failure rates are `[H]`** — this

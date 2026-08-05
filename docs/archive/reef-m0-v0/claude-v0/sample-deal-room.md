@@ -1,3 +1,10 @@
+> **ARCHIVED — HISTORICAL ONLY.**
+> This file is **not** implementation or validation authority and must not be
+> cited as the current process.
+> **Replaced by:** [`docs/validation/SYNTHETIC_DEAL_ROOM_SPEC.md`](../../../validation/SYNTHETIC_DEAL_ROOM_SPEC.md)
+> **Superseded because:** Superseded by a larger target company and a 20+ finding set with severity levels.
+> **Consolidated under:** [ADR-002](../../../decisions/ADR-002-validation-package-consolidation.md) on 2026-08-05.
+
 # Sample deal room
 
 A synthetic acquisition package. Built so the concierge process can be rehearsed and

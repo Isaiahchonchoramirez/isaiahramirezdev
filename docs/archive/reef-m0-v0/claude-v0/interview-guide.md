@@ -1,3 +1,10 @@
+> **ARCHIVED — HISTORICAL ONLY.**
+> This file is **not** implementation or validation authority and must not be
+> cited as the current process.
+> **Replaced by:** [`docs/validation/INTERVIEW_GUIDE.md`](../../../validation/INTERVIEW_GUIDE.md)
+> **Superseded because:** Non-leading rules, role paths and the commitment ladder were merged into the canonical guide.
+> **Consolidated under:** [ADR-002](../../../decisions/ADR-002-validation-package-consolidation.md) on 2026-08-05.
+
 # Interview guide
 
 25 minutes. The participant should talk for at least 20 of them.

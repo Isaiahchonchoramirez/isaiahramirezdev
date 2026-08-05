@@ -1,3 +1,10 @@
+> **ARCHIVED — HISTORICAL ONLY.**
+> This file is **not** implementation or validation authority and must not be
+> cited as the current process.
+> **Replaced by:** [`docs/validation/PILOT_OFFER.md`](../../../validation/PILOT_OFFER.md)
+> **Superseded because:** Its pricing was not cost-justified and was replaced; the accuracy-based refund survives.
+> **Consolidated under:** [ADR-002](../../../decisions/ADR-002-validation-package-consolidation.md) on 2026-08-05.
+
 # Pilot offer
 
 The thing actually sold during M0. It is a **service**, delivered by hand, and it is

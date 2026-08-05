@@ -1,0 +1,55 @@
+# Validation hypotheses
+
+## How to use this table
+
+Confidence describes current belief, not importance. “Pass” and “failure” are measured
+after the stated sample; do not move thresholds to fit results. Raw evidence belongs in
+[RESEARCH_LOG.md](RESEARCH_LOG.md).
+
+| ID | Category and assumption | Confidence | Existing evidence | Evidence needed | Method | Pass threshold | Failure threshold | Consequence if false |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| C1 | **Customer:** active searchers or independent sponsors personally own room inventory and issue tracking. | Low | Searchfunder describes small acquisition teams and buyer-led diligence. | Recent-task evidence from qualified buyers. | 15 interviews anchored to the latest live/completed deal. | At least 10 personally performed or directly managed the workflow. | Fewer than 6 did; advisors/VDR admins owned it. | Change user and channel or stop. |
+| C2 | **Customer:** the buyer can purchase a bounded service without enterprise procurement. | Medium-low | Searchers are self-directed entities, but deal/investor approvals vary. | Actual buying authority and approval steps. | Ask who approved the last external diligence expense; test offer. | At least 8 can authorize the design-partner price within 10 business days. | Fewer than 4 can. | Target advisors/sponsors or abandon fast-sales claim. |
+| W1 | **Workflow:** request-list-to-room reconciliation is repeated and poorly supported. | Low | VDRs manage files and Q&A; no customer evidence on this exact job. | Artifacts and step-by-step reconstruction. | Review real request lists, indexes, trackers, and update logs. | At least 8 of 15 perform it and at least 6 use manual spreadsheet/checklist work. | Fewer than 5 perform it manually. | Select a different diligence subworkflow. |
+| W2 | **Workflow:** room updates force material re-review. | Low | Historical proposal and VDR version features suggest the problem exists. | Update frequency, hours, and error cases. | Interview timeline plus pilot revision event. | At least 8 report one material update per live deal and median re-review of 3+ hours. | Fewer than 4 report meaningful re-review. | Remove revision comparison from first deliverable. |
+| P1 | **Pain:** covered work consumes enough time to buy. | Low | Diligence is multi-pronged; no measured Reef customer baseline. | Actual hours by actor and task. | Timeline reconstruction and artifact triangulation. | Median 12+ hours per package on inventory, search, reconciliation, and register preparation. | Median under 5 hours. | Economics are too weak; narrow to a costlier job or stop. |
+| P2 | **Pain:** missed gaps or inconsistent facts cause real escalation, delay, or loss. | Low | General diligence logic only. | Specific recent incident and consequence. | Ask for last miss and verify with non-confidential artifact where possible. | At least 8 cite a concrete event; at least 5 quantify delay/cost/rework. | Fewer than 4 cite a concrete event. | Do not market downside prevention; test time-saving only. |
+| F1 | **Financial impact:** buyer values covered time at enough to support a paid service. | Low | Historical prices were guesses. | Loaded rate/opportunity cost and actual external spend. | Interview ranges and offer tests. | Median stated covered-task cost or opportunity cost is at least 3× pilot price. | Median is below pilot price. | Lower service cost through narrower scope or stop. |
+| PAY1 | **Willingness to pay:** qualified buyers will pay at least $1,500 for a design-partner pilot. | Low | No payments or letters of intent. | Signed offer, deposit, and completed payment. | Present offer only after workflow qualification. | At least 2 of 5 qualified offers sign and pay 50% deposit. | 0 of 5 pay, or only free tests are accepted. | Fail M1; revisit wedge or buyer. |
+| PAY2 | **Willingness to pay:** standard value can support $4,000+ per bounded package. | Low | Historical $1,500/$2,500 claims unsupported. | Price experiment outcomes and value review. | Offer standard tier to later qualified prospects. | At least 1 of 3 accepts $4,000+ or provides a credible procurement path at that level. | 0 of 3 and all price ceilings are under $2,000. | Rework scope/economics; do not assume SaaS margins. |
+| D1 | **Data access:** buyers can lawfully share a redacted representative package under agreement. | Low | Searchers use data rooms; no sharing commitment exists. | Written authority and actual governed transfer. | Commitment ladder in interviews. | At least 3 of 15 provide packages containing request list, documents, and structured data. | Fewer than 2 provide usable material. | Stop build; synthetic data cannot validate extraction. |
+| D2 | **Data access:** package formats are sufficiently bounded for a first service. | Low | Historical guesses list many formats. | Format census over real samples. | Inventory three packages without retaining content metrics beyond agreement. | At least 80% of relevant items by review importance are PDF, DOCX, XLSX, CSV, or TXT. | More than 30% of critical evidence requires unsupported/proprietary formats. | Narrow deal type or change technical plan. |
+| S1 | **Security:** a manual pilot can meet buyer requirements without enterprise infrastructure. | Low | Datasite demonstrates a high bar; searcher segment may differ. | Security questionnaires, counsel review, and buyer objections. | Present written data flow and retention plan to qualified prospects. | At least 3 prospects approve or identify only controls achievable before pilot. | Two or more require SOC 2, VDR-native processing, or controls unavailable within 60 days. | Do not receive live data; use customer-hosted work or stop. |
+| T1 | **Technical feasibility:** exact evidence anchors can be produced reliably for dominant formats. | Medium-low | DataGate preserves rows but not PDF/DOCX/XLSX coordinates. | Fixture and real-package anchor evaluation. | Synthetic gold set, then governed sample evaluation. | At least 95% correct anchors over 100 stratified factual findings. | Below 90% after one bounded remediation cycle. | Narrow formats/findings; no M1. |
+| T2 | **Technical feasibility:** a reusable check set can reach high precision. | Low | DataGate has 55 deterministic engine tests; no diligence checks. | Labeled real and synthetic findings with negatives. | Human-reviewed concierge outputs and blinded replay. | At least 95% precision on deterministic checks and 90% on confirmed missing-item proposals. | Below 85% precision or checks remain mostly bespoke. | Sell human service only, narrow, or stop. |
+| A1 | **Adoption:** the evidence register fits existing advisor/investor communication. | Low | Historical memo claim; no forwarded artifact observed. | Real usage after delivery. | Customer review plus export/share observation. | Both paid pilots use the register in a diligence meeting, advisor escalation, or investor update. | Neither uses it outside the Reef review call. | Deliverable is wrong; redesign before product. |
+| R1 | **Recurring use:** value extends beyond one searcher's one deal. | Low | Searchers are episodic; sponsor/advisor expansion is speculative. | Second-deal intent, referrals, or channel buyer behavior. | 30-day follow-up and referral ask. | At least one repeat-project commitment and three qualified referrals from paid pilots. | No repeat or referral signal from three completed pilots. | Prefer per-project business, target advisors, pivot to engineering, or stop. |
+
+## Priority order
+
+Validate D1, C1, W1, P1, PAY1, and S1 first. If customers cannot share data, do not own
+the workflow, lack meaningful pain, will not pay, or require unavailable controls, later
+technical and design hypotheses do not matter.
+
+## Added by ADR-002
+
+Three hypotheses the original table under-weighted. `N1` and `L1` are **blocking**: a
+failure on either ends the wedge in its current form regardless of every other row.
+
+| ID | Category and assumption | Confidence | Existing evidence | Evidence needed | Method | Pass threshold | Failure threshold | Consequence if false |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| **N1** | **Frequency (blocking):** the buyer purchases more than once, or a repeat intermediary buys on behalf of many buyers. | Very low | ADR-001 scored M&A frequency 2/5. A traditional searcher acquires once and permanently stops being a buyer. | Deals per participant per year; second-deal intent; channel volume. | Ask deals closed in last 12 months and expected in next 12. Interview sponsors, QoE providers and sell-side advisors as buyers, not only as referrers. | Median 3+ qualified reviews/year across the buyer cohort, **or** one intermediary channel with 12+ reviews/year and stated intent. | Median ≤1 with no intermediary channel showing intent. | Lifetime value is one transaction against comparable acquisition cost. Move to the intermediary as primary customer or stop. |
+| **L1** | **Legal permissibility (blocking):** a buyer may lawfully route seller-confidential documents to a paid third-party service and its subprocessors. | Very low | None. Both prior packages required "written authority" without establishing it is customarily obtainable. | Counsel opinion on the seven questions in ADR-002 §3.2, plus the actual NDA clause from 3+ participants. | Engage transaction counsel in week one. Request the Representatives clause from every buyer interviewed. | Counsel confirms a customary consent path, and 3+ participants' NDAs permit it or a minimal consent request is workable. | Standard NDAs prohibit it with no workable consent path and no customer-controlled processing option. | The service cannot be lawfully delivered as designed. Pivot to processing on customer-controlled infrastructure, or stop. |
+| **X1** | **Differentiation:** the owned job is not already solved by an incumbent the buyer has actually tried. | Low | ADR-001 records Datasite shipping cited AI diligence across a reported 16,000+ deals/year. | Reconstructed episodes of attempted use, not opinions about availability. | Five separate probes (VDR AI, QoE, attorney list, generic assistant, configured project) requiring an artifact or a specific abandonment reason. | 8+ of 15 identify an owned step not acceptably solved by an incumbent **they tried**. | Most participants who tried an incumbent found it sufficient. | No defensible job. Narrow to the residual gap or supersede ADR-001. |
+
+**Scoring rule for X1.** Availability is not usage; usage is not satisfaction. A
+participant whose VDR has AI they never opened scores **neutral**, not favourable — the
+incumbent was untested, which is not the same as inadequate.
+
+## Priority order, revised
+
+Validate **L1, D1, N1, C1, W1, P1, PAY1, S1** first, in that order. `L1` moves to the
+front because it is binary, cheap to answer, and capable of ending the wedge on its own —
+there is no reason to spend two weeks on interviews before asking counsel one question
+set. `N1` joins the front group because it determines whether the buyer is the person
+being interviewed at all.

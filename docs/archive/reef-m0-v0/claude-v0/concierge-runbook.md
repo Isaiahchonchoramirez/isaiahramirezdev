@@ -1,3 +1,10 @@
+> **ARCHIVED — HISTORICAL ONLY.**
+> This file is **not** implementation or validation authority and must not be
+> cited as the current process.
+> **Replaced by:** [`docs/validation/CONCIERGE_RUNBOOK.md`](../../../validation/CONCIERGE_RUNBOOK.md)
+> **Superseded because:** Label taxonomy and QC survive; its procedure was merged with a more explicit operating sequence.
+> **Consolidated under:** [ADR-002](../../../decisions/ADR-002-validation-package-consolidation.md) on 2026-08-05.
+
 # Concierge runbook
 
 How to deliver the pilot by hand, before software exists.

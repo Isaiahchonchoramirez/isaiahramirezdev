@@ -12,7 +12,7 @@ instead, so the reasoning that turned out to be wrong stays visible.
 evidence-register service for searchers and independent sponsors, at approximately $1,500
 per deal.
 
-**Supported by** [ADR-001](../../decisions/ADR-001-initial-market-wedge.md), written
+**Supported by** [ADR-001](../decisions/ADR-001-initial-market-wedge.md), written
 independently and reaching the same conclusion by a scored comparison (51/85 vs 45/85
 against the engineering alternative). Two separate analyses converging is worth
 something, though less than it appears — see the shared-blind-spot note below.
@@ -41,13 +41,13 @@ something, though less than it appears — see the shared-blind-spot note below.
 
 **Zero customer conversations have occurred.** The wedge rests entirely on desk research
 and inference. ADR-001 states this plainly and its "Speculative assumptions" section
-should be read alongside `m0-plan.md`'s assumption register — they overlap and neither is
+should be read alongside `M0_PLAN.md`'s assumption register — they overlap and neither is
 redundant.
 
 ### What would reverse it
 
 Reversal triggers are in ADR-001 and reflected as FAIL conditions in
-[`validation-scorecard.md`](validation-scorecard.md). The three most likely:
+[`SCORECARD.md`](SCORECARD.md). The three most likely:
 
 1. **Frequency.** A searcher acquires once. If LTV is a single transaction against
    comparable CAC, the business fails regardless of product quality.
@@ -122,10 +122,10 @@ already shipping overlapping functionality.
 materially stronger rates than the M&A cohort, or M&A fails the scorecard. Requires a
 superseding ADR.
 
-**Worth noting:** this was runner-up wedge #1 in `../01-strategy.md` before ADR-001
+**Worth noting:** this was runner-up wedge #1 in `docs/reef/01-strategy.md` before ADR-001
 existed. Two independent analyses ranked the same two wedges in the same order.
 
-### Also documented in `../01-strategy.md`
+### Also documented in `docs/reef/01-strategy.md`
 
 - **Insurance claim and policy review** — repetitive, clear ROI, regulated, slower
 - **Municipal records and public comment** — best press story, least money; viable as a
@@ -137,7 +137,7 @@ Not a separate wedge but a different customer for the same deliverable: **SBA le
 QoE accountants, and business brokers** touch every deal in the ecosystem and have the
 frequency searchers lack.
 
-`m0-plan.md` allocates 5 of 22 interviews to them and `interview-guide.md` gives them
+`M0_PLAN.md` allocates 5 of 22 interviews to them and `INTERVIEW_GUIDE.md` gives them
 dedicated paths. If row 11 of the scorecard fails on searcher frequency, this is the
 first pivot to run — and it may turn out to be the primary customer rather than the
 fallback.
@@ -146,7 +146,7 @@ fallback.
 
 ## 2026-08-05 · Belief updated: differentiation is weaker than claimed
 
-**What changed.** `../01-strategy.md` asserts that VDR incumbents' AI is "a feature
+**What changed.** `docs/reef/01-strategy.md` asserts that VDR incumbents' AI is "a feature
 bolted to storage" and "a decade behind." ADR-001 contradicts this with sourced evidence:
 Datasite markets native semantic search, extraction and comparison, summaries,
 **exact-source citations**, human review, permission enforcement and audit trails — across
@@ -168,7 +168,7 @@ else, and the honest candidates are:
 AI search now. Why wouldn't you just use that?"* An unconvincing answer is the most
 likely honest reason to stop.
 
-**This entry exists because it weakens my own prior document.** `../01-strategy.md` has
+**This entry exists because it weakens my own prior document.** `docs/reef/01-strategy.md` has
 not been edited to match — the historical banner covers it, and per this log's
 append-only rule the original claim stays visible so the correction is legible.
 
@@ -214,19 +214,98 @@ whoever reconciles it with `docs/validation/**`.
 
 **Sections here worth carrying into the merged package:**
 
-- `sample-deal-room.md`'s twelve planted findings and four distractors — the distractors
+- `SYNTHETIC_DEAL_ROOM_SPEC.md`'s twelve planted findings and four distractors — the distractors
   are the part usually forgotten, and precision is the expensive metric
 - The **five discriminating cross-document findings** (1, 3, 5, 6, 10) as a separate
   score, since they are the product thesis expressed as a number
-- The label taxonomy in `concierge-runbook.md` — extracted / calculated / inferred /
+- The label taxonomy in `CONCIERGE_RUNBOOK.md` — extracted / calculated / inferred /
   unresolved / missing — which should survive into the product, not just the pilot
-- The **accuracy-based refund** in `pilot-offer.md` rather than a satisfaction guarantee
+- The **accuracy-based refund** in `PILOT_OFFER.md` rather than a satisfaction guarantee
 - The anti-gaming section in `validation-scorecard.md`, particularly the sealed prediction
 - The three pricing experiments run concurrently, and the rule that design-partner
   conversions count at half weight
 
 **What this package does not have** that the other may: ADR-001's sourced desk research,
-and whatever `docs/validation/RESEARCH_LOG.md` contains.
+and whatever `RESEARCH_LOG.md` contains.
 
 **State:** nothing validated. No interviews conducted. Every number is a threshold or a
 hypothesis, never a finding.
+
+---
+
+## 2026-08-05 · Validation packages consolidated
+
+**Decision.** One canonical package at `docs/validation/**`, merged section by section
+from two competing packages. Both originals preserved verbatim under
+`docs/archive/reef-m0-v0/`. Recorded in
+[ADR-002](../decisions/ADR-002-validation-package-consolidation.md).
+
+**Supersedes the handoff entry above.** That entry recommended merging and left the
+choice to the founder; the founder directed consolidation and it is done.
+
+**Three thresholds were deliberately loosened**, against the default of preferring the
+stricter number, because the stricter number would have produced false confidence:
+
+| | Was | Now | Because |
+|---|---|---|---|
+| Standard price | $1,500 | $4,500 | $1,500 against a 12-hour delivery is $125/hour gross before tooling; at a realistic first-run 25 hours it is $60/hour. The lower price validates a service that cannot be delivered profitably. It survives as the design-partner tier. |
+| Turnaround | 72 hours | 5 business days | 72 hours assumes uninterrupted work. Real intake costs two customer response cycles for passwords, scope and classification. |
+| Hours of pain | ≥40h whole-deal | ≥12h on owned steps | Wrong denominator. Reef owns part of the workflow; a 40-hour whole-deal figure with 6 hours in the owned scope is a fail dressed as a pass. |
+
+**One threshold is stricter than either original:** paid pilots now require ≥2 delivered
+**and** ≥2 of 5 offers converting. A count alone is reachable by making twenty offers; a
+ratio alone by making five offers to friends.
+
+**What this changed about my own prior work.** The $1,500 anchor in the archived package
+was set by what felt buyable and never checked against cost. That is a methodological
+defect, not a preference, and it is recorded here rather than quietly corrected.
+
+---
+
+## 2026-08-05 · ADR-001 red-teamed; wedge holds, three amendments
+
+Limited review of the three issues most likely to invalidate the wedge. **None did.**
+Details in ADR-002 §3.
+
+**A1 · Lifetime value.** The frequency risk logged in this file on 2026-08-05 was
+confirmed as real and under-processed. A traditional searcher acquires once and then
+permanently stops being a buyer. Candidates assessed: independent sponsors (2–5/yr, same
+job, no repositioning) become the **primary ICP**; QoE providers are tested as buyer *and*
+channel; **sell-side room readiness** emerges as an unexpected high-frequency variant
+using identical mechanics on documents the advisor already controls — which sidesteps the
+seller-NDA problem entirely. Transaction attorneys are **rejected**: billable-hour
+economics make time saved into revenue lost, which is structural misalignment, not an
+objection to be handled.
+
+**A2 · Third-party processing rights.** Both packages required "written authority" without
+establishing it is customarily obtainable. Now a blocking hypothesis (`L1`) with a
+seven-question counsel brief, moved to week one. No legal conclusion is stated anywhere in
+this repository. Question 7 — whether customer-controlled processing changes the analysis —
+matters most, because an affirmative answer turns a fatal blocker into an architecture
+requirement that DataGate already satisfies.
+
+**A3 · Existing coverage.** The methodological gap was that neither package distinguished
+availability from usage. **A participant whose VDR has AI they never opened is neutral
+evidence, not favourable** — the incumbent was untested, which is not the same as
+inadequate. Five incumbent probes added, each demanding an artifact or a specific
+abandonment reason. Only participants who *tried* an incumbent count toward the
+competitive-displacement gate.
+
+**What survives.** Reef retains a narrow job: request-list-to-room reconciliation with
+exact anchors, for a buyer with no analyst, on a room that frequently is not in a
+professional VDR at all. Not the QoE's work, not the attorney's, not reachable by VDR AI
+when the room is a Dropbox folder. **Defensibility remains unproven** — that is what M0
+tests.
+
+---
+
+## Open questions, revised
+
+1. **Do standard seller NDAs permit third-party processing?** `L1`, blocking, week one.
+2. **Is the buyer the sponsor, the searcher, or an intermediary?** `N1`, blocking.
+3. **Does the sell-side room-readiness variant have more pull than the buy-side one?**
+   Newly opened by ADR-002 §3.1. Three interviews allocated.
+4. **Do the QoE and the attorney already cover the check set?** Untested, possibly fatal.
+5. **Has anyone actually tried their VDR's AI?** `X1`. If most have not, incumbent
+   strength is unknown rather than low.
+6. **Does the register get used in a real meeting?** The outcome gate.

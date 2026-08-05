@@ -1,3 +1,10 @@
+> **ARCHIVED — HISTORICAL ONLY.**
+> This file is **not** implementation or validation authority and must not be
+> cited as the current process.
+> **Replaced by:** [`docs/validation/README.md`](../../../validation/README.md)
+> **Superseded because:** Index for a package that no longer exists at that path.
+> **Consolidated under:** [ADR-002](../../../decisions/ADR-002-validation-package-consolidation.md) on 2026-08-05.
+
 # M0 · Concierge validation
 
 The purpose of M0 is to find out whether the wedge chosen in

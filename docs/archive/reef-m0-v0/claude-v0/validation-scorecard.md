@@ -1,3 +1,10 @@
+> **ARCHIVED — HISTORICAL ONLY.**
+> This file is **not** implementation or validation authority and must not be
+> cited as the current process.
+> **Replaced by:** [`docs/validation/SCORECARD.md`](../../../validation/SCORECARD.md)
+> **Superseded because:** Merged; the other package's automatic-fail conditions were stronger and were adopted.
+> **Consolidated under:** [ADR-002](../../../decisions/ADR-002-validation-package-consolidation.md) on 2026-08-05.
+
 # Validation scorecard
 
 The M1 gate. Scored once, at the end of the two weeks, against evidence collected
