@@ -1,0 +1,48 @@
+{
+  "$comment": "Copy to cold-review-queries.json, fill in, then HASH OR COMMIT IT BEFORE running the engine.",
+  "$states": "See RESULT_STATES.md for the eight expected_state values.",
+  "reviewer": {
+    "initials": "XX",
+    "date": "YYYY-MM-DD",
+    "prior_exposure_to_this_project": "none | some | describe",
+    "diligence_experience": "none | some | professional",
+    "read_answer_key_before_freezing": false,
+    "deviation_disclosure": ""
+  },
+  "corpus_notes": {
+    "folders_and_contents": "",
+    "subjects_substantively_covered": [],
+    "subjects_mentioned_but_thin": [],
+    "referred_to_but_not_found": [],
+    "would_not_open_or_opened_badly": []
+  },
+  "$distribution_required": {
+    "directly_answerable": 10,
+    "subject_present_fact_may_be_absent": 5,
+    "outside_corpus_scope": 5,
+    "requires_calculation_or_comparison": 5,
+    "missing_inaccessible_stale_or_unreviewed": 3
+  },
+  "queries": [
+    {
+      "query_id": "CR-001",
+      "query_text": "Write the question exactly as you would type it.",
+      "intended_class": "directly_answerable",
+      "expected_state": "SUPPORTED",
+      "why": "One sentence, your own words.",
+      "supporting_document": "Path if you found one; blank otherwise.",
+      "confidence": "high",
+      "notes": ""
+    },
+    {
+      "query_id": "CR-002",
+      "query_text": "",
+      "intended_class": "subject_present_fact_may_be_absent",
+      "expected_state": "SUBJECT_PRESENT_FACT_ABSENT",
+      "why": "The room covers the subject but I could not find this attribute.",
+      "supporting_document": "",
+      "confidence": "medium",
+      "notes": ""
+    }
+  ]
+}

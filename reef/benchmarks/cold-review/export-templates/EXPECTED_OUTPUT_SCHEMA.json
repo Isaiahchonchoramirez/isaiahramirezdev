@@ -1,0 +1,64 @@
+{
+  "$comment": "Shape of cold-review-results.json. One entry per question, plus computed metrics.",
+  "$schema_version": "1",
+  "reviewer": { "initials": "XX", "date": "YYYY-MM-DD" },
+  "pre_registration": {
+    "queries_file_sha256": "REQUIRED unless a commit hash is given",
+    "queries_file_commit": "REQUIRED unless a sha256 is given",
+    "frozen_before_running_engine": true
+  },
+  "environment": {
+    "reef_config_output_verbatim": "REQUIRED: paste of `reef config`",
+    "dotenv_reported": "none present | <path>",
+    "embedding_model": "",
+    "similarity_floor": null,
+    "export_manifest_sha256": "from BLINDED_EXPORT_MANIFEST.json",
+    "verify_blinding_result": "PASS | FAIL"
+  },
+  "results": [
+    {
+      "query_id": "CR-001",
+      "expected_state": "SUPPORTED",
+      "engine_outcome": "found | not_found",
+      "engine_detail": "",
+      "top_documents": [{ "rank": 1, "document": "", "locations": [], "score": null }],
+      "mapped_state": "SUPPORTED | ... | UNMAPPABLE",
+      "mapping_was_possible": true,
+      "mapping_difficulty_note": "",
+      "verdict": "correct | false_support | false_abstention | wrong_state",
+      "would_you_escalate_this_error": false,
+      "citations_checked_against_source": false,
+      "reviewer_comment": ""
+    }
+  ],
+  "metrics": {
+    "$note": "Wilson 95% interval on every rate. See SCORING_PROTOCOL.md.",
+    "by_class": {
+      "directly_answerable": { "n": 0, "correct": 0, "rate": null, "wilson_95": [null, null], "underpowered": false },
+      "subject_present_fact_may_be_absent": { "n": 0, "correct": 0, "rate": null, "wilson_95": [null, null], "underpowered": false },
+      "outside_corpus_scope": { "n": 0, "correct": 0, "rate": null, "wilson_95": [null, null], "underpowered": false },
+      "requires_calculation_or_comparison": { "n": 0, "correct": 0, "rate": null, "wilson_95": [null, null], "underpowered": false },
+      "missing_inaccessible_stale_or_unreviewed": { "n": 0, "correct": 0, "rate": null, "wilson_95": [null, null], "underpowered": false }
+    },
+    "overall": {
+      "supported_question_recall": null,
+      "abstention_precision": null,
+      "abstention_recall": null,
+      "false_support_rate": null,
+      "false_abstention_rate": null,
+      "escalation_worthy_false_supports": 0,
+      "unmappable_states": 0
+    },
+    "hard_gates": {
+      "fabricated_citations": 0,
+      "citations_sampled": 0,
+      "unlabeled_inference": 0
+    }
+  },
+  "split_proposal": {
+    "$note": "You choose the split. The engine's authors must not.",
+    "development_query_ids": [],
+    "heldout_query_ids": [],
+    "split_method": ""
+  }
+}

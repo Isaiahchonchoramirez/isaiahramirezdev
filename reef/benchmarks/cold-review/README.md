@@ -1,8 +1,22 @@
 # Cold-review package
 
-Everything a second reviewer needs to evaluate Reef's retrieval and abstention **without
-seeing what the fixture plants**. Hand over this directory and the deal-room documents;
-nothing else.
+> **Do not hand this directory to a reviewer.** It lives inside the repository that holds
+> the answer key, so anything given from here is recoverable through version-control
+> history even after deletion.
+>
+> Build a sanitized export instead:
+>
+> ```bash
+> uv run python benchmarks/cold-review/build_blinded_export.py
+> ```
+>
+> That assembles `~/Developer/reef-cold-review-export` from an explicit allowlist — a fresh
+> directory with no history, no answer key, and no path back here. `export-templates/`
+> holds the reviewer-facing documents it ships; the files below are the authors' design
+> record and are **not** given to the reviewer.
+
+Everything a second reviewer needs to evaluate Reef's retrieval and abstention without
+seeing the expected answers.
 
 Every query set, label and threshold in this repository was written by the same party that
 built the fixture and the engine. `SCORECARD.md` names that conflict for market evidence and
@@ -13,7 +27,7 @@ verification pass, two commits and a written report before a routine trace caugh
 
 | File | When |
 |---|---|
-| [`BLINDING_PROTOCOL.md`](BLINDING_PROTOCOL.md) | **First.** What you must not read, and how to build a checkout that cannot show it to you. |
+| [`BLINDING_PROTOCOL.md`](BLINDING_PROTOCOL.md) | Superseded by the export builder, kept as the design rationale. |
 | [`REVIEWER_INSTRUCTIONS.md`](REVIEWER_INSTRUCTIONS.md) | The task, start to finish. |
 | [`QUERY_SUBMISSION_TEMPLATE.json`](QUERY_SUBMISSION_TEMPLATE.json) | Where your questions and pre-registered labels go. |
 | [`EXPECTED_OUTPUT_SCHEMA.json`](EXPECTED_OUTPUT_SCHEMA.json) | The shape of the results file you produce. |

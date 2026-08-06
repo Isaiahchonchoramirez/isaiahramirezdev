@@ -10,6 +10,8 @@ that no engine test would catch.
 from __future__ import annotations
 
 import json
+import re
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -18,6 +20,9 @@ import pytest
 BENCHMARKS = Path(__file__).resolve().parents[1] / "benchmarks"
 MANIFEST = BENCHMARKS / "ridgeline-query-manifest-v2.json"
 COLD_REVIEW = BENCHMARKS / "cold-review"
+TEMPLATES = COLD_REVIEW / "export-templates"
+BUILDER = COLD_REVIEW / "build_blinded_export.py"
+VERIFIER = COLD_REVIEW / "verify_blinding.sh"
 
 VALID_TIERS = {"T1", "T2", "T3"}
 VALID_DISPOSITIONS = {
@@ -191,7 +196,48 @@ class TestHeldOutContaminationIsDeclared:
         assert "contaminated" in source.lower()
 
 
-class TestColdReviewBundle:
+def _minimal_export(root: Path) -> Path:
+    """A structurally valid export, so the verifier's own checks can be exercised."""
+    (root / "engine").mkdir(parents=True)
+    (root / "deal-room").mkdir()
+    for name in (
+        "README.md",
+        "BLINDING_PROTOCOL.md",
+        "REVIEWER_INSTRUCTIONS.md",
+        "SCORING_PROTOCOL.md",
+        "RESULT_STATES.md",
+        "REVIEWER_OBSERVATIONS_TEMPLATE.md",
+        "ADJUDICATION_HANDOFF.md",
+        "QUERY_SUBMISSION_TEMPLATE.json",
+        "EXPECTED_OUTPUT_SCHEMA.json",
+        "DOCUMENT_INDEX.md",
+    ):
+        (root / name).write_text("placeholder\n")
+    (root / "BLINDED_EXPORT_MANIFEST.json").write_text(
+        json.dumps({"manifest_sha256": "x", "engine": {"wheel_sha256": "y"}})
+    )
+    shutil.copyfile(VERIFIER, root / "verify_blinding.sh")
+    (root / "engine" / "ENGINE_USAGE.md").write_text("x\n")
+    (root / "engine" / "setup.sh").write_text("x\n")
+    (root / "engine" / "alembic.ini").write_text("x\n")
+    (root / "engine" / "reef-0.1.0-py3-none-any.whl").write_bytes(b"PK\x05\x06" + b"\0" * 18)
+    for i in range(13):
+        folder = root / "deal-room" / f"{i:02d}_Folder"
+        folder.mkdir()
+        for j in range(5):
+            (folder / f"doc{j}.txt").write_text("ordinary document text\n")
+    return root
+
+
+def _run_verifier(target: Path) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        ["bash", str(VERIFIER), str(target)], capture_output=True, text=True, check=False
+    )
+
+
+class TestExportTemplates:
+    """The reviewer-facing documents the builder ships."""
+
     REQUIRED = (
         "README.md",
         "REVIEWER_INSTRUCTIONS.md",
@@ -200,67 +246,67 @@ class TestColdReviewBundle:
         "SCORING_PROTOCOL.md",
         "BLINDING_PROTOCOL.md",
         "REVIEWER_OBSERVATIONS_TEMPLATE.md",
-        "ADJUDICATION_PROTOCOL.md",
+        "ADJUDICATION_HANDOFF.md",
+        "RESULT_STATES.md",
+        "ENGINE_USAGE.md",
+        "setup.sh",
     )
 
-    def test_every_required_file_is_present(self) -> None:
-        missing = [name for name in self.REQUIRED if not (COLD_REVIEW / name).is_file()]
-        assert not missing, f"cold-review bundle is missing {missing}"
+    def test_every_required_template_exists(self) -> None:
+        missing = [n for n in self.REQUIRED if not (TEMPLATES / n).is_file()]
+        assert not missing, f"export templates missing {missing}"
 
-    def test_the_templates_are_valid_json(self) -> None:
+    def test_templates_are_valid_json_where_they_claim_to_be(self) -> None:
         for name in ("QUERY_SUBMISSION_TEMPLATE.json", "EXPECTED_OUTPUT_SCHEMA.json"):
-            json.loads((COLD_REVIEW / name).read_text(encoding="utf-8"))
+            json.loads((TEMPLATES / name).read_text(encoding="utf-8"))
 
-    #: Files whose job is to name the paths that must be removed. Mentioning
-    #: `ground-truth.json` in a deletion command is not a leak of its contents.
-    MAY_NAME_PATHS = frozenset({"BLINDING_PROTOCOL.md", "verify_blinding.sh", "README.md"})
-
-    def test_the_bundle_leaks_no_finding_identifiers_or_values(self) -> None:
-        """The bundle ships to the reviewer. Anything in it, they see.
-
-        Probes for the substance of the answer key — finding ids and planted figures —
-        rather than for filenames. A leak here silently converts an independent review into
-        a confirmation of the author's own labels.
-        """
+    def test_templates_leak_no_finding_identifiers_or_values(self) -> None:
+        """These ship to the reviewer. Anything in them, they see."""
         leaked: list[str] = []
         substance = [f"RDG-{n:03d}" for n in range(1, 23)] + [
-            "22.4",  # the planted concentration figure
-            "1.18",  # the planted covenant ratio
-            "000418",  # the planted zero-padded identifier
-            "Hartwell",  # a planted counterparty
-            "Lakeside",  # the planted largest customer
+            "22.4",
+            "1.18",
+            "000418",
+            "Hartwell",
+            "Lakeside",
+            "Ridgeline",
         ]
-        for path in COLD_REVIEW.rglob("*"):
+        for path in TEMPLATES.rglob("*"):
             if not path.is_file():
                 continue
             text = path.read_text(encoding="utf-8", errors="ignore")
-            for probe in substance:
-                if probe in text:
-                    leaked.append(f"{path.name}: {probe!r}")
-        assert not leaked, "cold-review bundle leaks ground truth:\n  " + "\n  ".join(leaked)
+            leaked += [f"{path.name}: {p!r}" for p in substance if p in text]
+        assert not leaked, "export templates leak fixture content:\n  " + "\n  ".join(leaked)
 
-    def test_only_the_blinding_files_name_answer_key_paths(self) -> None:
-        """Everything else must not even hint at what exists to be hidden."""
+    def test_templates_leak_no_prior_measurements(self) -> None:
+        """A reviewer told how the engine scored last time is no longer independent."""
         leaked: list[str] = []
-        for path in COLD_REVIEW.rglob("*"):
-            if not path.is_file() or path.name in self.MAY_NAME_PATHS:
+        priors = ["0.6555", "78.9", "87.5", "15/19", "3 of 6", "50%", "does not generalise"]
+        for path in TEMPLATES.rglob("*"):
+            if not path.is_file():
+                continue
+            text = path.read_text(encoding="utf-8", errors="ignore").lower()
+            leaked += [f"{path.name}: {p!r}" for p in priors if p.lower() in text]
+        assert not leaked, "export templates leak prior results:\n  " + "\n  ".join(leaked)
+
+    def test_templates_do_not_name_answer_key_paths(self) -> None:
+        leaked: list[str] = []
+        for path in TEMPLATES.rglob("*"):
+            if not path.is_file():
                 continue
             text = path.read_text(encoding="utf-8", errors="ignore")
-            for probe in ("ground-truth.json", "GROUND_TRUTH", "SYNTHETIC_DEAL_ROOM_SPEC"):
+            for probe in (
+                "ground-truth",
+                "GROUND_TRUTH",
+                "SYNTHETIC_DEAL_ROOM_SPEC",
+                "benchmarks/",
+            ):
                 if probe in text:
                     leaked.append(f"{path.name}: {probe!r}")
         assert not leaked, "\n  ".join(leaked)
 
-    def test_the_bundle_does_not_reveal_the_expected_answers_to_sample_queries(self) -> None:
-        """The template carries two illustrative queries. They must be plausible without
-        telling the reviewer what the fixture plants."""
-        template = json.loads((COLD_REVIEW / "QUERY_SUBMISSION_TEMPLATE.json").read_text())
-        assert len(template["queries"]) <= 2, (
-            "more than two examples starts to prescribe the reviewer's question set"
-        )
-
-    def test_required_distribution_matches_the_instructions(self) -> None:
-        template = json.loads((COLD_REVIEW / "QUERY_SUBMISSION_TEMPLATE.json").read_text())
+    def test_the_required_distribution_is_stated(self) -> None:
+        template = json.loads((TEMPLATES / "QUERY_SUBMISSION_TEMPLATE.json").read_text())
         required = template["$distribution_required"]
         assert required["directly_answerable"] >= 10
         assert required["subject_present_fact_may_be_absent"] >= 5
@@ -269,52 +315,111 @@ class TestColdReviewBundle:
         assert required["missing_inaccessible_stale_or_unreviewed"] >= 3
 
     def test_the_output_schema_requires_pre_registration(self) -> None:
-        """Labels committed before the engine runs is the control against relabelling."""
-        schema = json.loads((COLD_REVIEW / "EXPECTED_OUTPUT_SCHEMA.json").read_text())
-        assert "pre_registration" in schema
-        assert "queries_file_commit" in schema["pre_registration"]
+        """Freezing labels before the engine runs is the control against relabelling."""
+        schema = json.loads((TEMPLATES / "EXPECTED_OUTPUT_SCHEMA.json").read_text())
+        pre = schema["pre_registration"]
+        assert "queries_file_sha256" in pre or "queries_file_commit" in pre
+        assert pre["frozen_before_running_engine"] is True
 
     def test_the_output_schema_requires_the_resolved_configuration(self) -> None:
-        """A result without its configuration is what produced the invalidated benchmark."""
-        schema = json.loads((COLD_REVIEW / "EXPECTED_OUTPUT_SCHEMA.json").read_text())
+        schema = json.loads((TEMPLATES / "EXPECTED_OUTPUT_SCHEMA.json").read_text())
         env = schema["environment"]
         assert "reef_config_output_verbatim" in env
         assert "dotenv_reported" in env
 
-    def test_the_blinding_verifier_is_executable_and_detects_a_leak(self, tmp_path: Path) -> None:
-        script = COLD_REVIEW / "verify_blinding.sh"
-        assert script.is_file()
 
-        # A checkout that still has the answer key must fail.
-        leaky = tmp_path / "leaky"
-        (leaky / "fixtures/reef-deal-room").mkdir(parents=True)
-        (leaky / "fixtures/reef-deal-room/ground-truth.json").write_text("{}")
-        (leaky / "fixtures/reef-deal-room/01_Corporate").mkdir()
-        (leaky / "reef").mkdir()
-        (leaky / "reef/README.md").write_text("x")
-        result = subprocess.run(
-            ["bash", str(script), str(leaky)], capture_output=True, text=True, check=False
-        )
-        assert result.returncode != 0
-        assert "LEAK" in result.stdout
+class TestExportBuilder:
+    def test_the_builder_exists_and_is_allowlist_driven(self) -> None:
+        source = BUILDER.read_text(encoding="utf-8")
+        assert "DEAL_ROOM_FOLDERS" in source
+        assert "ROOT_DOCS" in source
+        # A denylist would silently ship anything nobody thought to name.
+        assert "allowlist" in source.lower()
 
-        # A correctly blinded checkout must pass.
-        clean = tmp_path / "clean"
-        (clean / "fixtures/reef-deal-room/01_Corporate").mkdir(parents=True)
-        (clean / "reef").mkdir()
-        (clean / "reef/README.md").write_text("x")
+    def test_the_builder_refuses_to_export_inside_the_repository(self) -> None:
+        assert "must live outside the source repository" in BUILDER.read_text()
+
+    def test_the_builder_names_no_answer_key_folder(self) -> None:
+        source = BUILDER.read_text(encoding="utf-8")
+        folders = re.findall(r'"(\d\d_[A-Za-z_]+)"', source)
+        assert len(folders) >= 10
+        assert "outputs" not in folders
+
+    def test_the_builder_guards_against_forbidden_files_and_symlinks(self) -> None:
+        source = BUILDER.read_text(encoding="utf-8")
+        assert "refusing to export forbidden file" in source
+        assert "refusing to export symlink" in source
+
+    def test_the_builder_withholds_calibration_evidence(self) -> None:
+        """The wheel ships a calibration record; its held-out evidence is a prior result."""
+        source = BUILDER.read_text(encoding="utf-8")
+        assert "CALIBRATION_WITHHELD_FIELDS" in source
+        for field_name in ("heldout_leaks", "heldout_negative_scores", "limitations"):
+            assert field_name in source
+
+
+class TestBlindingVerifier:
+    def test_it_requires_an_argument(self) -> None:
         result = subprocess.run(
-            ["bash", str(script), str(clean)], capture_output=True, text=True, check=False
+            ["bash", str(VERIFIER)], capture_output=True, text=True, check=False
         )
+        assert result.returncode == 2
+
+    def test_a_well_formed_export_passes(self, tmp_path: Path) -> None:
+        result = _run_verifier(_minimal_export(tmp_path / "good"))
         assert result.returncode == 0, result.stdout
+        assert "PASS" in result.stdout
 
-    def test_the_verifier_catches_over_removal(self, tmp_path: Path) -> None:
-        """Deleting the room too would leave the reviewer nothing to read."""
-        script = COLD_REVIEW / "verify_blinding.sh"
-        empty = tmp_path / "empty"
-        empty.mkdir()
-        result = subprocess.run(
-            ["bash", str(script), str(empty)], capture_output=True, text=True, check=False
-        )
+    def test_it_detects_an_answer_key(self, tmp_path: Path) -> None:
+        root = _minimal_export(tmp_path / "leaky")
+        (root / "deal-room" / "ground-truth.json").write_text("{}")
+        result = _run_verifier(root)
         assert result.returncode != 0
-        assert "OVER-REMOVED" in result.stdout
+        assert "FAIL" in result.stdout
+
+    def test_it_detects_finding_identifiers_in_content(self, tmp_path: Path) -> None:
+        root = _minimal_export(tmp_path / "ids")
+        (root / "deal-room" / "00_Folder" / "note.txt").write_text("see RDG-001 for detail")
+        result = _run_verifier(root)
+        assert result.returncode != 0
+        assert "RDG" in result.stdout
+
+    def test_it_detects_repository_history(self, tmp_path: Path) -> None:
+        root = _minimal_export(tmp_path / "hist")
+        (root / ".git").mkdir()
+        (root / ".git" / "HEAD").write_text("ref: refs/heads/main\n")
+        result = _run_verifier(root)
+        assert result.returncode != 0
+        assert "history" in result.stdout.lower()
+
+    def test_it_detects_symlinks(self, tmp_path: Path) -> None:
+        root = _minimal_export(tmp_path / "links")
+        (root / "deal-room" / "escape").symlink_to(tmp_path)
+        result = _run_verifier(root)
+        assert result.returncode != 0
+        assert "symlink" in result.stdout.lower()
+
+    def test_it_detects_absolute_source_paths(self, tmp_path: Path) -> None:
+        root = _minimal_export(tmp_path / "paths")
+        (root / "engine" / "note.txt").write_text("built from /Users/someone/Developer/x\n")
+        result = _run_verifier(root)
+        assert result.returncode != 0
+
+    def test_it_detects_over_removal(self, tmp_path: Path) -> None:
+        """An export stripped of the room is as useless as one that leaks."""
+        root = _minimal_export(tmp_path / "empty")
+        shutil.rmtree(root / "deal-room")
+        (root / "deal-room").mkdir()
+        result = _run_verifier(root)
+        assert result.returncode != 0
+        assert "over-removed" in result.stdout.lower()
+
+    def test_it_does_not_object_to_ordinary_suggestive_filenames(self, tmp_path: Path) -> None:
+        """A buyer sees names like `_revised` and `_v2`. Those are legitimate signal."""
+        root = _minimal_export(tmp_path / "ordinary")
+        folder = root / "deal-room" / "00_Folder"
+        (folder / "schedule_revised.csv").write_text("a,b\n1,2\n")
+        (folder / "report_v2_final.pdf").write_text("x\n")
+        (folder / "update_supersedes_prior.txt").write_text("x\n")
+        result = _run_verifier(root)
+        assert result.returncode == 0, result.stdout
