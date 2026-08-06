@@ -22,10 +22,20 @@ schedule, an interest-rate swap, a Delaware subsidiary list. The corpus has a re
 a debt schedule and corporate records. Retrieval cannot tell "covers this subject" from
 "states this fact".
 
-Decide one of: accept a retrieval-only engine with no reliable abstention and say so
-wherever results are shown; add a cheap non-generative check that the retrieved passages
-actually mention the queried entity; or defer abstention entirely to a findings layer. Do
-not tune the floor.
+**Investigated 2026-08-06.** See
+[`benchmarks/ridgeline-abstention-failure-analysis.md`](benchmarks/ridgeline-abstention-failure-analysis.md).
+Six designs were compared on 23 cases; none clears the bar. The root cause is that
+similarity answers "is this passage on the same topic?" while the product needs "does this
+passage state the asked-for fact?", and no threshold over the first answers the second.
+
+The recommended shape is a staged decision emitting a structured state rather than a
+boolean — contract designed in
+[`ABSTENTION_RESULT_CONTRACT.md`](benchmarks/ABSTENTION_RESULT_CONTRACT.md). **Implementation
+is not justified yet**: there is no development set, so anything built today would be tuned
+against the held-out queries and reported as held-out. Run
+[`ABSTENTION_COLD_REVIEW_PROTOCOL.md`](benchmarks/ABSTENTION_COLD_REVIEW_PROTOCOL.md) first.
+
+Do not tune the floor.
 
 ## 1 · Retrieval failure analysis for the four missed fixture targets
 
@@ -34,9 +44,9 @@ R1 recall@12 is 15 of 19 under the corrected configuration. The verified misses 
 | id | title | first read |
 |---|---|---|
 | RDG-008 | Single-supplier dependency with 60-day termination | not yet classified |
-| RDG-009 | Unbilled work in process grew far faster than revenue | abstained at 0.6488, just under the 0.6555 floor — a cost of the gate, not a retrieval failure |
-| RDG-015 | Referenced Exhibit B absent from baseline room | abstained at 0.5735; the finding is an absence and no passage states it |
-| RDG-021 | Tax support archive cannot be opened | the source is the encrypted archive, which has no chunks by construction and cannot be retrieved at any rank |
+| RDG-009 | Unbilled work in process grew far faster than revenue | **mislabelled** — requires a deterministic calculation across two documents; retrieval cannot produce it at any threshold |
+| RDG-015 | Referenced Exhibit B absent from baseline room | **mislabelled** — requires absence detection against the register; no passage states it |
+| RDG-021 | Tax support archive cannot be opened | **mislabelled** — the source is the encrypted archive, which has zero chunks; unretrievable by construction. Already answered correctly by the coverage register |
 
 **The previous list was wrong.** The invalidated benchmark named RDG-004, RDG-015, RDG-018,
 RDG-019 and RDG-021. Three of those — RDG-004, RDG-018, RDG-019 — were artifacts of the
@@ -44,12 +54,17 @@ embedding-model mismatch and retrieve their sources at rank 1 to 3 under the cor
 configuration. RDG-008 and RDG-009 were not previously visible as misses. Anyone resuming
 this work should read `benchmarks/ridgeline-m1-baseline-v2.json`, not the invalidated record.
 
-**The question to answer is whether these are retrieval defects at all.** RDG-015 and
-RDG-021 almost certainly are not: nothing in the corpus says "Exhibit B is missing", because
-the finding *is* the gap, and RDG-021's source is a file with no chunks that Reef already
-registered correctly as unprocessable. Retrieving it is a register question, not a search
-question. RDG-009 is a thresholding cost rather than a retrieval failure. That leaves
-RDG-008 as the only candidate for a genuine retrieval defect.
+**Answered.** Three of the four are not retrieval defects. RDG-009 needs arithmetic,
+RDG-015 needs absence detection, RDG-021 needs a register lookup — none is producible by
+retrieval at any threshold, and scoring them as retrieval recall is a label error in the
+harness. **Only RDG-008 is a genuine miss**, and its title contains coined compounds
+(`single-supplier`, `dependency`) absent from the corpus that no reviewer would type, which
+is more likely an artifact of scoring by title than a retrieval defect.
+
+**The remaining work is to correct the harness**, not the retriever: reclassify RDG-009,
+RDG-015 and RDG-021 out of retrieval recall. Doing so raises the measured baseline from
+15/19 to 15/16 without touching a line of retrieval code, which is the point — the number
+was wrong, not the engine.
 
 Classify each miss as one of: a genuine retrieval failure, a finding-layer requirement, or
 a query-formulation artifact of scoring by finding title. Only the first category is work
