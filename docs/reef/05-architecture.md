@@ -1,3 +1,7 @@
+> **Historical specification — not implementation authority.** The architecture below
+> predates ADR-001 and cannot authorize implementation. Current architecture is indexed
+> in [`../README.md`](../README.md).
+
 # 05 · Technical architecture
 
 Design, not implementation. The point of this document is that a session writing code

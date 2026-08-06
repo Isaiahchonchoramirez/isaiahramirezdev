@@ -3,8 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DataCore — Permission-aware knowledge for AI</title>
+<meta name="description" content="Discover, classify, and compress text, voice, and music into a governed knowledge base with traceable rights and provenance.">
 <script src="./support.js"></script>
 <script src="../shared/lyrx-vault.js"></script>
+<meta name="theme-color" content="#020607">
+<meta property="og:image" content="./assets/datacore-particle-hero.png">
 </head>
 <body>
 <x-dc>
@@ -13,23 +17,30 @@
   <script src="ds/bundle.js"></script>
   <style>
     :root{
-      --color-bg:#000000; --color-surface:#161616; --color-text:#f3f2f2;
-      --color-accent:#2CFF05; --color-accent-2:#BF00FF;
+      --color-bg:#020607; --color-surface:#071014; --color-text:#eefcff;
+      --color-accent:#35E7FF; --color-accent-2:#FFB65C;
       --color-divider: color-mix(in srgb, #f3f2f2 22%, transparent);
       --color-neutral-100:#181818; --color-neutral-200:#2D2D2D; --color-neutral-300:#3d3d3d;
       --color-neutral-400:#545454; --color-neutral-500:#6e6e6e; --color-neutral-600:#8a8a8a;
       --color-neutral-700:#a8a8a8; --color-neutral-800:#d4d2d2; --color-neutral-900:#f0efef;
-      --color-accent-100:#0d2003; --color-accent-200:#163a05; --color-accent-300:#1f5407;
-      --color-accent-400:#268f09; --color-accent-500:#2CFF05; --color-accent-600:#25d904;
-      --color-accent-700:#1ea603; --color-accent-800:#9bff7d; --color-accent-900:#d6ffc9;
-      --color-accent-2-100:#1f0329; --color-accent-2-200:#33044a; --color-accent-2-300:#4d0670;
-      --color-accent-2-400:#7a0aae; --color-accent-2-500:#BF00FF; --color-accent-2-600:#a300db;
-      --color-accent-2-700:#7d00a8; --color-accent-2-800:#e896ff; --color-accent-2-900:#f6d9ff;
+      --color-accent-100:#031b20; --color-accent-200:#073640; --color-accent-300:#0b5361;
+      --color-accent-400:#20aabd; --color-accent-500:#35E7FF; --color-accent-600:#27c9dc;
+      --color-accent-700:#1594a6; --color-accent-800:#8cf3ff; --color-accent-900:#d8fbff;
+      --color-accent-2-100:#24190c; --color-accent-2-200:#3c2912; --color-accent-2-300:#65441b;
+      --color-accent-2-400:#b77a2c; --color-accent-2-500:#FFB65C; --color-accent-2-600:#e69a3e;
+      --color-accent-2-700:#ad6c20; --color-accent-2-800:#ffd39b; --color-accent-2-900:#ffedd5;
       --shadow-sm: 0 1px 2px rgba(0,0,0,0.6);
-      --shadow-md: 0 4px 16px rgba(191,0,255,0.10);
-      --shadow-lg: 0 16px 40px rgba(44,255,5,0.08);
+      --shadow-md: 0 4px 16px rgba(53,231,255,0.10);
+      --shadow-lg: 0 16px 40px rgba(255,182,92,0.08);
     }
     .tag{ white-space: nowrap; }
+    .dc-field{position:fixed;inset:0;z-index:0;pointer-events:none;background:#020607;}
+    .dc-landing{position:relative;z-index:1;background:transparent!important;isolation:isolate;}
+    .dc-landing>section,.dc-landing>footer{position:relative;background-color:rgba(2,6,7,.9)!important;}
+    .dc-landing>section:first-of-type{background:linear-gradient(90deg,rgba(2,6,7,.98) 0%,rgba(2,6,7,.82) 48%,rgba(2,6,7,.2) 100%)!important;min-height:72vh;}
+    .dc-landing>section:nth-of-type(even){background-color:rgba(7,16,20,.91)!important;}
+    .dc-landing>section.dc-cta{background:var(--color-accent)!important;color:#020607!important;}
+    .dc-landing .nav{border-bottom:1px solid color-mix(in srgb,var(--color-accent) 18%,transparent);}
     .btn{ white-space: nowrap; height: auto; min-height: 0; }
     .theme-light{
       --color-bg:#f3f2f2; --color-surface:#ffffff; --color-text:#1a1a1a;
@@ -80,6 +91,33 @@
     .dc-bob{ animation: dcBob 6s ease-in-out infinite; }
     .dc-magnet{ transition: transform .25s cubic-bezier(.2,.7,.3,1), background .2s, color .2s; }
     .dc-magnet:hover{ transform:translateY(-4px); }
+    .dc-story{max-width:1280px;margin:0 auto;}
+    .dc-story-head{display:grid;grid-template-columns:minmax(0,.8fr) minmax(280px,1.2fr);gap:64px;align-items:end;margin-bottom:42px;}
+    .dc-story-copy{max-width:560px;color:color-mix(in srgb,var(--color-text) 68%,transparent);font-size:16px;}
+    .dc-visual{position:relative;min-height:360px;overflow:hidden;border:1px solid color-mix(in srgb,var(--color-accent) 26%,transparent);background:radial-gradient(circle at 60% 42%,rgba(53,231,255,.08),transparent 34%),#03090b;box-shadow:inset 0 0 80px rgba(0,0,0,.75);}
+    .dc-visual:before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(53,231,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(53,231,255,.035) 1px,transparent 1px);background-size:32px 32px;mask-image:linear-gradient(to bottom,black,transparent);}
+    .dc-vlabel{position:absolute;left:18px;top:15px;font:800 10px/1 var(--font-heading);letter-spacing:.14em;color:var(--color-accent);z-index:3;}
+    .dc-vmeta{position:absolute;right:18px;bottom:15px;font:600 10px/1 var(--font-heading);letter-spacing:.1em;color:var(--color-neutral-600);z-index:3;}
+    .dc-dot{position:absolute;width:4px;height:4px;border-radius:50%;background:var(--color-accent);box-shadow:0 0 9px var(--color-accent);}
+    .dc-discover .scan{position:absolute;left:12%;top:12%;bottom:12%;width:1px;background:var(--color-accent);box-shadow:0 0 18px var(--color-accent);animation:dcScanner 5s ease-in-out infinite alternate;z-index:2;}
+    .dc-discover .scan:after{content:"";position:absolute;top:0;bottom:0;left:-70px;width:140px;background:linear-gradient(90deg,transparent,rgba(53,231,255,.11),transparent);}
+    .dc-discover .trail{position:absolute;left:18%;right:8%;top:52%;height:1px;background:linear-gradient(90deg,var(--color-accent),rgba(53,231,255,.15));box-shadow:0 0 8px rgba(53,231,255,.7);}
+    .dc-discover .reject{background:#657079;box-shadow:none;opacity:.32;animation:dcReject 6s ease-in infinite;}
+    .dc-license{position:absolute;width:7px;height:7px;border:1px solid var(--color-accent-2);box-shadow:0 0 8px var(--color-accent-2);transform:rotate(45deg);}
+    @keyframes dcScanner{to{transform:translateX(58vw)}}
+    @keyframes dcReject{to{transform:translateY(70px);opacity:0}}
+    .dc-store{display:flex;align-items:center;justify-content:center;perspective:800px;}
+    .dc-shelf{position:absolute;width:min(72%,680px);height:74px;border:1px solid rgba(53,231,255,.5);background:linear-gradient(90deg,rgba(53,231,255,.02),rgba(53,231,255,.11),rgba(53,231,255,.02));transform:rotateX(62deg);box-shadow:0 0 30px rgba(53,231,255,.06);}
+    .dc-shelf:nth-of-type(2){transform:translateY(-105px) rotateX(62deg);opacity:.55}.dc-shelf:nth-of-type(3){transform:translateY(-35px) rotateX(62deg);opacity:.7}.dc-shelf:nth-of-type(4){transform:translateY(35px) rotateX(62deg);opacity:.85}.dc-shelf:nth-of-type(5){transform:translateY(105px) rotateX(62deg)}
+    .dc-tierlabels{position:absolute;left:7%;top:50%;transform:translateY(-50%);display:grid;gap:45px;font:800 10px/1 var(--font-heading);letter-spacing:.12em;color:var(--color-neutral-600)}
+    .dc-compress .cloud{position:absolute;left:7%;top:18%;width:35%;height:64%;filter:url(#none)}
+    .dc-compress .aperture{position:absolute;left:53%;top:17%;bottom:17%;width:4px;background:var(--color-accent);box-shadow:0 0 28px 8px rgba(53,231,255,.38)}
+    .dc-compress .funnel{position:absolute;left:38%;top:28%;width:15%;height:44%;clip-path:polygon(0 0,100% 44%,100% 56%,0 100%);background:linear-gradient(90deg,rgba(100,110,118,.18),rgba(53,231,255,.22))}
+    .dc-compress .cluster{position:absolute;right:14%;top:38%;width:110px;height:86px;border:1px solid rgba(53,231,255,.35);box-shadow:0 0 32px rgba(53,231,255,.15)}
+    .dc-workbench{display:grid;grid-template-columns:1fr 1fr;min-height:360px}
+    .dc-workbench>div{position:relative;padding:58px 26px 28px}.dc-workbench>div+div{border-left:1px solid var(--color-divider)}
+    .dc-code{font:12px/1.9 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--color-neutral-700)}.dc-code em{color:var(--color-accent);font-style:normal}.dc-code b{color:var(--color-accent-2);font-weight:500}
+    .dc-fact{border-left:1px solid var(--color-accent);padding:12px 15px;margin:12px 0;background:rgba(53,231,255,.035)}.dc-fact small{display:block;color:var(--color-accent-2);letter-spacing:.08em;margin-top:5px}
     /* — cross-link to Lyrx (sibling app) — */
     .dc-xlink{ --lyrx-acid:#C8FF2E; --lyrx-hot:#FF2E7A; display:inline-flex; align-items:center; gap:10px; text-decoration:none; color:var(--color-text); border:1px solid var(--color-divider); padding:7px 12px; transition:border-color .22s, background .22s, transform .22s, box-shadow .22s; }
     .dc-xlink:hover, .nav a.dc-xlink:hover{ color:var(--color-text); border-color:var(--lyrx-acid); background:color-mix(in srgb, var(--lyrx-acid) 9%, transparent); transform:translateY(-2px); box-shadow:0 8px 24px color-mix(in srgb, var(--lyrx-acid) 16%, transparent); }
@@ -98,11 +136,439 @@
     ::-webkit-scrollbar-track{ background:#0a0a0a; }
     ::-webkit-scrollbar-thumb{ background:#2D2D2D; }
     ::-webkit-scrollbar-thumb:hover{ background:var(--color-accent-400); }
+    @media(max-width:760px){
+      .dc-landing .nav{padding:14px 20px!important;gap:12px;overflow-x:auto;}
+      .dc-landing .nav>a:not(.nav-brand),.dc-landing .nav>.dc-xlink,.dc-landing .nav>.btn-ghost{display:none!important;}
+      .dc-landing>section{padding:58px 22px!important;}
+      .dc-landing>section:first-of-type{padding-top:74px!important;min-height:78vh;background:linear-gradient(180deg,rgba(2,6,7,.82),rgba(2,6,7,.96))!important;}
+      .dc-landing h1{font-size:clamp(42px,12vw,58px)!important;line-height:1.02;}
+      .dc-landing h2{font-size:clamp(30px,9vw,42px)!important;}
+      .dc-landing section [style*="grid-template-columns"]{grid-template-columns:1fr!important;}
+      .dc-landing section [style*="display:flex"]{flex-wrap:wrap;}
+      .dc-landing footer{padding:28px 22px!important;align-items:flex-start!important;flex-direction:column;}
+      .dc-float{display:none!important;}
+      .dc-story-head{grid-template-columns:1fr;gap:14px}.dc-visual{min-height:300px}.dc-workbench{grid-template-columns:1fr}.dc-workbench>div+div{border-left:0;border-top:1px solid var(--color-divider)}
+      .dc-totop{right:14px;bottom:14px;}
+    }
+    @media(prefers-reduced-motion:reduce){.dc-beam,.dc-d1,.dc-d2,.dc-d3,.dc-d4,.dc-d5,.dc-d6{animation:none!important;}}
+
+    /* ══════════════════════════════════════════════════════════════════════
+       REFINEMENT LAYER
+       The markup below carries inline styles from the builder, so this layer
+       reasserts the real system on top of them: one measure, one type ramp,
+       one edge treatment, one rhythm. Read this file top-down to retune.
+       ══════════════════════════════════════════════════════════════════════ */
+
+    :root{
+      --measure: 1180px;          /* content column */
+      --measure-wide: 1280px;     /* hero + full-bleed visuals */
+      --gutter: 56px;
+      /* Edges pick up the accent instead of neutral grey — a hairline that
+         belongs to the palette reads as tuned, not as a wireframe default. */
+      --edge: color-mix(in srgb, var(--color-accent) 15%, transparent);
+      --edge-strong: color-mix(in srgb, var(--color-accent) 34%, transparent);
+      --edge-warm: color-mix(in srgb, var(--color-accent-2) 30%, transparent);
+      --ink-1: var(--color-text);
+      --ink-2: color-mix(in srgb, var(--color-text) 68%, transparent);
+      --ink-3: color-mix(in srgb, var(--color-text) 42%, transparent);
+      --ease: cubic-bezier(.2,.8,.25,1);
+    }
+
+    /* — Measure ————————————————————————————————————————————————————————
+       Centres every section's content without touching markup. The inline
+       `padding:72px 64px` keeps its vertical value; only the inline axis is
+       reclaimed, so wide monitors get a column instead of a left-pinned slab. */
+    .dc-landing>section{
+      padding-inline: max(var(--gutter), calc((100% - var(--measure)) / 2)) !important;
+    }
+    .dc-landing>section:first-of-type,
+    .dc-landing>section:has(.dc-story){
+      padding-inline: max(var(--gutter), calc((100% - var(--measure-wide)) / 2)) !important;
+    }
+    .dc-landing .nav,
+    .dc-landing>footer{
+      padding-inline: max(var(--gutter), calc((100% - var(--measure-wide)) / 2)) !important;
+    }
+    .dc-story{max-width:none;}
+
+    /* — Rhythm ————————————————————————————————————————————————————————
+       Uniform 72px on every section is what made the page feel like a
+       spreadsheet. Sections now breathe wider, and the story sections
+       (the ones carrying a visual) get the most air. */
+    .dc-landing>section{ padding-block: 112px !important; }
+    .dc-landing>section:has(.dc-story){ padding-block: 136px !important; }
+    .dc-landing>section:first-of-type{
+      padding-block: 132px 108px !important;
+      min-height: 88vh;
+      display:flex; align-items:center;
+    }
+    .dc-landing>section.dc-cta{ padding-block: 116px !important; }
+
+    /* — Type ramp ————————————————————————————————————————————————————
+       Real range: a display size that actually lands, and a body size that
+       stays comfortable. Optical tracking tightens as size grows. */
+    .dc-landing h1{
+      font-size: clamp(46px, 6.1vw, 88px) !important;
+      line-height: .95; letter-spacing: -.032em;
+      max-width: 15ch !important; text-wrap: balance;
+    }
+    .dc-landing h2{
+      font-size: clamp(31px, 3.5vw, 49px) !important;
+      line-height: 1.03; letter-spacing: -.026em;
+      max-width: 20ch; text-wrap: balance;
+    }
+    .dc-landing h3{
+      font-size: clamp(21px, 1.9vw, 29px) !important;
+      line-height: 1.12; letter-spacing: -.018em; text-wrap: balance;
+    }
+    .dc-landing h5, .dc-landing h6{
+      font-size: 10.5px !important; letter-spacing: .19em;
+      font-weight: 800; margin-bottom: 14px !important;
+    }
+    /* Kicker gets a rule so it reads as a section marker, not stray caps. */
+    .dc-landing>section>h6:first-child,
+    .dc-story-head h6{
+      display:flex; align-items:center; gap:12px;
+    }
+    .dc-landing>section>h6:first-child::after,
+    .dc-story-head h6::after{
+      content:""; flex:0 0 56px; height:1px;
+      background:linear-gradient(90deg, currentColor, transparent);
+      opacity:.55;
+    }
+    .dc-landing p{ line-height: 1.62; }
+    .dc-landing>section>p{ max-width: 58ch; }
+    /* 58ch of an 11px tracked-out caption is only ~380px, which broke the
+       interaction hints onto two ragged lines. The measure is for prose. */
+    .dc-landing>section>p[style*="letter-spacing"]{ max-width: none; }
+    .dc-story-copy{ font-size: 16.5px !important; line-height:1.6; color: var(--ink-2) !important; }
+    /* The story headline column was narrower than the supporting paragraph,
+       so 49px display type broke onto three ragged lines while the body copy
+       sat in the wider half. Reversed. */
+    .dc-story-head{ grid-template-columns: minmax(0,1.2fr) minmax(240px,.8fr) !important; gap:56px !important; margin-bottom:52px !important; }
+    .dc-story-head h2{ max-width:17ch; }
+    .dc-story-copy{ max-width:38ch; }
+
+    /* — Grain ————————————————————————————————————————————————————————
+       The single biggest cure for "flat CSS gradient" cheapness. A fixed film
+       of monochrome noise at ~3.5% breaks up the large dark fields and the
+       radial glows, so gradients read as light rather than as banding. */
+    .dc-landing::after{
+      content:""; position:fixed; inset:0; z-index:3; pointer-events:none;
+      opacity:.055; mix-blend-mode:overlay;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+    /* The field is composition, not wallpaper. Copy runs down the left, so the
+       canvas is masked off there and allowed to build on the right, where the
+       floating capsule cards sit. Without this the particles read as static
+       behind the headline and the whole hero looks noisy. */
+    .dc-field{
+      --field-mask:
+        linear-gradient(90deg, rgba(0,0,0,.05) 0%, rgba(0,0,0,.1) 30%, rgba(0,0,0,.45) 48%, #000 66%),
+        radial-gradient(ellipse 110% 92% at 62% 44%, #000 40%, rgba(0,0,0,.5) 78%, rgba(0,0,0,.15) 100%);
+      -webkit-mask-image: var(--field-mask);
+      mask-image: var(--field-mask);
+      -webkit-mask-composite: source-in;
+      mask-composite: intersect;
+    }
+    /* Past the hero the copy uses the full column, so the left-side cutout is
+       dropped and only the soft vignette remains. */
+    body.dc-scrolled .dc-field{
+      --field-mask: radial-gradient(ellipse 115% 90% at 50% 45%, #000 38%, rgba(0,0,0,.42) 76%, rgba(0,0,0,.12) 100%);
+      transition: none;
+    }
+
+    /* — Section surfaces —————————————————————————————————————————————
+       Each section keeps its own faint light source instead of every panel
+       being the same flat rectangle, and the divider is a gradient hairline
+       that fades out rather than a hard full-width line. */
+    .dc-landing>section{ border-top: 1px solid transparent; }
+    .dc-landing>section::before{
+      content:""; position:absolute; inset-inline:0; top:0; height:1px; pointer-events:none;
+      background:linear-gradient(90deg, transparent, var(--edge-strong) 18%, var(--edge) 55%, transparent);
+      z-index:2;
+    }
+    .dc-landing>section:first-of-type::before,
+    .dc-landing>section.dc-cta::before{ display:none; }
+    .dc-landing>section:nth-of-type(odd)::after{
+      content:""; position:absolute; inset:0; pointer-events:none; z-index:0;
+      background:radial-gradient(ellipse 70% 60% at 15% 0%, color-mix(in srgb,var(--color-accent) 6%, transparent), transparent 62%);
+    }
+    .dc-landing>section:nth-of-type(even)::after{
+      content:""; position:absolute; inset:0; pointer-events:none; z-index:0;
+      background:radial-gradient(ellipse 60% 55% at 88% 8%, color-mix(in srgb,var(--color-accent-2) 5%, transparent), transparent 60%);
+    }
+    .dc-landing>section.dc-cta::after{ display:none; }
+    .dc-landing>section>*{ position:relative; z-index:1; }
+    /* The builder's flat dividers are redundant now that sections carry their own. */
+    .dc-landing>.hr{ display:none; }
+    /* Let the field read through the story sections — it is the signature
+       element and it was sitting behind 90% opaque panels. */
+    .dc-landing>section:has(.dc-story){ background-color:rgba(2,6,7,.62)!important; }
+    .dc-landing>section:has(.dc-story):nth-of-type(even){ background-color:rgba(7,16,20,.66)!important; }
+
+    /* — Edges & cards ————————————————————————————————————————————————
+       One rule replaces the grey wireframe hairlines everywhere, and cards
+       get a top-lit face so they sit on the page instead of being cut out. */
+    .dc-landing [style*="1px solid var(--color-divider)"],
+    .dc-landing [style*="1px solid var(--color-divider)"] > div{ border-color: var(--edge) !important; }
+    .dc-landing .card,
+    .dc-landing .dc-magnet{
+      background-image: linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,0) 46%) !important;
+      border-color: var(--edge) !important;
+      transition: transform .3s var(--ease), border-color .3s var(--ease), box-shadow .3s var(--ease), background-color .3s var(--ease);
+    }
+    .dc-landing .card:hover, .dc-landing .dc-magnet:hover{
+      border-color: var(--edge-strong) !important;
+      box-shadow: 0 14px 44px rgba(0,0,0,.5), 0 0 0 1px color-mix(in srgb,var(--color-accent) 10%, transparent) inset;
+    }
+    .dc-visual{
+      border-color: var(--edge) !important;
+      box-shadow: inset 0 0 90px rgba(0,0,0,.8), 0 24px 70px rgba(0,0,0,.45);
+    }
+
+    /* — Buttons ————————————————————————————————————————————————————— */
+    .dc-landing .btn{ transition: transform .22s var(--ease), box-shadow .22s var(--ease), background .22s, color .22s; }
+    .dc-landing .btn-primary{ box-shadow: 0 8px 30px color-mix(in srgb,var(--color-accent) 22%, transparent); }
+    .dc-landing .btn-primary:hover{ transform: translateY(-2px); box-shadow: 0 14px 42px color-mix(in srgb,var(--color-accent) 34%, transparent); }
+    .dc-landing .btn-secondary:hover{ transform: translateY(-2px); border-color: var(--edge-strong); }
+
+    /* — Light shafts ————————————————————————————————————————————————
+       These were short, wide, hard-edged rectangles under a 6px blur, which on
+       a near-black ground reads as a brown smear rather than as light. Volumetric
+       light is narrow at the source, wide at the far end, and has no visible
+       ends at all — so: taller, heavier blur, and masked to nothing top and
+       bottom. Amber is dropped here; warm light over near-black goes muddy. */
+    .dc-beam{
+      width:260px !important; height:900px !important; top:-220px !important;
+      filter: blur(48px) !important; opacity:.5;
+      background:linear-gradient(to bottom,
+        color-mix(in srgb, var(--color-accent) 24%, transparent),
+        color-mix(in srgb, var(--color-accent) 7%, transparent) 45%,
+        transparent 82%) !important;
+      -webkit-mask-image:linear-gradient(to bottom, transparent, #000 12%, #000 55%, transparent 92%);
+      mask-image:linear-gradient(to bottom, transparent, #000 12%, #000 55%, transparent 92%);
+    }
+    .dc-beam:nth-of-type(2){ opacity:.34; }
+    .dc-beam:nth-of-type(3){ opacity:.22; }
+
+    /* — Hero ————————————————————————————————————————————————————————
+       The eyebrow was a boxed tag competing with the headline; it becomes a
+       quiet marker. The interaction hint stops shouting in all-caps cyan. */
+    .dc-landing>section:first-of-type>div:last-child>div:first-child{
+      border:0 !important; padding:0 !important;
+      display:inline-flex !important; align-items:center; gap:12px;
+      letter-spacing:.2em !important; font-size:10.5px !important;
+      color: var(--color-accent) !important; margin-bottom:26px !important;
+    }
+    .dc-landing>section:first-of-type>div:last-child>div:first-child::before{
+      content:""; width:26px; height:1px; background:currentColor; opacity:.6;
+    }
+    .dc-landing>section:first-of-type p:first-of-type{
+      font-size:19px !important; line-height:1.55; color:var(--ink-2) !important;
+      max-width:52ch !important; opacity:1 !important;
+    }
+    .dc-landing>section:first-of-type .hr{ background:linear-gradient(90deg,var(--edge-strong),transparent) !important; height:1px; border:0; }
+
+    /* — Pipeline —————————————————————————————————————————————————————
+       Seven identical boxes with seven synchronised scan bars read as a
+       loading state. Cells now share one track and the scan is staggered so
+       it moves through the pipeline left to right, like the thing it depicts. */
+    #how .dc-magnet{
+      border:0 !important; border-top:1px solid var(--edge) !important;
+      background:linear-gradient(180deg, rgba(53,231,255,.035), transparent 60%) !important;
+      padding:22px 20px 26px !important;
+    }
+    #how .dc-magnet:hover{ background:linear-gradient(180deg, rgba(53,231,255,.09), transparent 70%) !important; }
+    #how .dc-magnet>div:first-child{ animation-duration:2.6s !important; }
+    #how .dc-magnet:nth-child(1)>div:first-child{ animation-delay:0s !important; }
+    #how .dc-magnet:nth-child(2)>div:first-child{ animation-delay:.22s !important; }
+    #how .dc-magnet:nth-child(3)>div:first-child{ animation-delay:.44s !important; }
+    #how .dc-magnet:nth-child(4)>div:first-child{ animation-delay:.66s !important; }
+    #how .dc-magnet:nth-child(5)>div:first-child{ animation-delay:.88s !important; }
+    #how .dc-magnet:nth-child(6)>div:first-child{ animation-delay:1.1s !important; }
+    #how .dc-magnet:nth-child(7)>div:first-child{ animation-delay:1.32s !important; }
+
+    /* — Rights split ————————————————————————————————————————————————
+       The "not this / this" pair was two identical grey panels, so the point
+       never landed visually. The rejected side is desaturated and struck
+       through; the accepted side is lit. */
+    #rights>div{ border-color:var(--edge) !important; }
+    #rights>div>div:first-child{ background:rgba(255,255,255,.012); }
+    #rights>div>div:first-child p{ color:var(--ink-3) !important; text-decoration:line-through; text-decoration-color:color-mix(in srgb,var(--color-text) 22%, transparent); }
+    #rights>div>div:last-child{
+      background:linear-gradient(135deg, color-mix(in srgb,var(--color-accent) 7%, transparent), transparent 70%);
+      box-shadow: inset 3px 0 0 var(--color-accent);
+    }
+    #rights>div>div:last-child p{ font-size:17px !important; }
+
+    /* — Music layers ————————————————————————————————————————————————
+       Amber at low alpha over near-black nets to grey, which is why the lower
+       stages looked like mud. Every stage now sits at full opacity on one
+       saturated hue and steps down in lightness only, so each layer stays a
+       colour. The left-edge highlight gives the bars a lit face. */
+    #dc-music-layers>div{ opacity:1 !important; }
+    #dc-music-layers>div:nth-child(1){ background:linear-gradient(90deg,#FFD79A,#FFC978) !important; }
+    #dc-music-layers>div:nth-child(2){ background:linear-gradient(90deg,#FFC47A,#FFB65C) !important; }
+    #dc-music-layers>div:nth-child(3){ background:linear-gradient(90deg,#F0A253,#E2913D) !important; }
+    #dc-music-layers>div:nth-child(4){ background:linear-gradient(90deg,#CB7F36,#B96F2A) !important; }
+    #dc-music-layers>div:nth-child(5){ background:linear-gradient(90deg,#9D5F26,#8C501C) !important; }
+
+    /* — Voice waveform ————————————————————————————————————————————————
+       A 48px row of flat 4px cyan ticks was too small to register as the
+       signature of the section. Mirrored around the centre line so it reads as
+       a waveform rather than a bar chart, with the ends falling off. */
+    #dc-voice-wave{
+      position:relative; max-width:420px;
+      -webkit-mask-image:linear-gradient(90deg, transparent, #000 7%, #000 86%, transparent);
+      mask-image:linear-gradient(90deg, transparent, #000 7%, #000 86%, transparent);
+    }
+    #dc-voice-wave>div{
+      width:5px !important; min-height:4px;
+      background:linear-gradient(180deg,
+        color-mix(in srgb,var(--color-accent) 45%, #ffffff),
+        var(--color-accent) 50%,
+        color-mix(in srgb,var(--color-accent) 45%, #ffffff)) !important;
+      box-shadow:0 0 12px color-mix(in srgb,var(--color-accent) 45%, transparent);
+    }
+
+    /* — Story visuals ————————————————————————————————————————————————
+       These panels were 360px of near-empty black with a couple of hairlines,
+       which reads as a failed render. Tighter height, denser content, and a
+       floor gradient so the scene has a ground plane. */
+    .dc-visual{ min-height:320px; }
+    .dc-visual::after{
+      content:""; position:absolute; inset-inline:0; bottom:0; height:45%;
+      background:linear-gradient(to top, rgba(53,231,255,.045), transparent);
+      pointer-events:none;
+    }
+    .dc-vlabel, .dc-vmeta{ font-size:9.5px !important; letter-spacing:.17em !important; }
+    .dc-dot{ width:5px; height:5px; box-shadow:0 0 12px var(--color-accent), 0 0 3px #fff inset; }
+    /* Unsorted candidate material: present, but not yet worth anything. Enough
+       of them that the panels read as a populated field instead of a void. */
+    .dc-src{
+      position:absolute; width:4px; height:4px; border-radius:50%;
+      background:#8a99a4; box-shadow:0 0 6px rgba(138,153,164,.45);
+      opacity:.72; animation:dcTwinkle 7s ease-in-out infinite;
+    }
+    .dc-src:nth-of-type(3n){ animation-duration:9s; animation-delay:-2s; opacity:.5; }
+    .dc-src:nth-of-type(4n){ animation-duration:6s; animation-delay:-4s; opacity:.85; }
+    @keyframes dcTwinkle{ 0%,100%{opacity:.28} 45%{opacity:.9} }
+
+    /* Discover: the approved lane should be the brightest thing in the frame. */
+    .dc-discover .trail{ left:13%; right:6%; height:1px; }
+    .dc-discover .scan{ width:2px; }
+    .dc-license{ width:8px; height:8px; }
+
+    /* Store: material sitting on each shelf plane, plus lineage threads that
+       run the full height so the tiers read as connected, not stacked. */
+    .dc-shelf>i{
+      position:absolute; top:50%; width:5px; height:5px; margin-top:-2.5px;
+      border-radius:50%; background:var(--color-accent);
+      box-shadow:0 0 10px var(--color-accent);
+    }
+    .dc-shelf:nth-of-type(1)>i{ width:7px; height:7px; margin-top:-3.5px; box-shadow:0 0 16px var(--color-accent); }
+    .dc-shelf:nth-of-type(4)>i{ width:3.5px; height:3.5px; margin-top:-1.75px; opacity:.75; box-shadow:0 0 6px var(--color-accent); }
+    .dc-lineage{
+      position:absolute; top:16%; bottom:16%; width:1px; z-index:2;
+      background:linear-gradient(to bottom, transparent, color-mix(in srgb,var(--color-accent-2) 55%, transparent), transparent);
+    }
+
+    /* Compress: a genuinely dense input cloud is the whole point of the panel —
+       eight dots could not sell an 8.4x reduction. */
+    /* `filter:url(#none)` pointed at a filter that does not exist, which in
+       Chromium renders the element as fully transparent — the input cloud was
+       never actually drawn. */
+    .dc-compress .cloud{ left:5%; top:12%; width:40%; height:76%; filter:none !important; }
+    /* The funnel was an opaque grey wedge that read as a paper aeroplane. It
+       should be the light between the cloud and the aperture, not an object. */
+    .dc-compress .funnel{
+      left:36%; top:22%; width:19%; height:56%;
+      background:linear-gradient(90deg, rgba(138,153,164,.06), rgba(53,231,255,.2)) !important;
+      filter:blur(7px); opacity:.85;
+    }
+    .dc-compress .cluster{
+      right:12%; top:32%; width:132px; height:104px;
+      border-color:var(--edge-strong);
+      background:radial-gradient(ellipse at 50% 50%, rgba(53,231,255,.08), transparent 70%);
+      box-shadow:0 0 44px rgba(53,231,255,.18), inset 0 0 24px rgba(53,231,255,.06);
+    }
+    .dc-compress .aperture{ width:3px; box-shadow:0 0 34px 10px rgba(53,231,255,.42); }
+
+    /* Store: the tier captions were floating free of the shelves they name.
+       One grid, one row height, labels pinned to shelf centres. */
+    .dc-store{ perspective:1000px; }
+    /* The shelves are the first four DIVs in the panel, so the offsets have to
+       start at nth-of-type(1). The original rules started at (2), which left
+       the first shelf untransformed and aimed the last offset at the label
+       column instead — two shelves ended up stacked on the centre line and
+       none of them lined up with the tier they were labelling. */
+    .dc-shelf{ width:min(62%,600px); height:64px; left:26%; }
+    .dc-shelf:nth-of-type(1){ transform:translateY(-108px) rotateX(64deg); opacity:1; }
+    .dc-shelf:nth-of-type(2){ transform:translateY(-36px)  rotateX(64deg); opacity:.86; }
+    .dc-shelf:nth-of-type(3){ transform:translateY(36px)   rotateX(64deg); opacity:.7; }
+    .dc-shelf:nth-of-type(4){ transform:translateY(108px)  rotateX(64deg); opacity:.55; }
+    .dc-tierlabels{ left:9%; gap:0 !important; display:grid !important; grid-auto-rows:72px; align-items:center; }
+    .dc-tierlabels span{ display:flex; align-items:center; gap:10px; color:var(--ink-2) !important; }
+    .dc-tierlabels span::after{ content:""; flex:1; height:1px; background:linear-gradient(90deg,var(--edge-strong),transparent); }
+
+    /* Workbench is the strongest panel on the page — give it room to be. */
+    .dc-workbench{ min-height:340px; }
+    .dc-code{ font-size:12.5px !important; }
+    .dc-fact{ border-left-width:2px; background:linear-gradient(90deg, rgba(53,231,255,.06), transparent 70%); }
+
+    /* — Pricing ————————————————————————————————————————————————————
+       Three flat cells with no recommended tier gave the eye nowhere to go. */
+    #pricing>div>div:nth-child(2){
+      background:linear-gradient(180deg, color-mix(in srgb,var(--color-accent) 8%, transparent), transparent 55%);
+      box-shadow: inset 0 2px 0 var(--color-accent);
+    }
+    #pricing h3{ font-size:clamp(30px,3vw,42px) !important; letter-spacing:-.03em; }
+    #pricing>div>div:last-child{ border-right:0 !important; }
+
+    /* — CTA ————————————————————————————————————————————————————————
+       Solid cyan wall was the loudest thing on the page and it came last.
+       Anchored gradient + a rule keeps the impact without the flatness. */
+    .dc-landing>section.dc-cta{
+      background:linear-gradient(115deg, var(--color-accent) 0%, var(--color-accent-600) 46%, #0d8fa2 100%) !important;
+    }
+    .dc-landing>section.dc-cta h2{ font-size:clamp(34px,4.4vw,60px) !important; letter-spacing:-.03em; }
+
+    /* — Back to top: only once there is a top to go back to. ————————— */
+    .dc-totop{ opacity:0; transform:translateY(10px); pointer-events:none; transition:opacity .3s var(--ease), transform .3s var(--ease), background .2s; }
+    body.dc-scrolled .dc-totop{ opacity:1; transform:none; pointer-events:auto; }
+    /* It is fixed to the viewport corner, so the footer has to clear the space
+       or the button lands on top of the last line of text. */
+    .dc-landing>footer{ padding-block: 34px 92px !important; flex-wrap:wrap; }
+
+    /* — Reveal on scroll ——————————————————————————————————————————— */
+    [data-reveal]{ opacity:0; transform:translateY(22px); transition:opacity .8s var(--ease), transform .8s var(--ease); }
+    [data-reveal].dc-in{ opacity:1; transform:none; }
+    @media(prefers-reduced-motion:reduce){ [data-reveal]{ opacity:1 !important; transform:none !important; } }
+
+    @media(max-width:900px){
+      :root{ --gutter:24px; }
+      /* No room for a side-by-side composition at this width, so the field
+         can only ever sit behind the copy. Dropped to atmosphere. */
+      .dc-field{ opacity:.28; --field-mask:linear-gradient(180deg, #000, rgba(0,0,0,.35) 70%, rgba(0,0,0,.1)); }
+      body.dc-scrolled .dc-field{ --field-mask:linear-gradient(180deg, #000, rgba(0,0,0,.35) 70%, rgba(0,0,0,.1)); }
+      .dc-landing>section:first-of-type>div:last-child>div:first-child{
+        letter-spacing:.14em !important; font-size:9.5px !important;
+      }
+      .dc-story-head{ grid-template-columns:1fr !important; gap:16px !important; margin-bottom:34px !important; }
+      .dc-story-head h2, .dc-story-copy{ max-width:none; }
+      .dc-landing>section{ padding-block:76px !important; }
+      .dc-landing>section:has(.dc-story){ padding-block:88px !important; }
+      .dc-landing>section:first-of-type{ padding-block:88px 72px !important; min-height:auto; display:block; }
+      .dc-landing h1{ max-width:none !important; }
+      .dc-visual{ min-height:260px; }
+      .dc-tierlabels{ grid-auto-rows:56px; }
+    }
   </style>
 </helmet>
 
 <sc-if value="{{ isLanding }}" hint-placeholder-val="{{ true }}">
-<div class="{{ themeClass }}" style="background:var(--color-bg); color:var(--color-text); min-height:100vh;">
+<div class="{{ themeClass }} dc-landing" style="background:var(--color-bg); color:var(--color-text); min-height:100vh;">
 
   <nav class="nav" style="background:color-mix(in srgb, var(--color-bg) 78%, transparent); backdrop-filter:blur(14px); position:sticky; top:0; z-index:50; padding:{{ navPad }}; transition:padding .25s ease;">
     <a class="nav-brand" href="#" onClick="{{ goHome }}" style="color:var(--color-text); display:inline-flex; align-items:center; gap:10px; text-decoration:none; cursor:pointer;">
@@ -141,7 +607,7 @@
 
   <section onMouseMove="{{ onHeroMove }}" onClick="{{ onHeroClick }}" style="padding:96px 64px 96px; position:relative; overflow:hidden;">
     <div style="position:absolute; inset:0; pointer-events:none; background-image:linear-gradient(color-mix(in srgb, var(--color-text) 5%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, var(--color-text) 5%, transparent) 1px, transparent 1px); background-size:64px 64px;"></div>
-    <div style="position:absolute; width:520px; height:520px; border-radius:50%; pointer-events:none; left:{{ glowX }}; top:{{ glowY }}; transform:translate(-50%,-50%); background:radial-gradient(circle, rgba(44,255,5,0.13), rgba(191,0,255,0.07) 45%, transparent 70%); transition:left .25s ease-out, top .25s ease-out;"></div>
+    <div style="position:absolute; width:520px; height:520px; border-radius:50%; pointer-events:none; left:{{ glowX }}; top:{{ glowY }}; transform:translate(-50%,-50%); background:radial-gradient(circle, rgba(53,231,255,0.13), rgba(255,182,92,0.07) 45%, transparent 70%); transition:left .25s ease-out, top .25s ease-out;"></div>
 
     <div style="position:absolute; inset:0; overflow:hidden; pointer-events:none;">
       <sc-for list="{{ beams }}" as="b" hint-placeholder-count="3">
@@ -197,7 +663,7 @@
     <h2 style="margin-bottom:36px; max-width:640px;">A governed refinery, not one giant scraper feeding one giant model.</h2>
     <div style="display:flex; gap:0; flex-wrap:wrap;">
       <sc-for list="{{ pipelineStages }}" as="stage" hint-placeholder-count="7">
-        <div class="dc-magnet" style="flex:1; min-width:140px; border:1px solid var(--color-divider); padding:16px; display:flex; flex-direction:column; gap:8px; position:relative; overflow:hidden; background:var(--color-bg);" style-hover="border-color:var(--color-accent); background:#0d1a05;">
+        <div class="dc-magnet" style="flex:1; min-width:140px; border:1px solid var(--color-divider); padding:16px; display:flex; flex-direction:column; gap:8px; position:relative; overflow:hidden; background:var(--color-bg);" style-hover="border-color:var(--color-accent); background:#071b20;">
           <div style="position:absolute; top:0; left:0; height:2px; width:25%; background:linear-gradient(90deg, transparent, var(--color-accent), transparent); animation:dcScan 3.4s linear infinite;"></div>
           <span style="font-size:11px; color:var(--color-accent); font-family:var(--font-heading); font-weight:800;">{{ stage.n }}</span>
           <span style="font-family:var(--font-heading); font-weight:800; font-size:15px;">{{ stage.label }}</span>
@@ -230,10 +696,12 @@
     <h6 style="color:var(--color-accent-2);">THE KNOWLEDGE CAPSULE</h6>
     <h2 style="margin-bottom:12px; max-width:680px;">A compact, portable, inspectable package — not a mystery neural net.</h2>
     <p style="opacity:0.75; max-width:560px; margin-bottom:32px;">Each capsule bundles purpose, source manifest, licenses, compressed evidence, indexes, adapter, and eval scores.</p>
-    <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:40px;">
+    <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:1px; margin-bottom:44px; background:var(--edge); border:1px solid var(--edge);">
       <sc-for list="{{ capsuleContents }}" as="c" hint-placeholder-count="8">
-        <div class="card dc-magnet" style="background:var(--color-bg); border:1px solid var(--color-divider);" style-hover="border-color:var(--color-accent-2); box-shadow:0 10px 30px rgba(191,0,255,0.18);">
-          <span class="card-title" style="font-size:14px;">{{ c }}</span>
+        <div class="dc-magnet" style="background:var(--color-bg); border:0; padding:20px 20px 24px; display:flex; flex-direction:column; gap:7px;" style-hover="background:#07161a;">
+          <span style="font-size:10px; letter-spacing:0.14em; color:var(--color-accent-2); font-family:var(--font-heading); font-weight:800;">{{ c.n }}</span>
+          <span style="font-family:var(--font-heading); font-weight:800; font-size:15px; letter-spacing:-0.01em;">{{ c.label }}</span>
+          <span style="font-size:12.5px; line-height:1.5; color:var(--ink-3);">{{ c.desc }}</span>
         </div>
       </sc-for>
     </div>
@@ -256,21 +724,102 @@
         <h6 style="color:var(--color-accent);">VOICE STUDIO</h6>
         <h3 style="margin-bottom:12px;">Consent before cloning.</h3>
         <p style="opacity:0.75; font-size:14px; margin-bottom:16px;">Identity verification and a recorded consent step gate every voice model before synthesis controls unlock.</p>
-        <div style="display:flex; gap:3px; align-items:flex-end; height:48px;">
+        <div id="dc-voice-wave" style="display:flex; gap:3px; align-items:center; height:92px;">
           <sc-for list="{{ liveBars }}" as="h" hint-placeholder-count="24">
             <div style="width:4px; height:{{ h }}%; background:var(--color-accent); transition:height .16s linear;"></div>
           </sc-for>
+        </div>
+        <div style="display:flex; justify-content:space-between; margin-top:10px; font-size:10.5px; letter-spacing:0.14em; color:var(--color-neutral-600);">
+          <span>CONSENT ON FILE &middot; IDENTITY VERIFIED</span><span>SYNTHESIS UNLOCKED</span>
         </div>
       </div>
       <div>
         <h6 style="color:var(--color-accent-2);">MUSIC STUDIO</h6>
         <h3 style="margin-bottom:12px;">Composition, arrangement, performance — separately.</h3>
         <p style="opacity:0.75; font-size:14px; margin-bottom:16px;">One generator composing, arranging, performing, and mixing at once is why generic output happens. DataCore stages it.</p>
-        <div style="display:flex; flex-direction:column; gap:6px;">
+        <div id="dc-music-layers" style="display:flex; flex-direction:column; gap:7px;">
           <sc-for list="{{ musicLayers }}" as="layer" hint-placeholder-count="5">
-            <div style="height:10px; width:{{ layer.w }}%; background:var(--color-accent-2); opacity:{{ layer.o }};"></div>
+            <div title="{{ layer.name }}" style="height:11px; width:{{ layer.w }}%; background:var(--color-accent-2); opacity:{{ layer.o }};"></div>
           </sc-for>
         </div>
+        <div style="display:flex; gap:18px; margin-top:14px; font-size:10.5px; letter-spacing:0.14em; color:var(--color-neutral-600);">
+          <sc-for list="{{ musicLayers }}" as="layer" hint-placeholder-count="5">
+            <span>{{ layer.name }}</span>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="hr" style="margin:0;"></div>
+
+  <section id="discover" data-reveal="" data-particle-scene="discover" style="padding:92px 64px;">
+    <div class="dc-story">
+      <div class="dc-story-head">
+        <div><h6 style="color:var(--color-accent);">DISCOVER / CRAWLER</h6><h2>Search approved sources. Keep the proof.</h2></div>
+        <p class="dc-story-copy">The crawler checks policy before collection. Approved material enters the pipeline with its license attached; everything else falls away.</p>
+      </div>
+      <div class="dc-visual dc-discover" aria-label="A scanning field sorting approved sources from rejected material">
+        <span class="dc-vlabel">SOURCE SCAN / POLICY ACTIVE</span><span class="dc-vmeta">LICENSE RECORD ATTACHED AT INGEST</span><i class="scan"></i><i class="trail"></i>
+        <!-- Unsorted candidates ahead of the scan line. -->
+        <i class="dc-src" style="left:6%;top:19%"></i><i class="dc-src" style="left:11%;top:63%"></i><i class="dc-src" style="left:14%;top:34%"></i><i class="dc-src" style="left:9%;top:81%"></i><i class="dc-src" style="left:18%;top:15%"></i><i class="dc-src" style="left:21%;top:74%"></i><i class="dc-src" style="left:25%;top:41%"></i><i class="dc-src" style="left:16%;top:88%"></i><i class="dc-src" style="left:31%;top:24%"></i><i class="dc-src" style="left:28%;top:66%"></i><i class="dc-src" style="left:36%;top:13%"></i><i class="dc-src" style="left:39%;top:79%"></i><i class="dc-src" style="left:44%;top:36%"></i><i class="dc-src" style="left:47%;top:69%"></i><i class="dc-src" style="left:52%;top:21%"></i><i class="dc-src" style="left:56%;top:84%"></i><i class="dc-src" style="left:61%;top:31%"></i><i class="dc-src" style="left:65%;top:74%"></i><i class="dc-src" style="left:70%;top:17%"></i><i class="dc-src" style="left:76%;top:63%"></i><i class="dc-src" style="left:81%;top:27%"></i><i class="dc-src" style="left:86%;top:78%"></i><i class="dc-src" style="left:91%;top:38%"></i><i class="dc-src" style="left:94%;top:66%"></i>
+        <!-- Approved lane, licence tag attached at ingest. -->
+        <i class="dc-dot" style="left:15%;top:52%"></i><i class="dc-dot" style="left:22%;top:52%"></i><i class="dc-dot" style="left:29%;top:52%"></i><i class="dc-dot" style="left:35%;top:52%"></i><i class="dc-dot" style="left:42%;top:52%"></i><i class="dc-dot" style="left:50%;top:52%"></i><i class="dc-dot" style="left:58%;top:52%"></i><i class="dc-dot" style="left:65%;top:52%"></i><i class="dc-dot" style="left:72%;top:52%"></i><i class="dc-dot" style="left:80%;top:52%"></i><i class="dc-dot" style="left:88%;top:52%"></i>
+        <i class="dc-license" style="left:29%;top:44%"></i><i class="dc-license" style="left:50%;top:44%"></i><i class="dc-license" style="left:72%;top:44%"></i><i class="dc-license" style="left:88%;top:44%"></i>
+        <!-- Rejected: falls away below the lane. -->
+        <i class="dc-dot reject" style="left:22%;top:28%"></i><i class="dc-dot reject" style="left:34%;top:70%;animation-delay:-2s"></i><i class="dc-dot reject" style="left:49%;top:22%;animation-delay:-4s"></i><i class="dc-dot reject" style="left:59%;top:66%;animation-delay:-1s"></i><i class="dc-dot reject" style="left:67%;top:30%;animation-delay:-3s"></i><i class="dc-dot reject" style="left:78%;top:68%;animation-delay:-5s"></i><i class="dc-dot reject" style="left:85%;top:24%;animation-delay:-2.6s"></i>
+      </div>
+    </div>
+  </section>
+
+  <section id="store" data-reveal="" data-particle-scene="store" style="padding:92px 64px;background:var(--color-surface);">
+    <div class="dc-story">
+      <div class="dc-story-head">
+        <div><h6 style="color:var(--color-accent-2);">DATA STORE / FOUR TIERS</h6><h2>Raw evidence becomes usable knowledge without losing lineage.</h2></div>
+        <p class="dc-story-copy">Every tier has a different job. Captures preserve the original, chunks make it searchable, facts make it useful, and capsules make it portable.</p>
+      </div>
+      <div class="dc-visual dc-store" aria-label="Four connected storage tiers">
+        <span class="dc-vlabel">LINEAGE / UNBROKEN</span>
+        <!-- Population per tier: sparse and bright at the top where material has
+             been refined into capsules, dense and dim at the bottom where the
+             raw captures live. Threads carry lineage between the tiers. -->
+        <div class="dc-shelf"><i style="left:14%"></i><i style="left:52%"></i><i style="left:83%"></i></div>
+        <div class="dc-shelf"><i style="left:9%"></i><i style="left:26%"></i><i style="left:44%"></i><i style="left:61%"></i><i style="left:79%"></i><i style="left:93%"></i></div>
+        <div class="dc-shelf"><i style="left:6%"></i><i style="left:17%"></i><i style="left:28%"></i><i style="left:39%"></i><i style="left:50%"></i><i style="left:61%"></i><i style="left:72%"></i><i style="left:83%"></i><i style="left:94%"></i></div>
+        <div class="dc-shelf"><i style="left:4%"></i><i style="left:11%"></i><i style="left:19%"></i><i style="left:26%"></i><i style="left:34%"></i><i style="left:41%"></i><i style="left:49%"></i><i style="left:56%"></i><i style="left:64%"></i><i style="left:71%"></i><i style="left:79%"></i><i style="left:86%"></i><i style="left:94%"></i></div>
+        <b class="dc-lineage" style="left:40%"></b><b class="dc-lineage" style="left:57%"></b><b class="dc-lineage" style="left:71%"></b>
+        <div class="dc-tierlabels"><span>CAPSULES</span><span>FACTS</span><span>CHUNKS</span><span>CAPTURES</span></div><span class="dc-vmeta">SOURCE → EVIDENCE → FACT → PACKAGE</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="compression" data-reveal="" data-particle-scene="compress" style="padding:92px 64px;">
+    <div class="dc-story">
+      <div class="dc-story-head">
+        <div><h6 style="color:var(--color-accent);">COMPRESSION</h6><h2>Less bulk. More signal. Citations intact.</h2></div>
+        <p class="dc-story-copy">Repeated and low-value material is removed while distinct claims, evidence spans, and conflicts stay visible and retrievable.</p>
+      </div>
+      <div class="dc-visual dc-compress" aria-label="A broad particle cloud compressing into a small organized cluster">
+        <span class="dc-vlabel">SEMANTIC COMPRESSION / 8.4×</span><div class="cloud">
+          <i class="dc-src" style="left:4%;top:12%"></i><i class="dc-src" style="left:16%;top:6%"></i><i class="dc-src" style="left:29%;top:17%"></i><i class="dc-src" style="left:41%;top:9%"></i><i class="dc-src" style="left:55%;top:20%"></i><i class="dc-src" style="left:68%;top:11%"></i><i class="dc-src" style="left:82%;top:22%"></i><i class="dc-src" style="left:94%;top:14%"></i>
+          <i class="dc-src" style="left:8%;top:34%"></i><i class="dc-src" style="left:21%;top:29%"></i><i class="dc-src" style="left:35%;top:40%"></i><i class="dc-src" style="left:49%;top:32%"></i><i class="dc-src" style="left:62%;top:43%"></i><i class="dc-src" style="left:76%;top:35%"></i><i class="dc-src" style="left:89%;top:44%"></i>
+          <i class="dc-src" style="left:3%;top:58%"></i><i class="dc-src" style="left:17%;top:64%"></i><i class="dc-src" style="left:31%;top:55%"></i><i class="dc-src" style="left:45%;top:67%"></i><i class="dc-src" style="left:58%;top:59%"></i><i class="dc-src" style="left:72%;top:70%"></i><i class="dc-src" style="left:86%;top:61%"></i>
+          <i class="dc-src" style="left:11%;top:85%"></i><i class="dc-src" style="left:26%;top:91%"></i><i class="dc-src" style="left:40%;top:83%"></i><i class="dc-src" style="left:54%;top:93%"></i><i class="dc-src" style="left:69%;top:86%"></i><i class="dc-src" style="left:83%;top:94%"></i>
+          <i class="dc-dot reject" style="left:23%;top:47%"></i><i class="dc-dot reject" style="left:52%;top:76%;animation-delay:-2s"></i><i class="dc-dot reject" style="left:78%;top:26%;animation-delay:-4s"></i>
+        </div><i class="funnel"></i><i class="aperture"></i><div class="cluster"><i class="dc-dot" style="left:16%;top:18%"></i><i class="dc-dot" style="left:44%;top:14%"></i><i class="dc-dot" style="left:72%;top:22%"></i><i class="dc-dot" style="left:28%;top:42%"></i><i class="dc-dot" style="left:58%;top:38%"></i><i class="dc-dot" style="left:84%;top:47%"></i><i class="dc-dot" style="left:20%;top:66%"></i><i class="dc-dot" style="left:50%;top:62%"></i><i class="dc-dot" style="left:76%;top:72%"></i><i class="dc-dot" style="left:36%;top:86%"></i><i class="dc-dot" style="left:64%;top:88%"></i></div><span class="dc-vmeta">CLAIMS RETAINED / DUPLICATES COLLAPSED</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="workbench" data-reveal="" data-particle-scene="knowledge" style="padding:92px 64px;background:var(--color-surface);">
+    <div class="dc-story">
+      <div class="dc-story-head">
+        <div><h6 style="color:var(--color-accent-2);">WORKBENCH / KNOWLEDGE</h6><h2>Ask the corpus. Inspect the answer.</h2></div>
+        <p class="dc-story-copy">Query structured facts and semantic evidence in the same place. Every answer exposes the source, license, confidence, and conflicting claims.</p>
+      </div>
+      <div class="dc-visual dc-workbench">
+        <div><span class="dc-vlabel">WORKBENCH / SEMANTIC</span><div class="dc-code"><em>find</em> chunks about vocal consent<br><em>filter</em> license_class = <b>reusable</b><br><em>include</em> conflicts, citations<br><em>top_k</em> 3<br><br><span style="color:var(--color-neutral-500)">→ 3 grounded results in 42 ms</span></div></div>
+        <div><span class="dc-vlabel">KNOWLEDGE / GROUNDED</span><div class="dc-fact">Explicit consent must precede voice synthesis.<small>CONSENT-014 · REUSABLE · 98%</small></div><div class="dc-fact">Revocation status is checked at generation time.<small>POLICY-008 · LICENSED · 94%</small></div><div class="dc-fact">Identity verification binds consent to a person.<small>VOICE-021 · OWNED · 91%</small></div></div>
       </div>
     </div>
   </section>
@@ -368,7 +917,7 @@
       <span class="xl-arrow" style="font-size:15px; flex:none;">Open Lyrx &#8599;</span></a>
   </section>
 
-  <section style="padding:88px 64px; background:var(--color-accent); color:#000;">
+  <section class="dc-cta" style="padding:88px 64px; background:var(--color-accent); color:#000;">
     <h2 style="color:#000; max-width:640px; margin-bottom:24px; font-size:40px;">Build what you're allowed to build.</h2>
     <button class="btn" style="background:#000; color:var(--color-accent); padding:14px 28px; font-size:15px;" onClick="{{ goApp }}">Launch the app</button>
   </section>
@@ -1072,6 +1621,7 @@
 </sc-if>
 
 </x-dc>
+<script src="./particle-field.js"></script>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
   state = {
@@ -1089,10 +1639,10 @@ class Component extends DCLogic {
     scrolled: false,
     phase: 0,
     floaties: [
-      { id: 'f1', x: 720, y: 40, kicker: 'CAPSULE', title: 'Country Songwriting', meta: '1.2 GB · CC-BY-4.0', color: '#2CFF05' },
-      { id: 'f2', x: 940, y: 210, kicker: 'VOICE', title: 'Isaiah Voice v3', meta: 'consent verified', color: '#BF00FF' },
-      { id: 'f3', x: 700, y: 360, kicker: 'ADAPTER', title: 'nashville-lora-17', meta: '620 MB · rank 16', color: '#2CFF05' },
-      { id: 'f4', x: 980, y: 470, kicker: 'RIGHTS', title: '6 sources reviewed', meta: '1 quarantined', color: '#BF00FF' },
+      { id: 'f1', x: 720, y: 40, kicker: 'CAPSULE', title: 'Country Songwriting', meta: '1.2 GB · CC-BY-4.0', color: '#35E7FF' },
+      { id: 'f2', x: 940, y: 210, kicker: 'VOICE', title: 'Isaiah Voice v3', meta: 'consent verified', color: '#FFB65C' },
+      { id: 'f3', x: 700, y: 360, kicker: 'ADAPTER', title: 'nashville-lora-17', meta: '620 MB · rank 16', color: '#35E7FF' },
+      { id: 'f4', x: 980, y: 470, kicker: 'RIGHTS', title: '6 sources reviewed', meta: '1 quarantined', color: '#FFB65C' },
     ],
     dragId: null,
     crawlRunning: false,
@@ -1751,7 +2301,16 @@ class Component extends DCLogic {
     { n: '07', label: 'Train / retrieve', desc: 'Adapter or live citation' },
   ];
 
-  capsuleContents = ['Purpose', 'Source manifest', 'Licenses', 'Compressed evidence', 'Search index', 'Knowledge graph', 'Model adapter', 'Eval scores'];
+  capsuleContents = [
+    { n: '01', label: 'Purpose',            desc: 'What this capsule is allowed to be used for' },
+    { n: '02', label: 'Source manifest',    desc: 'Every URL, file, and recording that went in' },
+    { n: '03', label: 'Licenses',           desc: 'Terms per source, plus revocation status' },
+    { n: '04', label: 'Compressed evidence',desc: 'Deduplicated spans that still cite back' },
+    { n: '05', label: 'Search index',       desc: 'Vector and keyword, queryable at runtime' },
+    { n: '06', label: 'Knowledge graph',    desc: 'Entities, claims, and the conflicts between them' },
+    { n: '07', label: 'Model adapter',      desc: 'Optional LoRA trained only on cleared material' },
+    { n: '08', label: 'Eval scores',        desc: 'Grounding, refusal, and leakage benchmarks' },
+  ];
 
   pricingTiers = [
     { name: 'FREE', price: '$0', desc: 'Personal projects, retrieval-only, 3 sources.', cta: 'Start free' },
@@ -2618,7 +3177,7 @@ class Component extends DCLogic {
       waveStatus: s.chordPlaying ? 'PLAYING ' + s.chordPlaying
         : (s.activeNote ? 'PLAYING ' + s.activeNote + (s.chordMode ? ' TRIAD' : '') : 'IDLE — 56 BAND MONITOR'),
       soundGlow: decay > 0.02
-        ? '0 0 ' + (10 + decay * 46).toFixed(0) + 'px rgba(191,0,255,' + (0.16 + decay * 0.4).toFixed(2) + ')'
+        ? '0 0 ' + (10 + decay * 46).toFixed(0) + 'px rgba(255,182,92,' + (0.16 + decay * 0.4).toFixed(2) + ')'
         : 'none',
       soundBorder: decay > 0.02 ? 'var(--color-accent-2)' : 'var(--color-divider)',
       navPad: s.scrolled ? '8px 16px' : '12px 16px',
@@ -2699,7 +3258,13 @@ class Component extends DCLogic {
       isMusic: s.screen === 'music', isCompression: s.screen === 'compression',
       pipelineStages: this.pipelineStages, capsuleContents: this.capsuleContents, pricingTiers: this.pricingTiers,
       waveformBars: this.waveformBarsData,
-      musicLayers: [{w:90,o:1},{w:70,o:0.8},{w:55,o:0.6},{w:40,o:0.4},{w:25,o:0.25}],
+      musicLayers: [
+        { w: 92, o: 1,    name: 'COMPOSITION' },
+        { w: 74, o: 0.8,  name: 'ARRANGEMENT' },
+        { w: 58, o: 0.6,  name: 'PERFORMANCE' },
+        { w: 43, o: 0.4,  name: 'MIX' },
+        { w: 28, o: 0.25, name: 'MASTER' },
+      ],
       discoverQuery: s.discoverQuery, setDiscoverQuery: (e) => this.setState({ discoverQuery: e.target.value }),
       filteredSources, sources: this.sourcesData,
       computeBudget: s.computeBudget, setComputeBudget: (e) => this.setState({ computeBudget: e.target.value }),

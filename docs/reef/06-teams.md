@@ -1,3 +1,7 @@
+> **Historical specification — not implementation authority.** Team charters and
+> sequencing below are preserved context, not approved assignments. Start with
+> [`../README.md`](../README.md).
+
 # 06 · The executing organization
 
 ---

@@ -1,3 +1,7 @@
+> **Historical specification — not implementation authority.** Milestones and MVP
+> claims below are not approved work. Use [`../README.md`](../README.md),
+> [ADR-001](../decisions/ADR-001-initial-market-wedge.md), and the validation scorecard.
+
 # 02 · Roadmap
 
 Every milestone below ships to a real user and creates value on its own. None of them

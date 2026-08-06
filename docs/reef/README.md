@@ -1,4 +1,10 @@
-# Reef — canonical blueprint
+> **Historical specification — not implementation authority.** This is the preserved
+> first M&A proposal. Its reasoning remains useful, but its claims, prices, roadmap,
+> architecture, and MVP predate reconciliation. Start with
+> [`../README.md`](../README.md) and
+> [ADR-001](../decisions/ADR-001-initial-market-wedge.md).
+
+# Reef — historical M&A blueprint
 
 The product specification. Written to be implemented one section at a time without
 relitigating decisions made in the others.

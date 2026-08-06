@@ -1,3 +1,7 @@
+> **Historical specification — not implementation authority.** Preserved as reasoning
+> for the M&A alternative. Current authority begins at [`../README.md`](../README.md)
+> and [ADR-001](../decisions/ADR-001-initial-market-wedge.md).
+
 # 01 · Strategy
 
 ---

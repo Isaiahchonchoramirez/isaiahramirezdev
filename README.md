@@ -1,5 +1,30 @@
 # React + Vite
 
+## Reef canonical blueprint
+
+Reef's single documentation authority is [`docs/README.md`](docs/README.md). Read in
+this order before making product or implementation decisions:
+
+1. [`ADR-001`](docs/decisions/ADR-001-initial-market-wedge.md) — why M&A diligence is
+   the provisional validation wedge and engineering is deferred.
+2. [`COMPANY.md`](docs/vision/COMPANY.md) and
+   [`MISSION.md`](docs/vision/MISSION.md) — company direction and boundaries.
+3. [`PRODUCT.md`](docs/product/PRODUCT.md) and [`MVP.md`](docs/product/MVP.md) — exact
+   customer, workflow, deliverable, and exclusions.
+4. [`docs/validation/README.md`](docs/validation/README.md) and
+   [`SCORECARD.md`](docs/validation/SCORECARD.md) — evidence plan and the gate that
+   blocks M1 application implementation.
+5. Architecture, design, and business documents in the order listed by the canonical
+   index.
+
+Files under [`docs/reef/`](docs/reef/README.md) are preserved historical proposals and
+are not implementation authority. The Sora kit is supporting brand material only.
+
+> **Favor ruthless focus over breadth.** If two ideas compete, choose the one that
+> gets a real customer to pay sooner while preserving the long-term vision. Reef
+> should evolve from one exceptional workflow into a platform, not attempt to be a
+> platform before it has product-market fit.
+
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
 Currently, two official plugins are available:

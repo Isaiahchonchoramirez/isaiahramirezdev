@@ -1,3 +1,7 @@
+> **Historical specification — not implementation authority.** Positioning, channels,
+> launch claims, and prices below require validation under ADR-001. Start with
+> [`../README.md`](../README.md).
+
 # 07 · Marketing
 
 ---

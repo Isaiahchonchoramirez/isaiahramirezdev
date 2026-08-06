@@ -1,3 +1,7 @@
+> **Historical specification — not implementation authority.** Preserve this design
+> exploration for reference; current design authority is indexed in
+> [`../README.md`](../README.md).
+
 # 04 · Visual language and the world
 
 Palette and grade are shared with [`../reef-sora-kit.md`](../reef-sora-kit.md). Change
