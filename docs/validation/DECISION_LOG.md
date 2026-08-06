@@ -309,3 +309,125 @@ tests.
 5. **Has anyone actually tried their VDR's AI?** `X1`. If most have not, incumbent
    strength is unknown rather than low.
 6. **Does the register get used in a real meeting?** The outcome gate.
+
+---
+
+## 2026-08-06 · M1 gate split; engine authorized, product still blocked
+
+**Decision.** Build the headless ingestion and evidence engine now, validated against
+`fixtures/reef-deal-room` only. Recorded in
+[ADR-003](../decisions/ADR-003-m1-engine-authorization.md). Everything commercial —
+pricing, offers, pilots, live customer documents, the review UI, export — remains blocked
+by the nineteen mandatory scorecard rows, none of which has evidence.
+
+**Why the gate could be split.** The engine is wedge-independent. Ingestion, coordinate-
+preserving anchors, chunking, hybrid retrieval and the evidence join are identical whether
+the buyer is a searcher, an independent sponsor, a QoE provider, a sell-side advisor, or an
+AEC firm under the deferred engineering wedge. Every reversal candidate ADR-001 and ADR-002
+keep live consumes the same pipeline, so the engine survives all four outcomes of the
+build/narrow/pivot/stop decision — including *stop*.
+
+**The second reason, which is the stronger one.** `T1` (anchors reach 95%) and `T2` (checks
+reach precision) are the only two hypotheses in `HYPOTHESES.md` that interviews cannot
+answer. They need a working extractor measured against labeled findings. Deferring them
+behind interviews that structurally cannot test them means they get tested after
+commitments exist, which is the wrong order for the two rows whose failure mode is
+technical.
+
+**No threshold moved.** Every number in `SCORECARD.md` is unchanged. No row was
+reclassified. The anti-gaming rule that matters — a superseding ADR written before the data
+is seen — is satisfied: no eval has been run.
+
+**The honest risk, recorded rather than argued away.** Engine work is more enjoyable than
+cold outreach, and this repository currently holds roughly five thousand lines of
+documentation and zero customer conversations. That ratio is the actual finding of the last
+two days and it is not a good one. ADR-003 §7 sets a tripwire: if no qualified interview has
+been conducted by **2026-09-06**, engine work stops until five are booked, and the reason
+for the displacement is written here. `L1` needs one call with a transaction attorney and
+can be answered in a week without any of the engine existing.
+
+**Deferred deliberately.** The recommendation to reposition Reef as an intelligence
+platform with diligence as the first paid vertical is *not* decided by ADR-003. It changes
+nothing about the engine scope, and rewriting canonical strategy on zero customer evidence
+is the same defect ADR-002 recorded about the original $1,500 price. Revisit with eval
+results in hand.
+
+**What would reverse it.** Anchor accuracy misses 95% after one bounded remediation cycle —
+`T1` fails and the differentiating claim is undeliverable. Or the tripwire fires and
+interviews still do not happen, in which case the problem was never the roadmap.
+
+**Also recorded:** the `projects/reef-showcase/` work from 2026-08-05 was lost to a terminal
+crash before it was ever committed. The directory contained one empty lockfile. Nothing is
+being reconstructed — ADR-003 supersedes the showcase approach with the engine.
+
+---
+
+## 2026-08-06 · M1 engine built and scored; two real defects found by the fixture
+
+**What exists.** The headless pipeline authorized by ADR-003 §4 is complete and runs end to
+end: intake → extract → structure → chunk → embed → index, plus a search API, an evidence
+API and a CLI. 73 tests, lint and strict type checking clean. Against
+`fixtures/reef-deal-room` v1.0.0 it registers 121 files, indexes 120 and produces 869
+chunks in about twelve seconds. Every scored engine gate passes.
+
+| Gate | Value | Bar |
+|---|---|---|
+| G1 inventory recall | 100% | ≥100% |
+| G2 processing status correctness | 100% | ≥100% |
+| G3 parsing success | 100% | ≥95% |
+| G9 citation presence | 100% | ≥100% |
+| G10 citation location accuracy | 100% | ≥95% |
+| G11 deterministic reproducibility | 100% | ≥100% |
+| G12 fabricated citations | 0 | 0 |
+| ABS abstention on absent subjects | 100% | ≥100% |
+| R@12 retrieval recall | 73.7% (14/19 R1, 15/22 with R2) | baseline, no bar set |
+
+**`T1` has provisional support.** Anchor correctness is the hypothesis with a 95% threshold
+and the one that decides whether the differentiating claim is deliverable. It is at 100% on
+synthetic data. That is necessary and nowhere near sufficient — the fixture's PDFs were
+generated rather than scanned, its spreadsheets are well-formed, and its one degraded scan
+was degraded programmatically. `SYNTHETIC_DEAL_ROOM_SPEC.md` already records the caveat:
+"whether real scans OCR this well — synthetic degradation is kinder than a decade-old fax."
+`T1` is not answered until governed real packages exist, which `D1` gates.
+
+**The fixture earned its cost by finding two real defects**, which is the strongest argument
+for having built it before the interviews rather than after.
+
+*Chunks cited spans they did not contain.* When a chunk was split for size, every part kept
+the full span list, so parts claimed provenance over text that was in a sibling part.
+Measured G10 at 34.8%. This is precisely the failure the whole design exists to prevent — a
+confident citation pointing at the wrong place — and no unit test caught it because each
+component was individually correct. Fixed by making span attribution correct by
+construction rather than assigned after the fact.
+
+*The abstention gate admitted every nonsense query put to it.* The first implementation
+gated on the reciprocal-rank-fusion score, which is rank-based and therefore discards the
+one number that says whether anything matched: a vector search always returns its top-k,
+and its worst result still ranks first among them. "Best of a bad lot" scored identically to
+a real hit. Fixed by gating on absolute cosine similarity. The floor is calibrated on ten
+hand-written queries and is explicitly provisional — recorded in `search.SIMILARITY_FLOOR`
+as under-evidenced rather than presented as settled.
+
+**Three deviations from the architecture documents, each with a reason.**
+
+1. **Chunk size 420/500, not 800/1500.** `05-architecture.md` set those numbers without
+   reference to an encoder. The encoder accepts 512 tokens and truncates silently past it,
+   so an 800-token chunk would store text its vector never represented. Sizes now follow the
+   encoder and should move if it is replaced.
+2. **Python/FastAPI per `docs/architecture/**`, not the one-language TypeScript proposal in
+   `docs/reef/05-architecture.md`** — that file is historical under ADR-001. Its ingest
+   decomposition, chunking rules and evidence schema were adopted on merit regardless.
+3. **Local Postgres and filesystem object storage for development.** Docker Desktop is not
+   installed on the build machine; `compose.yaml` is retained for CI and deployment.
+
+**What the engine still cannot do, stated plainly.** No finding layer, so G4-G8 and G13-G15
+are unscored rather than estimated. Retrieval-only abstention cannot distinguish "the corpus
+covers this subject" from "the corpus states this fact" — a search for electric vehicles
+correctly returns the fleet register, and only a finding layer can decline to answer from
+it. That boundary is measured and reported rather than hidden by choosing easier negatives.
+
+**The tripwire is unchanged and now matters more.** ADR-003 §7: if no qualified interview
+has happened by **2026-09-06**, engine work stops until five are booked. Building the engine
+has not advanced `L1`, `D1`, `N1`, `C1`, `W1`, `P1`, `PAY1` or `S1` by any amount, and every
+one of them still gates the product. A green eval board is not customer evidence, and
+treating it as any is an automatic-fail condition on the scorecard.

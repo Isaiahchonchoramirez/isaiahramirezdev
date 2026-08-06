@@ -1,0 +1,162 @@
+{
+  "fixture_version": "1.0.0",
+  "run": "R1",
+  "room_id": "8f10593c-9c53-4dee-b959-27480cd8c7be",
+  "passed": true,
+  "gates": [
+    {
+      "gate": "G1",
+      "description": "document inventory recall \u2014 every supplied file has a state",
+      "value": 1.0,
+      "threshold": 1.0,
+      "passed": true,
+      "detail": "no silent drops"
+    },
+    {
+      "gate": "G2",
+      "description": "processing status correctness",
+      "value": 1.0,
+      "threshold": 1.0,
+      "passed": true,
+      "detail": "every file correctly classified"
+    },
+    {
+      "gate": "G3",
+      "description": "parsing success on supported formats",
+      "value": 1.0,
+      "threshold": 0.95,
+      "passed": true,
+      "detail": "no parse failures"
+    },
+    {
+      "gate": "G9",
+      "description": "citation presence \u2014 every chunk resolves to at least one anchor",
+      "value": 1.0,
+      "threshold": 1.0,
+      "passed": true,
+      "detail": "0 chunks without an anchor"
+    },
+    {
+      "gate": "G10",
+      "description": "citation location accuracy \u2014 anchors resolve to their own text",
+      "value": 1.0,
+      "threshold": 0.95,
+      "passed": true,
+      "detail": "0 mismatched of 1739 anchors"
+    },
+    {
+      "gate": "G12",
+      "description": "fabricated citations \u2014 anchors pointing at non-existent spans",
+      "value": 0.0,
+      "threshold": 0.0,
+      "passed": true,
+      "detail": "0 fabricated anchors"
+    },
+    {
+      "gate": "G11",
+      "description": "deterministic extraction reproducibility",
+      "value": 1.0,
+      "threshold": 1.0,
+      "passed": true,
+      "detail": "0 of 116 documents drifted on re-extraction"
+    },
+    {
+      "gate": "R@12",
+      "description": "retrieval recall at 12 on planted-finding source documents",
+      "value": 0.7368,
+      "threshold": 0.0,
+      "passed": true,
+      "detail": "14 of 19 findings recalled"
+    },
+    {
+      "gate": "ABS",
+      "description": "abstention on subjects absent from the corpus",
+      "value": 1.0,
+      "threshold": 1.0,
+      "passed": true,
+      "detail": "abstained on every question"
+    }
+  ],
+  "diagnostics": {
+    "retrieval": {
+      "recalled": [
+        "RDG-001",
+        "RDG-002",
+        "RDG-003",
+        "RDG-005",
+        "RDG-006",
+        "RDG-007",
+        "RDG-008",
+        "RDG-009",
+        "RDG-010",
+        "RDG-011",
+        "RDG-012",
+        "RDG-016",
+        "RDG-017",
+        "RDG-020"
+      ],
+      "missed": [
+        {
+          "id": "RDG-004",
+          "title": "Recurring revenue share unsupported as stated",
+          "reason": "abstained"
+        },
+        {
+          "id": "RDG-015",
+          "title": "Referenced Exhibit B absent from baseline room",
+          "reason": "abstained"
+        },
+        {
+          "id": "RDG-018",
+          "title": "Entity name inconsistent across records",
+          "reason": "abstained"
+        },
+        {
+          "id": "RDG-019",
+          "title": "Customer identifier zero-padding lost",
+          "reason": "abstained"
+        },
+        {
+          "id": "RDG-021",
+          "title": "Tax support archive cannot be opened",
+          "reason": "top 12 did not include any of ['Tax_Support_2023-2025.zip']"
+        }
+      ],
+      "findings_scored": 19
+    },
+    "abstention": {
+      "leaked": [],
+      "topic_present_fact_absent": {
+        "surfaced": [
+          "how many electric vehicles are in the delivery fleet -> fleet_equipment.csv"
+        ],
+        "note": "not gated \u2014 retrieval cannot distinguish 'the corpus covers this subject' from 'the corpus states this fact'. Deferred to the finding layer."
+      }
+    },
+    "table_extraction": {
+      "rows_sampled": 200,
+      "cells_sampled": 902,
+      "zero_padded_values_preserved": 127,
+      "examples": [
+        "000418",
+        "0.31",
+        "001953",
+        "002100",
+        "001729"
+      ]
+    },
+    "not_scored": {
+      "gates": [
+        "G4",
+        "G5",
+        "G6",
+        "G7",
+        "G8",
+        "G13",
+        "G14",
+        "G15"
+      ],
+      "reason": "these score the finding layer, which ADR-003 \u00a74 does not authorize. Reporting a value for them would be inventing a number."
+    }
+  }
+}
