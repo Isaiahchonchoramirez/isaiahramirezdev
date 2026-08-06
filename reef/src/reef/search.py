@@ -19,7 +19,9 @@ from enum import StrEnum
 from sqlalchemy import bindparam, text
 from sqlalchemy.orm import Session
 
+from reef.calibration import CalibrationStatus, ResolvedFloor, resolve_floor
 from reef.config import Settings, get_settings
+from reef.corpus import CorpusEmbedding, require_compatible
 from reef.db import room_session
 from reef.models_gateway import Embedder, get_embedder
 
@@ -28,26 +30,17 @@ from reef.models_gateway import Embedder, get_embedder
 #: findings would be overfitting to the answer key rather than measuring retrieval.
 RRF_K = 60
 
-#: Minimum cosine similarity for the best semantic match before the corpus is considered
-#: to contain an answer.
-#:
 #: The gate reads absolute similarity, not the fused score, and that distinction is the
-#: whole point. Reciprocal rank fusion is rank-based, so it throws away the one number
-#: that says whether anything actually matched: a vector search always returns its top-k,
-#: and its worst-ever result still ranks first among them. Gating on the fused score
-#: therefore scores "best of a bad lot" identically to a real hit — measured, not assumed,
-#: after an earlier rank-based gate admitted every nonsense query put to it.
+#: whole point. Reciprocal rank fusion is rank-based, so it throws away the one number that
+#: says whether anything actually matched: a vector search always returns its top-k, and
+#: its worst-ever result still ranks first among them. Gating on the fused score therefore
+#: scores "best of a bad lot" identically to a real hit — measured, not assumed, after an
+#: earlier rank-based gate admitted every nonsense query put to it.
 #:
-#: Calibration on this corpus: five answerable questions scored 0.4855-0.6675 and five
-#: unanswerable ones scored 0.2934-0.3645. 0.42 sits in the middle of that gap.
-#:
-#: **This number is provisional and under-evidenced.** Ten hand-written queries is not a
-#: calibration set. The abstention set required by ADR-003 §6 — questions whose answers
-#: were deliberately removed from the corpus — is what should set it, and this constant
-#: must be re-derived when that set exists. Owned by the engine owner named in ADR-003 §4.
-#: Lowering it raises recall and is the easiest way to make a demo look better and the
-#: product worse, so a change needs a recorded reason and a rerun of the abstention set.
-SIMILARITY_FLOOR = 0.42
+#: **The floor itself is no longer defined here.** It is a property of the embedding model,
+#: resolved per-model from `calibration.py`. A bare module constant is what allowed a floor
+#: fitted to one model to be applied silently to another, which took abstention from 100%
+#: to 0% with no code change and no error.
 
 
 class Outcome(StrEnum):
@@ -82,6 +75,21 @@ class SearchResult:
     #: Why the gate abstained, when it did. Shown to the user rather than swallowed —
     #: "nothing scored above the floor" is useful; a blank screen is not.
     detail: str = ""
+    #: Which embedding model produced both the query vector and the corpus vectors. They
+    #: are guaranteed equal by `require_compatible`, so one field suffices.
+    embedding_model: str = ""
+    #: Whether the abstention floor applied here has evidence behind it. A result carrying
+    #: `uncalibrated` may be shown to a developer but its abstention behaviour must not be
+    #: reported as a passing metric.
+    calibration_status: CalibrationStatus = CalibrationStatus.NOT_APPLICABLE
+    #: The floor actually applied, or None when the model is uncalibrated or embedding is
+    #: switched off. Recorded so a result can be reproduced.
+    similarity_floor: float | None = None
+
+    @property
+    def is_reportable(self) -> bool:
+        """Whether abstention behaviour from this result may be counted as passing."""
+        return self.calibration_status is CalibrationStatus.CALIBRATED
 
 
 _VECTOR_SQL = text(
@@ -115,26 +123,49 @@ def search(
     candidates: int = 50,
     settings: Settings | None = None,
     embedder: Embedder | None = None,
-    similarity_floor: float = SIMILARITY_FLOOR,
 ) -> SearchResult:
-    settings = settings or get_settings()
-    query = query.strip()
-    if not query:
-        return SearchResult(outcome=Outcome.NOT_FOUND, hits=[], query=query, detail="empty query")
+    """Search one room.
 
+    Raises `EmbeddingIncompatible` when the room's stored vectors came from a different
+    model, and `CalibrationMissing` when the model has no calibrated abstention floor and
+    `allow_uncalibrated_search` is off. Both are hard failures on purpose: each replaces a
+    condition that previously produced a plausible-looking but meaningless result.
+    """
+    settings = settings or get_settings()
     embedder = embedder or get_embedder(settings)
 
+    # Resolved before any work, so a misconfigured deployment fails on its first query
+    # rather than after returning results nobody can trust. `resolve_floor` raises when the
+    # model is uncalibrated and that has not been explicitly permitted.
+    resolved: ResolvedFloor = resolve_floor(embedder.model_id, settings.allow_uncalibrated_search)
+
+    def result(outcome: Outcome, hits: list[SearchHit], detail: str = "") -> SearchResult:
+        return SearchResult(
+            outcome=outcome,
+            hits=hits,
+            query=query,
+            detail=detail,
+            embedding_model=embedder.model_id,
+            calibration_status=resolved.status,
+            similarity_floor=resolved.floor,
+        )
+
+    query = query.strip()
+    if not query:
+        return result(Outcome.NOT_FOUND, [], "empty query")
+
     with room_session(room_id) as session:
-        vector_rows = _vector_arm(session, query, candidates, embedder)
+        # The contract check. Equal vector dimension is not compatibility, and Postgres
+        # will happily compare vectors from two different models without complaint.
+        corpus: CorpusEmbedding = require_compatible(session, embedder.model_id)
+
+        vector_rows = (
+            _vector_arm(session, query, candidates, embedder) if corpus.embedded_chunks else []
+        )
         lexical_rows = _lexical_arm(session, query, candidates)
 
         if not vector_rows and not lexical_rows:
-            return SearchResult(
-                outcome=Outcome.NOT_FOUND,
-                hits=[],
-                query=query,
-                detail="no chunk matched lexically or semantically",
-            )
+            return result(Outcome.NOT_FOUND, [], "no chunk matched lexically or semantically")
 
         best_similarity = max((sim for _, sim in vector_rows), default=0.0)
         # A lexical hit means every term in the query appears in one chunk, because
@@ -143,25 +174,22 @@ def search(
         # encoder is weak on rare identifiers like "OP-2024-11687".
         has_lexical = bool(lexical_rows)
 
-        if best_similarity < similarity_floor and not has_lexical:
+        if resolved.floor is not None and best_similarity < resolved.floor and not has_lexical:
             # Checked on the best hit rather than the mean. A query with one weak match
             # and eleven irrelevant ones should abstain, and averaging would let the
             # eleven drag an already-weak best result across the line.
-            return SearchResult(
-                outcome=Outcome.NOT_FOUND,
-                hits=[],
-                query=query,
-                detail=(
-                    f"best semantic similarity {best_similarity:.4f} is below the "
-                    f"{similarity_floor:.2f} floor and no chunk contains every query term"
-                ),
+            return result(
+                Outcome.NOT_FOUND,
+                [],
+                f"best semantic similarity {best_similarity:.4f} is below the "
+                f"{resolved.floor:.2f} floor calibrated for {embedder.model_id} "
+                "and no chunk contains every query term",
             )
 
         fused = _fuse(vector_rows, lexical_rows)
-        top = fused[:limit]
-        hits = _hydrate(session, top)
+        hits = _hydrate(session, fused[:limit])
 
-    return SearchResult(outcome=Outcome.FOUND, hits=hits, query=query)
+    return result(Outcome.FOUND, hits)
 
 
 def _vector_arm(

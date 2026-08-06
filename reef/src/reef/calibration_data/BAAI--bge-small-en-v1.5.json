@@ -1,0 +1,44 @@
+{
+  "schema_version": "1",
+  "status": "calibrated",
+  "embedding_model": "BAAI/bge-small-en-v1.5",
+  "embedding_dimension": 384,
+  "similarity_metric": "cosine",
+  "similarity_floor": 0.6555,
+  "pipeline_version": "1",
+  "calibrated_at": "2026-08-06T18:41:02+00:00",
+  "fixture": {
+    "name": "reef-deal-room",
+    "version": "1.0.0",
+    "corpus_sha256": "02379a0ac08a0d91422e34dc33acc00d6b0c0bcd7a693c3e51d46b373ac8dd69"
+  },
+  "answerable_scores": {
+    "n": 10,
+    "min": 0.6789,
+    "max": 0.7939,
+    "mean": 0.7461
+  },
+  "negative_scores": {
+    "n": 6,
+    "min": 0.595,
+    "max": 0.6322,
+    "mean": 0.6118
+  },
+  "heldout_negative_scores": {
+    "n": 6,
+    "min": 0.581,
+    "max": 0.7308,
+    "mean": 0.6488
+  },
+  "heldout_leaks": 3,
+  "separation_fitted": 0.0467,
+  "separation_heldout": -0.052,
+  "generalises": false,
+  "method": "Best cosine similarity of the top vector hit was recorded for each query in two disjoint sets: questions the corpus answers, and questions about subjects it does not cover. The floor sits at the midpoint of the gap between the weakest answerable score and the strongest negative score (GAP_POSITION=0.5). The midpoint is chosen because it assumes nothing about which error is worse; it was not selected by searching for the value that maximises fixture recall, which would fit the gate to the answer key.",
+  "limitations": [
+    "DOES NOT GENERALISE: 3 of 6 held-out negatives score at or above the fitted floor (held-out range 0.5810-0.7308 against an answerable minimum of 0.6789). The distributions overlap, so no floor separates them. Raising the floor to reject these would reject real answerable queries. Retrieval-only abstention cannot distinguish 'the corpus covers this subject' from 'the corpus states this fact'; that separation belongs to a findings layer.",
+    "Fitted on one synthetic fixture (reef-deal-room 1.0.0) with 10 answerable and 6 negative queries. That is a small sample and a single corpus; it does not establish the floor for real packages.",
+    "Queries were written by the same party that built the engine and the fixture. An independent cold-run reviewer has not yet confirmed the sets are fair.",
+    "The floor is valid only for the embedding model named in this record. Applying it to any other model is the defect this contract exists to prevent."
+  ]
+}

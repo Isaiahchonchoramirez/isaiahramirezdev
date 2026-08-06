@@ -15,7 +15,9 @@ from pydantic import BaseModel, Field
 from sqlalchemy import func, select
 
 from reef import db
+from reef.calibration import CalibrationMissing
 from reef.config import Settings, get_settings
+from reef.corpus import EmbeddingIncompatible
 from reef.evidence import EvidenceNotFound, EvidenceService, SourceRegion
 from reef.models import Document, ProcessingState, Room
 from reef.search import search
@@ -88,6 +90,13 @@ class SearchOut(BaseModel):
     outcome: str
     query: str
     detail: str = ""
+    #: The model that produced both the query vector and the corpus vectors — guaranteed
+    #: equal, because a mismatch is refused before the search runs.
+    embedding_model: str = ""
+    #: "calibrated", "uncalibrated" or "not_applicable". A caller must not treat abstention
+    #: from an uncalibrated run as evidence of anything.
+    calibration_status: str = ""
+    similarity_floor: float | None = None
     hits: list[HitOut] = Field(default_factory=list)
 
 
@@ -126,11 +135,42 @@ def search_room(
     limit: Annotated[int, Query(ge=1, le=50)] = 12,
 ) -> SearchOut:
     _room_or_404(room_id)
-    result = search(room_id, q, limit=limit)
+    try:
+        result = search(room_id, q, limit=limit)
+    except EmbeddingIncompatible as exc:
+        # 409, not 500: the request is well-formed and the server is healthy. The room and
+        # the configured model are in conflict, and only an operator can resolve it.
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "error": "embedding_incompatible",
+                "state": str(exc.state),
+                "stored_models": list(exc.stored_models),
+                "requested_model": exc.query_model,
+                "remediation": exc.remediation_text,
+            },
+        ) from exc
+    except CalibrationMissing as exc:
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "error": "calibration_missing",
+                "embedding_model": exc.model_id,
+                "remediation": (
+                    "Calibrate an abstention floor for this model, or set "
+                    "REEF_ALLOW_UNCALIBRATED_SEARCH=true to receive results labelled "
+                    "uncalibrated."
+                ),
+            },
+        ) from exc
+
     return SearchOut(
         outcome=str(result.outcome),
         query=result.query,
         detail=result.detail,
+        embedding_model=result.embedding_model,
+        calibration_status=str(result.calibration_status),
+        similarity_floor=result.similarity_floor,
         hits=[
             HitOut(
                 chunk_id=h.chunk_id,

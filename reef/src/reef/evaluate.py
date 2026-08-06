@@ -29,6 +29,8 @@ from typing import Any
 from sqlalchemy import func, select
 
 from reef import db
+from reef.calibrate_floor import NEGATIVE_QUERIES as CALIBRATION_NEGATIVES
+from reef.calibration import CalibrationStatus
 from reef.config import Settings, get_settings
 from reef.ingest.intake import Intake
 from reef.ingest.pipeline import Pipeline
@@ -41,20 +43,28 @@ ANSWER_KEY_FILES = frozenset({"ground-truth.json", "GROUND_TRUTH.md", "README.md
 #: The R2 delta. Scored as a separate run per the eval procedure: R1 alone, then with R2.
 R2_FOLDER = "11_Update_R2"
 
-#: Questions about subjects this corpus does not cover at all. The threshold gate must
-#: return "not found" for every one, and this is the set the ABS gate scores.
+#: Negatives the abstention floor was **fitted on**. Scoring the gate against these would
+#: be circular — the floor was placed to separate exactly this set, so it passes by
+#: construction. Reported for transparency, never as the gate.
+ABSTENTION_CALIBRATION_QUESTIONS = tuple(CALIBRATION_NEGATIVES)
+
+#: Negatives **held out** of calibration. These are what the ABS gate scores.
 #:
-#: ADR-003 §6 requires an abstention set to exist. It is defined here rather than in the
-#: fixture because it must stay independent of the planted findings — a negative set
-#: derived from the answer key would only test the same content twice.
-ABSTENTION_QUESTIONS = (
-    "what cryptocurrency does the company hold in treasury",
-    "describe the company's manufacturing operations in Singapore",
-    "list the company's registered patents in the European Union",
-    "what dividend was paid to preferred shareholders in fiscal 2022",
-    "describe the joint venture with the Osaka subsidiary",
-    "what were the findings of the environmental remediation order in Nevada",
+#: Written after the floor was fixed and never used to place it, so passing them is
+#: evidence the floor generalises rather than evidence it was fitted. ADR-003 §6 requires
+#: an abstention set to exist; keeping it disjoint from both the planted findings and the
+#: calibration set is what makes the number mean anything.
+ABSTENTION_HELDOUT_QUESTIONS = (
+    "what is the company's employee stock ownership plan vesting schedule",
+    "describe the recall of the 2019 product line",
+    "how much did the company spend on television advertising",
+    "what are the terms of the interest rate swap",
+    "list the company's subsidiaries incorporated in Delaware",
+    "what did the pension actuary report for fiscal 2024",
 )
+
+#: Backwards-compatible alias: the union, for callers that just want "all negatives".
+ABSTENTION_QUESTIONS = ABSTENTION_CALIBRATION_QUESTIONS + ABSTENTION_HELDOUT_QUESTIONS
 
 #: Questions whose *subject* is well covered but whose specific *fact* is absent. The
 #: corpus has a fleet register; it records no vehicle propulsion type.
@@ -454,15 +464,29 @@ def score_retrieval(
 
 
 def score_abstention(room_id: uuid.UUID) -> tuple[GateResult, dict[str, Any]]:
-    """The threshold gate must return "not found" for questions the corpus cannot answer."""
+    """The threshold gate must return "not found" for questions the corpus cannot answer.
+
+    Scored on the **held-out** negatives only. The calibration negatives are measured too,
+    but a gate scored on the data its threshold was fitted to reports nothing except that
+    the fitting worked.
+    """
     leaked: list[str] = []
-    for question in ABSTENTION_QUESTIONS:
+    uncalibrated = False
+    for question in ABSTENTION_HELDOUT_QUESTIONS:
         result = search(room_id, question, limit=5)
+        if result.calibration_status is not CalibrationStatus.CALIBRATED:
+            uncalibrated = True
         if result.outcome is not Outcome.NOT_FOUND:
             top = result.hits[0].filename if result.hits else "?"
             leaked.append(f"{question} -> {top}")
 
-    rate = (len(ABSTENTION_QUESTIONS) - len(leaked)) / len(ABSTENTION_QUESTIONS)
+    fitted_leaked = [
+        q
+        for q in ABSTENTION_CALIBRATION_QUESTIONS
+        if search(room_id, q, limit=5).outcome is not Outcome.NOT_FOUND
+    ]
+
+    rate = (len(ABSTENTION_HELDOUT_QUESTIONS) - len(leaked)) / len(ABSTENTION_HELDOUT_QUESTIONS)
 
     # Measured, not gated. See the constant's docstring for why retrieval cannot pass this.
     surfaced: list[str] = []
@@ -471,16 +495,41 @@ def score_abstention(room_id: uuid.UUID) -> tuple[GateResult, dict[str, Any]]:
         if result.outcome is not Outcome.NOT_FOUND and result.hits:
             surfaced.append(f"{question} -> {result.hits[0].filename}")
 
+    if uncalibrated:
+        # An uncalibrated run applies no floor at all. Whatever the abstention number looks
+        # like, it is not evidence, and reporting it as a passing gate would be exactly the
+        # misattribution this whole contract exists to prevent.
+        return (
+            GateResult(
+                gate="ABS",
+                description="abstention on held-out absent subjects (NOT REPORTABLE)",
+                value=0.0,
+                threshold=1.0,
+                detail=(
+                    "run used an uncalibrated embedding model; no floor was applied and "
+                    "abstention cannot be scored"
+                ),
+            ),
+            {"uncalibrated": True, "leaked": leaked},
+        )
+
     return (
         GateResult(
             gate="ABS",
-            description="abstention on subjects absent from the corpus",
+            description="abstention on held-out absent subjects",
             value=rate,
             threshold=1.0,
-            detail=f"{len(leaked)} leaked" if leaked else "abstained on every question",
+            detail=f"{len(leaked)} of {len(ABSTENTION_HELDOUT_QUESTIONS)} leaked"
+            if leaked
+            else f"abstained on all {len(ABSTENTION_HELDOUT_QUESTIONS)} held-out questions",
         ),
         {
             "leaked": leaked,
+            "calibration_set_leaked": fitted_leaked,
+            "calibration_set_note": (
+                "the floor was fitted to separate these; they are reported for "
+                "transparency and are not the gate"
+            ),
             "topic_present_fact_absent": {
                 "surfaced": surfaced,
                 "note": (

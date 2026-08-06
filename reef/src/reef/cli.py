@@ -19,10 +19,13 @@ from rich.table import Table
 from sqlalchemy import func, select, text
 
 from reef import db
-from reef.config import get_settings
+from reef.calibration import CalibrationMissing, CalibrationStatus, resolve_floor
+from reef.config import configuration_sources, dotenv_path, get_settings
+from reef.corpus import EmbeddingIncompatible
 from reef.ingest.intake import Intake
 from reef.ingest.pipeline import Pipeline
 from reef.models import Document, ProcessingState, Room
+from reef.provenance import PIPELINE_VERSION
 from reef.search import Outcome, search
 
 app = typer.Typer(
@@ -89,6 +92,67 @@ def init() -> None:
     if tables < 5:
         console.print("run [bold]alembic upgrade head[/bold]")
         raise typer.Exit(1)
+
+
+@app.command()
+def config() -> None:
+    """Print the resolved configuration and where every value came from.
+
+    This command exists because a `.env` silently pinned a different embedding model than
+    the code default, and a benchmark was published attributing its numbers to a model it
+    never used. An override nobody can see is the same as an override nobody made.
+    """
+    settings = get_settings()
+    embedder_model = settings.embedding_model if settings.embedding_provider != "none" else "none"
+
+    table = Table(title="resolved configuration", show_header=True)
+    table.add_column("setting")
+    table.add_column("value")
+    table.add_column("source")
+    for source in configuration_sources(settings):
+        style = "yellow" if source.is_override else ""
+        origin = f"{source.origin}" + (f" ({source.detail})" if source.detail else "")
+        table.add_row(
+            source.field,
+            f"[{style}]{source.value}[/{style}]" if style else source.value,
+            f"[{style}]{origin}[/{style}]" if style else origin,
+        )
+    console.print(table)
+
+    path = dotenv_path()
+    if path is None:
+        console.print("dotenv: [green]none present[/green] — code defaults apply")
+    else:
+        console.print(f"dotenv: [yellow]{path}[/yellow] — values marked 'dotenv' come from it")
+
+    console.print(f"pipeline version: [bold]{PIPELINE_VERSION}[/bold]")
+
+    try:
+        resolved = resolve_floor(embedder_model, allow_uncalibrated=True)
+    except CalibrationMissing:  # pragma: no cover - allow_uncalibrated=True cannot raise
+        resolved = None
+
+    if resolved is None or resolved.status is CalibrationStatus.NOT_APPLICABLE:
+        console.print("abstention floor: [dim]not applicable (embedding disabled)[/dim]")
+    elif resolved.status is CalibrationStatus.UNCALIBRATED:
+        console.print(
+            f"abstention floor: [red]UNCALIBRATED[/red] for {embedder_model} — "
+            "search will refuse unless REEF_ALLOW_UNCALIBRATED_SEARCH=true, and abstention "
+            "metrics from such a run are not reportable"
+        )
+    else:
+        cal = resolved.calibration
+        assert cal is not None
+        console.print(
+            f"abstention floor: [green]{cal.similarity_floor}[/green] "
+            f"({cal.similarity_metric}) calibrated for [bold]{cal.embedding_model}[/bold]"
+        )
+        console.print(
+            f"  fitted on {cal.fixture_name} {cal.fixture_version} at {cal.calibrated_at}; "
+            f"answerable {cal.answerable.minimum:.4f}-{cal.answerable.maximum:.4f} "
+            f"(n={cal.answerable.n}), negative {cal.negative.minimum:.4f}-"
+            f"{cal.negative.maximum:.4f} (n={cal.negative.n}), separation {cal.separation:+.4f}"
+        )
 
 
 @app.command()
@@ -189,7 +253,25 @@ def query(
 ) -> None:
     """Search a room. Abstains rather than guessing when nothing scores above the floor."""
     room_id = _resolve_room(room)
-    result = search(room_id, question, limit=limit)
+    try:
+        result = search(room_id, question, limit=limit)
+    except EmbeddingIncompatible as exc:
+        console.print("[red]embedding contract violated[/red]")
+        console.print(f"  state           : {exc.state}")
+        console.print(f"  stored model(s) : {', '.join(exc.stored_models) or 'none'}")
+        console.print(f"  requested model : {exc.query_model}")
+        console.print(f"  remediation     : {exc.remediation_text}")
+        raise typer.Exit(1) from exc
+    except CalibrationMissing as exc:
+        console.print(f"[red]no abstention calibration for {exc.model_id}[/red]")
+        console.print(f"  {exc}")
+        raise typer.Exit(1) from exc
+
+    if result.calibration_status is CalibrationStatus.UNCALIBRATED:
+        console.print(
+            "[yellow]uncalibrated run[/yellow] — no abstention floor is applied and these "
+            "results must not be reported as abstention evidence"
+        )
 
     if result.outcome is Outcome.NOT_FOUND:
         console.print(f"[yellow]not found in this corpus[/yellow] — {result.detail}")
