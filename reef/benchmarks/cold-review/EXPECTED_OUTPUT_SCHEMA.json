@@ -1,0 +1,58 @@
+{
+  "$comment": "Shape of cold-review-results.json. One result per query, plus computed metrics.",
+  "$schema_version": "1",
+  "reviewer": { "initials": "XX", "date": "YYYY-MM-DD" },
+  "pre_registration": {
+    "queries_file_commit": "REQUIRED: git hash of the commit containing cold-review-queries.json",
+    "queries_committed_before_running_engine": true
+  },
+  "environment": {
+    "reef_config_output_verbatim": "REQUIRED: paste of `reef config`",
+    "dotenv_reported": "none present | <path>",
+    "embedding_model": "",
+    "similarity_floor": null,
+    "engine_commit": ""
+  },
+  "results": [
+    {
+      "query_id": "CR-001",
+      "expected_disposition": "SUPPORTED",
+      "engine_outcome": "found | not_found_in_corpus",
+      "engine_detail": "",
+      "top_documents": [
+        { "rank": 1, "document": "", "locators": [], "score": null }
+      ],
+      "mapped_state": "SUPPORTED | ... | UNMAPPABLE",
+      "mapping_was_possible": true,
+      "mapping_difficulty_note": "",
+      "verdict": "correct | false_support | false_abstention | wrong_state",
+      "would_you_escalate_this_error": false,
+      "reviewer_comment": ""
+    }
+  ],
+  "metrics": {
+    "$note": "Report Wilson 95% intervals on every rate. See SCORING_PROTOCOL.md.",
+    "by_class": {
+      "directly_answerable": { "n": 0, "correct": 0, "rate": null, "wilson_95": [null, null] },
+      "subject_present_fact_may_be_absent": { "n": 0, "correct": 0, "rate": null, "wilson_95": [null, null] },
+      "outside_corpus_scope": { "n": 0, "correct": 0, "rate": null, "wilson_95": [null, null] },
+      "requires_calculation_or_comparison": { "n": 0, "correct": 0, "rate": null, "wilson_95": [null, null] },
+      "missing_inaccessible_stale_or_unreviewed": { "n": 0, "correct": 0, "rate": null, "wilson_95": [null, null] }
+    },
+    "overall": {
+      "supported_query_recall": null,
+      "abstention_precision": null,
+      "abstention_recall": null,
+      "false_support_rate": null,
+      "false_abstention_rate": null,
+      "escalation_worthy_false_supports": 0,
+      "unmappable_states": 0
+    }
+  },
+  "split_proposal": {
+    "$note": "The reviewer chooses the split. The authors must not.",
+    "development_query_ids": [],
+    "heldout_query_ids": [],
+    "split_method": "e.g. alternating by class after sorting by query_id"
+  }
+}

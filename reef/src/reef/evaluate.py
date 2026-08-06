@@ -50,10 +50,16 @@ ABSTENTION_CALIBRATION_QUESTIONS = tuple(CALIBRATION_NEGATIVES)
 
 #: Negatives **held out** of calibration. These are what the ABS gate scores.
 #:
-#: Written after the floor was fixed and never used to place it, so passing them is
-#: evidence the floor generalises rather than evidence it was fitted. ADR-003 §6 requires
-#: an abstention set to exist; keeping it disjoint from both the planted findings and the
-#: calibration set is what makes the number mean anything.
+#: Written after the floor was fixed and never used to place it, so passing them was
+#: evidence the floor generalises rather than evidence it was fitted.
+#:
+#: **DIAGNOSTIC ONLY as of 2026-08-06 — contaminated.** These six have since been inspected
+#: repeatedly: scored, traced per-query, decomposed into terms, and used to compare six
+#: candidate abstention rules. The 50% they currently produce stands as a historical
+#: measurement of the shipped floor. They must not be used to validate any new mechanism —
+#: doing so reports fitted-set performance as generalisation. A genuinely blind replacement
+#: comes from `benchmarks/cold-review/`, where the reviewer chooses the split so the authors
+#: cannot. The queries are unchanged and no difficult case was moved out; only the status is.
 ABSTENTION_HELDOUT_QUESTIONS = (
     "what is the company's employee stock ownership plan vesting schedule",
     "describe the recall of the 2019 product line",

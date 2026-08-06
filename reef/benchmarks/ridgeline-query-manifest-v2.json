@@ -1,0 +1,1794 @@
+{
+ "record_version": "1",
+ "name": "ridgeline-query-manifest-v2",
+ "generated_at": "2026-08-06T19:50:07+00:00",
+ "fixture": {
+  "name": "reef-deal-room",
+  "version": "1.0.0",
+  "corpus_sha256": "02379a0ac08a0d91422e34dc33acc00d6b0c0bcd7a693c3e51d46b373ac8dd69"
+ },
+ "engine": {
+  "commit": "af07009",
+  "embedding_model": "BAAI/bge-small-en-v1.5",
+  "similarity_floor": 0.6555,
+  "pipeline_version": "1"
+ },
+ "taxonomy": "EVALUATION_CAPABILITY_TAXONOMY.md",
+ "purpose": "Assigns every benchmark query a capability class and a metric tier so that retrieval is scored only on what retrieval can produce. No query wording was altered; labels changed, queries did not.",
+ "tier_definitions": {
+  "T1": "finding-level retrieval \u2014 a passage or row states the conclusion; retrieval recall is valid",
+  "T2": "operand retrieval \u2014 retrieval must surface sources; the conclusion needs another component",
+  "T3": "retrieval invalid \u2014 no chunk can satisfy the task; any retrieval metric is an invented number"
+ },
+ "counts": {
+  "total_queries": 44,
+  "planted_findings": 22,
+  "r1_scored_findings": 19,
+  "r2_dependent": 3,
+  "calibration_answerable": 10,
+  "calibration_negative": 6,
+  "heldout_negative": 6
+ },
+ "metrics_r1": {
+  "retrieval_only_T1": {
+   "eligible": 2,
+   "recall_at_1": 0.5,
+   "recall_at_5": 0.5,
+   "recall_at_12": 0.5,
+   "mean_reciprocal_rank": 0.5,
+   "source_document_recall_at_12": 0.5,
+   "exact_anchor_availability": 1.0,
+   "ranking_only_recall_at_12_gate_disabled": 0.5,
+   "misses": [
+    {
+     "id": "RDG-008",
+     "cause": "ranking_outside_top_12"
+    }
+   ]
+  },
+  "operand_retrieval_T2": {
+   "eligible": 16,
+   "recall_at_1": 0.6875,
+   "recall_at_5": 0.8125,
+   "recall_at_12": 0.875,
+   "mean_reciprocal_rank": 0.7604,
+   "source_document_recall_at_12": 0.875,
+   "exact_anchor_availability": 0.875,
+   "ranking_only_recall_at_12_gate_disabled": 0.9375,
+   "misses": [
+    {
+     "id": "RDG-009",
+     "cause": "gate_suppressed"
+    },
+    {
+     "id": "RDG-015",
+     "cause": "never_retrieved"
+    }
+   ]
+  },
+  "not_scored_T3": {
+   "count": 1,
+   "findings": [
+    "RDG-021"
+   ],
+   "reason": "source document has zero chunks; unretrievable by construction",
+   "status": "invalid_expectation"
+  },
+  "combined_T1_T2": {
+   "eligible": 18,
+   "recall_at_1": 0.6667,
+   "recall_at_5": 0.7778,
+   "recall_at_12": 0.8333,
+   "mean_reciprocal_rank": 0.7315,
+   "source_document_recall_at_12": 0.8333,
+   "exact_anchor_availability": 0.8889,
+   "ranking_only_recall_at_12_gate_disabled": 0.8889,
+   "misses": [
+    {
+     "id": "RDG-008",
+     "cause": "ranking_outside_top_12"
+    },
+    {
+     "id": "RDG-009",
+     "cause": "gate_suppressed"
+    },
+    {
+     "id": "RDG-015",
+     "cause": "never_retrieved"
+    }
+   ]
+  },
+  "superseded_metric": {
+   "previous": "retrieval recall@12 = 15/19 = 78.9%",
+   "why_wrong": "counted all 19 R1 findings as retrieval tasks, including RDG-021 whose source has zero chunks, and reported operand retrieval as finding recall",
+   "replacement": "T1 retrieval recall and T2 operand recall, reported separately"
+  },
+  "miss_cause_note": "A miss is not always a retrieval failure. RDG-009's source documents rank 1 and 2 with the abstention gate disabled \u2014 retrieval succeeded and the gate discarded the result. RDG-015 is never retrieved at depth 500 and is a genuine ranking miss. RDG-008 ranks 15, just outside the window. Reporting all three as 'retrieval misses' hides three different causes with three different owners."
+ },
+ "small_sample_warning": "T1 has 2 eligible queries. No rate computed over it is statistically meaningful \u2014 the Wilson 95% interval on 1/2 spans roughly 3%-97%. It is reported to be honest about how little finding-level retrieval this fixture actually tests, not as a performance claim.",
+ "queries": [
+  {
+   "query_id": "RQ-RDG-001",
+   "source_finding": "RDG-001",
+   "query_text": "Customer concentration materially understated",
+   "query_text_note": "finding title used verbatim as the query; a generous proxy for what a reviewer types",
+   "origin": "planted_finding",
+   "severity": "Critical",
+   "ground_truth_classification": "cross_document_contradiction",
+   "primary_capability_class": 5,
+   "primary_capability": "explicit_contradiction_detection",
+   "secondary_capability_class": 3,
+   "secondary_capability": "cross_document_comparison",
+   "metric_tier": "T2",
+   "expected_source_type": [
+    "csv",
+    "pdf",
+    "xlsx"
+   ],
+   "directly_responsive_passage_exists": false,
+   "arithmetic_required": true,
+   "multiple_documents_required": true,
+   "explicit_absence_must_be_established": false,
+   "all_source_files_accessible": true,
+   "source_chunk_counts": {
+    "seller_qa_log.csv": 7,
+    "Revenue_by_Customer_FY25.xlsx": 149,
+    "Branch_KPI_Deck_FY2025.pdf": 1
+   },
+   "retrieval_recall_is_valid_metric": false,
+   "operand_recall_is_valid_metric": true,
+   "expected_disposition": "CONTRADICTED",
+   "r2_dependent": false,
+   "scored_in_r1": true,
+   "sources": [
+    "10_QA/seller_qa_log.csv",
+    "03_Customers/Revenue_by_Customer_FY25.xlsx",
+    "06_Operations/Branch_KPI_Deck_FY2025.pdf"
+   ],
+   "ground_truth_anchor": "seller_qa_log.csv row Q-011; Revenue_by_Customer_FY25.xlsx sheet FY25 row 3",
+   "observed": {
+    "abstained": false,
+    "source_document_ranks": [
+     1,
+     2,
+     8,
+     9
+    ],
+    "first_rank": 1,
+    "anchors_available": true,
+    "ranking_only_first_rank_no_floor": 1,
+    "ranking_only_deep_ranks": {
+     "seller_qa_log.csv": 1,
+     "Revenue_by_Customer_FY25.xlsx": 7,
+     "Branch_KPI_Deck_FY2025.pdf": 379
+    },
+    "miss_cause": null
+   }
+  },
+  {
+   "query_id": "RQ-RDG-002",
+   "source_finding": "RDG-002",
+   "query_text": "Change-of-control consent required by largest customer",
+   "query_text_note": "finding title used verbatim as the query; a generous proxy for what a reviewer types",
+   "origin": "planted_finding",
+   "severity": "Critical",
+   "ground_truth_classification": "direct_fact",
+   "primary_capability_class": 1,
+   "primary_capability": "direct_passage_retrieval",
+   "secondary_capability_class": null,
+   "secondary_capability": null,
+   "metric_tier": "T1",
+   "expected_source_type": [
+    "pdf"
+   ],
+   "directly_responsive_passage_exists": true,
+   "arithmetic_required": false,
+   "multiple_documents_required": true,
+   "explicit_absence_must_be_established": false,
+   "all_source_files_accessible": true,
+   "source_chunk_counts": {
+    "Lakeside_Master_Service_Agreement.pdf": 2
+   },
+   "retrieval_recall_is_valid_metric": true,
+   "operand_recall_is_valid_metric": false,
+   "expected_disposition": "SUPPORTED",
+   "r2_dependent": false,
+   "scored_in_r1": true,
+   "sources": [
+    "03_Customers/Lakeside_Master_Service_Agreement.pdf"
+   ],
+   "ground_truth_anchor": "page 2, Section 14.2\u201314.3",
+   "observed": {
+    "abstained": false,
+    "source_document_ranks": [
+     1
+    ],
+    "first_rank": 1,
+    "anchors_available": true,
+    "ranking_only_first_rank_no_floor": 1,
+    "ranking_only_deep_ranks": {
+     "Lakeside_Master_Service_Agreement.pdf": 1
+    },
+    "miss_cause": null
+   }
+  },
+  {
+   "query_id": "RQ-RDG-003",
+   "source_finding": "RDG-003",
+   "query_text": "Fixed charge coverage covenant not met",
+   "query_text_note": "finding title used verbatim as the query; a generous proxy for what a reviewer types",
+   "origin": "planted_finding",
+   "severity": "Critical",
+   "ground_truth_classification": "deterministic_calculation",
+   "primary_capability_class": 4,
+   "primary_capability": "deterministic_calculation",
+   "secondary_capability_class": 2,
+   "secondary_capability": "structured_row_or_cell_retrieval",
+   "metric_tier": "T2",
+   "expected_source_type": [
+    "csv",
+    "pdf"
+   ],
+   "directly_responsive_passage_exists": false,
+   "arithmetic_required": true,
+   "multiple_documents_required": true,
+   "explicit_absence_must_be_established": false,
+   "all_source_files_accessible": true,
+   "source_chunk_counts": {
+    "Covenant_Compliance_Certificate_FY2025.pdf": 1,
+    "debt_schedule.csv": 5
+   },
+   "retrieval_recall_is_valid_metric": false,
+   "operand_recall_is_valid_metric": true,
+   "expected_disposition": "REQUIRES_CALCULATION",
+   "r2_dependent": false,
+   "scored_in_r1": true,
+   "sources": [
+    "02_Financial/Covenant_Compliance_Certificate_FY2025.pdf",
+    "02_Financial/debt_schedule.csv"
+   ],
+   "ground_truth_anchor": "Covenant certificate page 1; debt_schedule.csv rows 1\u20132",
+   "observed": {
+    "abstained": false,
+    "source_document_ranks": [
+     1,
+     2,
+     3,
+     5,
+     6
+    ],
+    "first_rank": 1,
+    "anchors_available": true,
+    "ranking_only_first_rank_no_floor": 1,
+    "ranking_only_deep_ranks": {
+     "Covenant_Compliance_Certificate_FY2025.pdf": 1,
+     "debt_schedule.csv": 2
+    },
+    "miss_cause": null
+   }
+  },
+  {
+   "query_id": "RQ-RDG-004",
+   "source_finding": "RDG-004",
+   "query_text": "Recurring revenue share unsupported as stated",
+   "query_text_note": "finding title used verbatim as the query; a generous proxy for what a reviewer types",
+   "origin": "planted_finding",
+   "severity": "High",
+   "ground_truth_classification": "unresolved_ambiguity",
+   "primary_capability_class": 9,
+   "primary_capability": "evidence_sufficiency",
+   "secondary_capability_class": 3,
+   "secondary_capability": "cross_document_comparison",
+   "metric_tier": "T2",
+   "expected_source_type": [
+    "pdf",
+    "txt"
+   ],
+   "directly_responsive_passage_exists": false,
+   "arithmetic_required": true,
+   "multiple_documents_required": true,
+   "explicit_absence_must_be_established": false,
+   "all_source_files_accessible": true,
+   "source_chunk_counts": {
+    "Branch_KPI_Deck_FY2025.pdf": 1,
+    "kpi_definitions.txt": 1,
+    "Income_Statement_FY2025.pdf": 1
+   },
+   "retrieval_recall_is_valid_metric": false,
+   "operand_recall_is_valid_metric": true,
+   "expected_disposition": "INSUFFICIENT_EVIDENCE",
+   "r2_dependent": false,
+   "scored_in_r1": true,
+   "sources": [
+    "06_Operations/Branch_KPI_Deck_FY2025.pdf",
+    "06_Operations/kpi_definitions.txt",
+    "02_Financial/Income_Statement_FY2025.pdf"
+   ],
+   "ground_truth_anchor": "KPI deck page 1 line 7; kpi_definitions.txt 'Recurring revenue'",
+   "observed": {
+    "abstained": false,
+    "source_document_ranks": [
+     1,
+     9
+    ],
+    "first_rank": 1,
+    "anchors_available": true,
+    "ranking_only_first_rank_no_floor": 1,
+    "ranking_only_deep_ranks": {
+     "kpi_definitions.txt": 1,
+     "Branch_KPI_Deck_FY2025.pdf": 9,
+     "Income_Statement_FY2025.pdf": 21
+    },
+    "miss_cause": null
+   }
+  },
+  {
+   "query_id": "RQ-RDG-005",
+   "source_finding": "RDG-005",
+   "query_text": "Erie lease expired; premises held over month-to-month",
+   "query_text_note": "finding title used verbatim as the query; a generous proxy for what a reviewer types",
+   "origin": "planted_finding",
+   "severity": "High",
+   "ground_truth_classification": "cross_document_contradiction",
+   "primary_capability_class": 5,
+   "primary_capability": "explicit_contradiction_detection",
+   "secondary_capability_class": 3,
+   "secondary_capability": "cross_document_comparison",
+   "metric_tier": "T2",
+   "expected_source_type": [
+    "csv",
+    "md"
+   ],
+   "directly_responsive_passage_exists": false,
+   "arithmetic_required": false,
+   "multiple_documents_required": true,
+   "explicit_absence_must_be_established": false,
+   "all_source_files_accessible": true,
+   "source_chunk_counts": {
+    "Facility_Lease_Erie.md": 2,
+    "seller_qa_log.csv": 7,
+    "management_meeting_transcript.md": 2
+   },
+   "retrieval_recall_is_valid_metric": false,
+   "operand_recall_is_valid_metric": true,
+   "expected_disposition": "CONTRADICTED",
+   "r2_dependent": false,
+   "scored_in_r1": true,
+   "sources": [
+    "07_Legal_Insurance/Facility_Lease_Erie.md",
+    "10_QA/seller_qa_log.csv",
+    "10_QA/management_meeting_transcript.md"
+   ],
+   "ground_truth_anchor": "Facility_Lease_Erie.md 'Expiry' line; seller_qa_log.csv row Q-019",
+   "observed": {
+    "abstained": false,
+    "source_document_ranks": [
+     1,
+     3,
+     6
+    ],
+    "first_rank": 1,
+    "anchors_available": true,
+    "ranking_only_first_rank_no_floor": 1,
+    "ranking_only_deep_ranks": {
+     "Facility_Lease_Erie.md": 1,
+     "seller_qa_log.csv": 6,
+     "management_meeting_transcript.md": 14
+    },
+    "miss_cause": null
+   }
+  },
+  {
+   "query_id": "RQ-RDG-006",
+   "source_finding": "RDG-006",
+   "query_text": "Aged receivables concentrated in one customer",
+   "query_text_note": "finding title used verbatim as the query; a generous proxy for what a reviewer types",
+   "origin": "planted_finding",
+   "severity": "High",
+   "ground_truth_classification": "deterministic_calculation",
+   "primary_capability_class": 4,
+   "primary_capability": "deterministic_calculation",
+   "secondary_capability_class": 2,
+   "secondary_capability": "structured_row_or_cell_retrieval",
+   "metric_tier": "T2",
+   "expected_source_type": [
+    "csv"
+   ],
+   "directly_responsive_passage_exists": false,
+   "arithmetic_required": true,
+   "multiple_documents_required": true,
+   "explicit_absence_must_be_established": false,
+   "all_source_files_accessible": true,
+   "source_chunk_counts": {
+    "ar_aging.csv": 13,
+    "seller_qa_log.csv": 7
+   },
+   "retrieval_recall_is_valid_metric": false,
+   "operand_recall_is_valid_metric": true,
+   "expected_disposition": "REQUIRES_CALCULATION",
+   "r2_dependent": false,
+   "scored_in_r1": true,
+   "sources": [
+    "02_Financial/ar_aging.csv",
+    "10_QA/seller_qa_log.csv"
+   ],
+   "ground_truth_anchor": "ar_aging.csv rows 1\u20134; seller_qa_log.csv row Q-014",
+   "observed": {
+    "abstained": false,
+    "source_document_ranks": [
+     1,
+     2,
+     3
+    ],
+    "first_rank": 1,
+    "anchors_available": true,
+    "ranking_only_first_rank_no_floor": 1,
+    "ranking_only_deep_ranks": {
+     "seller_qa_log.csv": 1,
+     "ar_aging.csv": 13
+    },
+    "miss_cause": null
+   }
+  },
+  {
+   "query_id": "RQ-RDG-007",
+   "source_finding": "RDG-007",
+   "query_text": "Field staff classified as contractors contrary to Q&A",
+   "query_text_note": "finding title used verbatim as the query; a generous proxy for what a reviewer types",
+   "origin": "planted_finding",
+   "severity": "High",
+   "ground_truth_classification": "cross_document_contradiction",
+   "primary_capability_class": 5,
+   "primary_capability": "explicit_contradiction_detection",
+   "secondary_capability_class": 3,
+   "secondary_capability": "cross_document_comparison",
+   "metric_tier": "T2",
+   "expected_source_type": [
+    "csv",
+    "txt",
+    "xlsx"
+   ],
+   "directly_responsive_passage_exists": false,
+   "arithmetic_required": true,
+   "multiple_documents_required": true,
+   "explicit_absence_must_be_established": false,
+   "all_source_files_accessible": true,
+   "source_chunk_counts": {
+    "employee_roster.xlsx": 89,
+    "payroll_summary.txt": 1,
+    "contractor_schedule.csv": 15,
+    "seller_qa_log.csv": 7
+   },
+   "retrieval_recall_is_valid_metric": false,
+   "operand_recall_is_valid_metric": true,
+   "expected_disposition": "CONTRADICTED",
+   "r2_dependent": false,
+   "scored_in_r1": true,
+   "sources": [
+    "05_Employees/employee_roster.xlsx",
+    "05_Employees/payroll_summary.txt",
+    "05_Employees/contractor_schedule.csv",
+    "10_QA/seller_qa_log.csv"
+   ],
+   "ground_truth_anchor": "payroll_summary.txt line 3; contractor_schedule.csv rows 1\u201313; seller_qa_log.csv Q-022",
+   "observed": {
+    "abstained": false,
+    "source_document_ranks": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9,
+     10,
+     11,
+     12
+    ],
+    "first_rank": 1,
+    "anchors_available": true,
+    "ranking_only_first_rank_no_floor": 1,
+    "ranking_only_deep_ranks": {
+     "seller_qa_log.csv": 1,
+     "contractor_schedule.csv": 2,
+     "employee_roster.xlsx": 14,
+     "payroll_summary.txt": 42
+    },
+    "miss_cause": null
+   }
+  },
+  {
+   "query_id": "RQ-RDG-008",
+   "source_finding": "RDG-008",
+   "query_text": "Single-supplier dependency with 60-day termination",
+   "query_text_note": "finding title used verbatim as the query; a generous proxy for what a reviewer types",
+   "origin": "planted_finding",
+   "severity": "High",
+   "ground_truth_classification": "direct_fact",
+   "primary_capability_class": 1,
+   "primary_capability": "direct_passage_retrieval",
+   "secondary_capability_class": null,
+   "secondary_capability": null,
+   "metric_tier": "T1",
+   "expected_source_type": [
+    "pdf",
+    "txt"
+   ],
+   "directly_responsive_passage_exists": true,
+   "arithmetic_required": true,
+   "multiple_documents_required": true,
+   "explicit_absence_must_be_established": false,
+   "all_source_files_accessible": true,
+   "source_chunk_counts": {
+    "top_vendor_schedule.txt": 1,
+    "Hartwell_Distribution_Agreement.pdf": 1
+   },
+   "retrieval_recall_is_valid_metric": true,
+   "operand_recall_is_valid_metric": false,
+   "expected_disposition": "SUPPORTED",
+   "r2_dependent": false,
+   "scored_in_r1": true,
+   "sources": [
+    "04_Suppliers/top_vendor_schedule.txt",
+    "04_Suppliers/Hartwell_Distribution_Agreement.pdf"
+   ],
+   "ground_truth_anchor": "top_vendor_schedule.txt lines 3\u20134; Hartwell agreement page 1 Section 11.2",
+   "observed": {
+    "abstained": false,
+    "source_document_ranks": [],
+    "first_rank": null,
+    "anchors_available": true,
+    "ranking_only_first_rank_no_floor": 15,
+    "ranking_only_deep_ranks": {
+     "Hartwell_Distribution_Agreement.pdf": 15,
+     "top_vendor_schedule.txt": 182
+    },
+    "miss_cause": "ranking_outside_top_12"
+   }
+  },
+  {
+   "query_id": "RQ-RDG-009",
+   "source_finding": "RDG-009",
+   "query_text": "Unbilled work in process grew far faster than revenue",
+   "query_text_note": "finding title used verbatim as the query; a generous proxy for what a reviewer types",
+   "origin": "planted_finding",
+   "severity": "High",
+   "ground_truth_classification": "deterministic_calculation",
+   "primary_capability_class": 4,
+   "primary_capability": "deterministic_calculation",
+   "secondary_capability_class": 2,
+   "secondary_capability": "structured_row_or_cell_retrieval",
+   "metric_tier": "T2",
+   "expected_source_type": [
+    "pdf",
+    "txt"
+   ],
+   "directly_responsive_passage_exists": false,
+   "arithmetic_required": true,
+   "multiple_documents_required": true,
+   "explicit_absence_must_be_established": false,
+   "all_source_files_accessible": true,
+   "source_chunk_counts": {
+    "wip_schedule.txt": 1,
+    "Balance_Sheet_FY2025.pdf": 2
+   },
+   "retrieval_recall_is_valid_metric": false,
+   "operand_recall_is_valid_metric": true,
+   "expected_disposition": "REQUIRES_CALCULATION",
+   "r2_dependent": false,
+   "scored_in_r1": true,
+   "sources": [
+    "06_Operations/wip_schedule.txt",
+    "02_Financial/Balance_Sheet_FY2025.pdf"
+   ],
+   "ground_truth_anchor": "wip_schedule.txt lines 3\u20135; balance sheet page 2 notes",
+   "observed": {
+    "abstained": true,
+    "source_document_ranks": [],
+    "first_rank": null,
+    "anchors_available": false,
+    "ranking_only_first_rank_no_floor": 1,
+    "ranking_only_deep_ranks": {
+     "Balance_Sheet_FY2025.pdf": 1,
+     "wip_schedule.txt": 2
+    },
+    "miss_cause": "gate_suppressed"
+   }
+  },
+  {
+   "query_id": "RQ-RDG-010",
+   "source_finding": "RDG-010",
+   "query_text": "Umbrella policy expiring with no renewal evidence",
+   "query_text_note": "finding title used verbatim as the query; a generous proxy for what a reviewer types",
+   "origin": "planted_finding",
+   "severity": "Medium",
+   "ground_truth_classification": "missing_document",
+   "primary_capability_class": 6,
+   "primary_capability": "explicit_absence_detection",
+   "secondary_capability_class": 3,
+   "secondary_capability": "cross_document_comparison",
+   "metric_tier": "T2",
+   "expected_source_type": [
+    "csv",
+    "txt"
+   ],
+   "directly_responsive_passage_exists": false,
+   "arithmetic_required": false,
+   "multiple_documents_required": true,
+   "explicit_absence_must_be_established": true,
+   "all_source_files_accessible": true,
+   "source_chunk_counts": {
+    "insurance_certificates.csv": 6,
+    "insurance_renewal_notice.txt": 1
+   },
+   "retrieval_recall_is_valid_metric": false,
+   "operand_recall_is_valid_metric": true,
+   "expected_disposition": "EXPLICITLY_ABSENT",
+   "r2_dependent": false,
+   "scored_in_r1": true,
+   "sources": [
+    "07_Legal_Insurance/insurance_certificates.csv",
+    "07_Legal_Insurance/insurance_renewal_notice.txt"
+   ],
+   "ground_truth_anchor": "insurance_certificates.csv row 3; insurance_renewal_notice.txt final line",
+   "observed": {
+    "abstained": false,
+    "source_document_ranks": [
+     1,
+     2,
+     3,
+     5
+    ],
+    "first_rank": 1,
+    "anchors_available": true,
+    "ranking_only_first_rank_no_floor": 1,
+    "ranking_only_deep_ranks": {
+     "insurance_renewal_notice.txt": 1,
+     "insurance_certificates.csv": 2
+    },
+    "miss_cause": null
+   }
+  },
+  {
+   "query_id": "RQ-RDG-011",
+   "source_finding": "RDG-011",
+   "query_text": "Litigation summary contradicted by counsel invoice",
+   "query_text_note": "finding title used verbatim as the query; a generous proxy for what a reviewer types",
+   "origin": "planted_finding",
+   "severity": "Medium",
+   "ground_truth_classification": "cross_document_contradiction",
+   "primary_capability_class": 5,
+   "primary_capability": "explicit_contradiction_detection",
+   "secondary_capability_class": 3,
+   "secondary_capability": "cross_document_comparison",
+   "metric_tier": "T2",
+   "expected_source_type": [
+    "md",
+    "pdf",
+    "txt"
+   ],
+   "directly_responsive_passage_exists": false,
+   "arithmetic_required": false,
+   "multiple_documents_required": true,
+   "explicit_absence_must_be_established": false,
+   "all_source_files_accessible": true,
+   "source_chunk_counts": {
+    "Litigation_Summary.pdf": 1,
+    "legal_invoice_2025-11.txt": 1,
+    "management_meeting_transcript.md": 2
+   },
+   "retrieval_recall_is_valid_metric": false,
+   "operand_recall_is_valid_metric": true,
+   "expected_disposition": "CONTRADICTED",
+   "r2_dependent": false,
+   "scored_in_r1": true,
+   "sources": [
+    "07_Legal_Insurance/Litigation_Summary.pdf",
+    "07_Legal_Insurance/legal_invoice_2025-11.txt",
+    "10_QA/management_meeting_transcript.md"
+   ],
+   "ground_truth_anchor": "Litigation_Summary.pdf page 1; legal_invoice_2025-11.txt lines 4\u20135",
+   "observed": {
+    "abstained": false,
+    "source_document_ranks": [
+     2,
+     3
+    ],
+    "first_rank": 2,
+    "anchors_available": true,
+    "ranking_only_first_rank_no_floor": 2,
+    "ranking_only_deep_ranks": {
+     "legal_invoice_2025-11.txt": 2,
+     "Litigation_Summary.pdf": 3,
+     "management_meeting_transcript.md": 89
+    },
+    "miss_cause": null
+   }
+  },
+  {
+   "query_id": "RQ-RDG-012",
+   "source_finding": "RDG-012",
+   "query_text": "Capex and fixed asset registers disagree",
+   "query_text_note": "finding title used verbatim as the query; a generous proxy for what a reviewer types",
+   "origin": "planted_finding",
+   "severity": "Medium",
+   "ground_truth_classification": "cross_document_contradiction",
+   "primary_capability_class": 5,
+   "primary_capability": "explicit_contradiction_detection",
+   "secondary_capability_class": 3,
+   "secondary_capability": "cross_document_comparison",
+   "metric_tier": "T2",
+   "expected_source_type": [
+    "csv"
+   ],
+   "directly_responsive_passage_exists": false,
+   "arithmetic_required": true,
+   "multiple_documents_required": true,
+   "explicit_absence_must_be_established": false,
+   "all_source_files_accessible": true,
+   "source_chunk_counts": {
+    "capex_register.csv": 7,
+    "fixed_asset_register.csv": 5
+   },
+   "retrieval_recall_is_valid_metric": false,
+   "operand_recall_is_valid_metric": true,
+   "expected_disposition": "CONTRADICTED",
+   "r2_dependent": false,
+   "scored_in_r1": true,
+   "sources": [
+    "09_Capex/capex_register.csv",
+    "09_Capex/fixed_asset_register.csv"
+   ],
+   "ground_truth_anchor": "capex_register.csv rows 1\u20135; fixed_asset_register.csv rows 1\u20133",
+   "observed": {
+    "abstained": false,
+    "source_document_ranks": [
+     6
+    ],
+    "first_rank": 6,
+    "anchors_available": true,
+    "ranking_only_first_rank_no_floor": 6,
+    "ranking_only_deep_ranks": {
+     "fixed_asset_register.csv": 6
+    },
+    "miss_cause": null
+   }
+  },
+  {
+   "query_id": "RQ-RDG-013",
+   "source_finding": "RDG-013",
+   "query_text": "Two revenue schedules with different totals",
+   "query_text_note": "finding title used verbatim as the query; a generous proxy for what a reviewer types",
+   "origin": "planted_finding",
+   "severity": "Medium",
+   "ground_truth_classification": "stale_version",
+   "primary_capability_class": 3,
+   "primary_capability": "cross_document_comparison",
+   "secondary_capability_class": 2,
+   "secondary_capability": "structured_row_or_cell_retrieval",
+   "metric_tier": "T2",
+   "expected_source_type": [
+    "txt",
+    "xlsx"
+   ],
+   "directly_responsive_passage_exists": false,
+   "arithmetic_required": true,
+   "multiple_documents_required": true,
+   "explicit_absence_must_be_established": false,
+   "all_source_files_accessible": null,
+   "source_chunk_counts": {
+    "Revenue_by_Customer_FY25.xlsx": 149,
+    "Revenue_by_Customer_FY25_v2.xlsx": 149,
+    "withdrawal_notice.txt": null
+   },
+   "retrieval_recall_is_valid_metric": false,
+   "operand_recall_is_valid_metric": true,
+   "expected_disposition": "REQUIRES_COMPARISON",
+   "r2_dependent": true,
+   "scored_in_r1": false,
+   "sources": [
+    "03_Customers/Revenue_by_Customer_FY25.xlsx",
+    "03_Customers/Revenue_by_Customer_FY25_v2.xlsx",
+    "11_Update_R2/withdrawal_notice.txt"
+   ],
+   "ground_truth_anchor": "both workbooks sheet FY25 row 4",
+   "accessibility_note": "not evaluated in R1 \u2014 sources live in 11_Update_R2, which the R1 run excludes by design. Accessibility is undetermined here, not false."
+  },
+  {
+   "query_id": "RQ-RDG-014",
+   "source_finding": "RDG-014",
+   "query_text": "FY2024 financial statements not supplied",
+   "query_text_note": "finding title used verbatim as the query; a generous proxy for what a reviewer types",
+   "origin": "planted_finding",
+   "severity": "Medium",
+   "ground_truth_classification": "missing_document",
+   "primary_capability_class": 6,
+   "primary_capability": "explicit_absence_detection",
+   "secondary_capability_class": 3,
+   "secondary_capability": "cross_document_comparison",
+   "metric_tier": "T2",
+   "expected_source_type": [
+    "csv"
+   ],
+   "directly_responsive_passage_exists": false,
+   "arithmetic_required": false,
+   "multiple_documents_required": true,
+   "explicit_absence_must_be_established": true,
+   "all_source_files_accessible": null,
+   "source_chunk_counts": {
+    "request_list.csv": 32,
+    "seller_qa_log.csv": 7,
+    "seller_qa_log_revised.csv": null
+   },
+   "retrieval_recall_is_valid_metric": false,
+   "operand_recall_is_valid_metric": true,
+   "expected_disposition": "EXPLICITLY_ABSENT",
+   "r2_dependent": true,
+   "scored_in_r1": false,
+   "sources": [
+    "00_Request_List/request_list.csv",
+    "10_QA/seller_qa_log.csv",
+    "11_Update_R2/seller_qa_log_revised.csv"
+   ],
+   "ground_truth_anchor": "request_list.csv row 2.2; seller_qa_log_revised.csv row Q-027",
+   "accessibility_note": "not evaluated in R1 \u2014 sources live in 11_Update_R2, which the R1 run excludes by design. Accessibility is undetermined here, not false."
+  },
+  {
+   "query_id": "RQ-RDG-015",
+   "source_finding": "RDG-015",
+   "query_text": "Referenced Exhibit B absent from baseline room",
+   "query_text_note": "finding title used verbatim as the query; a generous proxy for what a reviewer types",
+   "origin": "planted_finding",
+   "severity": "Medium",
+   "ground_truth_classification": "not_found",
+   "primary_capability_class": 6,
+   "primary_capability": "explicit_absence_detection",
+   "secondary_capability_class": 1,
+   "secondary_capability": "direct_passage_retrieval",
+   "metric_tier": "T2",
+   "expected_source_type": [
+    "pdf"
+   ],
+   "directly_responsive_passage_exists": false,
+   "arithmetic_required": false,
+   "multiple_documents_required": false,
+   "explicit_absence_must_be_established": true,
+   "all_source_files_accessible": true,
+   "source_chunk_counts": {
+    "Hartwell_Distribution_Agreement.pdf": 1
+   },
+   "retrieval_recall_is_valid_metric": false,
+   "operand_recall_is_valid_metric": true,
+   "expected_disposition": "EXPLICITLY_ABSENT",
+   "r2_dependent": false,
+   "scored_in_r1": true,
+   "sources": [
+    "04_Suppliers/Hartwell_Distribution_Agreement.pdf"
+   ],
+   "ground_truth_anchor": "page 1 Section 4",
+   "observed": {
+    "abstained": true,
+    "source_document_ranks": [],
+    "first_rank": null,
+    "anchors_available": false,
+    "ranking_only_first_rank_no_floor": null,
+    "ranking_only_deep_ranks": {},
+    "miss_cause": "never_retrieved"
+   }
+  },
+  {
+   "query_id": "RQ-RDG-016",
+   "source_finding": "RDG-016",
+   "query_text": "Branch gross margin overstated in KPI reporting",
+   "query_text_note": "finding title used verbatim as the query; a generous proxy for what a reviewer types",
+   "origin": "planted_finding",
+   "severity": "Medium",
+   "ground_truth_classification": "deterministic_calculation",
+   "primary_capability_class": 4,
+   "primary_capability": "deterministic_calculation",
+   "secondary_capability_class": 2,
+   "secondary_capability": "structured_row_or_cell_retrieval",
+   "metric_tier": "T2",
+   "expected_source_type": [
+    "csv",
+    "pdf"
+   ],
+   "directly_responsive_passage_exists": false,
+   "arithmetic_required": true,
+   "multiple_documents_required": true,
+   "explicit_absence_must_be_established": false,
+   "all_source_files_accessible": true,
+   "source_chunk_counts": {
+    "Branch_KPI_Deck_FY2025.pdf": 1,
+    "trial_balance.csv": 13
+   },
+   "retrieval_recall_is_valid_metric": false,
+   "operand_recall_is_valid_metric": true,
+   "expected_disposition": "REQUIRES_CALCULATION",
+   "r2_dependent": false,
+   "scored_in_r1": true,
+   "sources": [
+    "06_Operations/Branch_KPI_Deck_FY2025.pdf",
+    "02_Financial/trial_balance.csv"
+   ],
+   "ground_truth_anchor": "KPI deck page 1 line 4; trial_balance.csv rows for branch FTW accounts 4000 and 5000",
+   "observed": {
+    "abstained": false,
+    "source_document_ranks": [
+     1,
+     3,
+     9,
+     12
+    ],
+    "first_rank": 1,
+    "anchors_available": true,
+    "ranking_only_first_rank_no_floor": 1,
+    "ranking_only_deep_ranks": {
+     "Branch_KPI_Deck_FY2025.pdf": 1,
+     "trial_balance.csv": 3
+    },
+    "miss_cause": null
+   }
+  },
+  {
+   "query_id": "RQ-RDG-017",
+   "source_finding": "RDG-017",
+   "query_text": "Equipment revenue recognized on order, not shipment",
+   "query_text_note": "finding title used verbatim as the query; a generous proxy for what a reviewer types",
+   "origin": "planted_finding",
+   "severity": "Medium",
+   "ground_truth_classification": "unusual_revenue_recognition",
+   "primary_capability_class": 10,
+   "primary_capability": "findings_or_risk_interpretation",
+   "secondary_capability_class": 1,
+   "secondary_capability": "direct_passage_retrieval",
+   "metric_tier": "T2",
+   "expected_source_type": [
+    "pdf"
+   ],
+   "directly_responsive_passage_exists": false,
+   "arithmetic_required": false,
+   "multiple_documents_required": false,
+   "explicit_absence_must_be_established": false,
+   "all_source_files_accessible": true,
+   "source_chunk_counts": {
+    "Balance_Sheet_FY2025.pdf": 2
+   },
+   "retrieval_recall_is_valid_metric": false,
+   "operand_recall_is_valid_metric": true,
+   "expected_disposition": "SUPPORTED",
+   "r2_dependent": false,
+   "scored_in_r1": true,
+   "sources": [
+    "02_Financial/Balance_Sheet_FY2025.pdf"
+   ],
+   "ground_truth_anchor": "page 2, revenue recognition note",
+   "observed": {
+    "abstained": false,
+    "source_document_ranks": [
+     1
+    ],
+    "first_rank": 1,
+    "anchors_available": true,
+    "ranking_only_first_rank_no_floor": 1,
+    "ranking_only_deep_ranks": {
+     "Balance_Sheet_FY2025.pdf": 1
+    },
+    "miss_cause": null
+   }
+  },
+  {
+   "query_id": "RQ-RDG-018",
+   "source_finding": "RDG-018",
+   "query_text": "Entity name inconsistent across records",
+   "query_text_note": "finding title used verbatim as the query; a generous proxy for what a reviewer types",
+   "origin": "planted_finding",
+   "severity": "Low",
+   "ground_truth_classification": "cross_document_contradiction",
+   "primary_capability_class": 5,
+   "primary_capability": "explicit_contradiction_detection",
+   "secondary_capability_class": 3,
+   "secondary_capability": "cross_document_comparison",
+   "metric_tier": "T2",
+   "expected_source_type": [
+    "csv",
+    "pdf"
+   ],
+   "directly_responsive_passage_exists": false,
+   "arithmetic_required": false,
+   "multiple_documents_required": true,
+   "explicit_absence_must_be_established": false,
+   "all_source_files_accessible": true,
+   "source_chunk_counts": {
+    "Articles_of_Organization.pdf": 1,
+    "ownership_schedule.csv": 5
+   },
+   "retrieval_recall_is_valid_metric": false,
+   "operand_recall_is_valid_metric": true,
+   "expected_disposition": "CONTRADICTED",
+   "r2_dependent": false,
+   "scored_in_r1": true,
+   "sources": [
+    "01_Corporate/Articles_of_Organization.pdf",
+    "01_Corporate/ownership_schedule.csv"
+   ],
+   "ground_truth_anchor": "Articles page 1 line 2; ownership_schedule.csv column entity_name_as_written",
+   "observed": {
+    "abstained": false,
+    "source_document_ranks": [
+     1,
+     4
+    ],
+    "first_rank": 1,
+    "anchors_available": true,
+    "ranking_only_first_rank_no_floor": 1,
+    "ranking_only_deep_ranks": {
+     "ownership_schedule.csv": 1,
+     "Articles_of_Organization.pdf": 17
+    },
+    "miss_cause": null
+   }
+  },
+  {
+   "query_id": "RQ-RDG-019",
+   "source_finding": "RDG-019",
+   "query_text": "Customer identifier zero-padding lost",
+   "query_text_note": "finding title used verbatim as the query; a generous proxy for what a reviewer types",
+   "origin": "planted_finding",
+   "severity": "Low",
+   "ground_truth_classification": "deterministic_calculation",
+   "primary_capability_class": 4,
+   "primary_capability": "deterministic_calculation",
+   "secondary_capability_class": 2,
+   "secondary_capability": "structured_row_or_cell_retrieval",
+   "metric_tier": "T2",
+   "expected_source_type": [
+    "csv",
+    "xlsx"
+   ],
+   "directly_responsive_passage_exists": false,
+   "arithmetic_required": false,
+   "multiple_documents_required": true,
+   "explicit_absence_must_be_established": false,
+   "all_source_files_accessible": true,
+   "source_chunk_counts": {
+    "customer_master.csv": 148,
+    "Revenue_by_Customer_FY25.xlsx": 149
+   },
+   "retrieval_recall_is_valid_metric": false,
+   "operand_recall_is_valid_metric": true,
+   "expected_disposition": "REQUIRES_CALCULATION",
+   "r2_dependent": false,
+   "scored_in_r1": true,
+   "sources": [
+    "03_Customers/customer_master.csv",
+    "03_Customers/Revenue_by_Customer_FY25.xlsx"
+   ],
+   "ground_truth_anchor": "customer_master.csv row 1 column customer_id; workbook sheet FY25 row 3 column A",
+   "observed": {
+    "abstained": false,
+    "source_document_ranks": [
+     1,
+     3,
+     4,
+     7,
+     9,
+     11
+    ],
+    "first_rank": 1,
+    "anchors_available": true,
+    "ranking_only_first_rank_no_floor": 1,
+    "ranking_only_deep_ranks": {
+     "customer_master.csv": 1,
+     "Revenue_by_Customer_FY25.xlsx": 3
+    },
+    "miss_cause": null
+   }
+  },
+  {
+   "query_id": "RQ-RDG-020",
+   "source_finding": "RDG-020",
+   "query_text": "Employee roster data quality defects",
+   "query_text_note": "finding title used verbatim as the query; a generous proxy for what a reviewer types",
+   "origin": "planted_finding",
+   "severity": "Low",
+   "ground_truth_classification": "deterministic_calculation",
+   "primary_capability_class": 4,
+   "primary_capability": "deterministic_calculation",
+   "secondary_capability_class": 2,
+   "secondary_capability": "structured_row_or_cell_retrieval",
+   "metric_tier": "T2",
+   "expected_source_type": [
+    "xlsx"
+   ],
+   "directly_responsive_passage_exists": false,
+   "arithmetic_required": true,
+   "multiple_documents_required": false,
+   "explicit_absence_must_be_established": false,
+   "all_source_files_accessible": true,
+   "source_chunk_counts": {
+    "employee_roster.xlsx": 89
+   },
+   "retrieval_recall_is_valid_metric": false,
+   "operand_recall_is_valid_metric": true,
+   "expected_disposition": "REQUIRES_CALCULATION",
+   "r2_dependent": false,
+   "scored_in_r1": true,
+   "sources": [
+    "05_Employees/employee_roster.xlsx"
+   ],
+   "ground_truth_anchor": "sheet Roster rows 14, 35, 53, 72 (blank hire_date); rows 9/42 and 21/64 (duplicate ids)",
+   "observed": {
+    "abstained": false,
+    "source_document_ranks": [
+     2,
+     3,
+     11,
+     12
+    ],
+    "first_rank": 2,
+    "anchors_available": true,
+    "ranking_only_first_rank_no_floor": 2,
+    "ranking_only_deep_ranks": {
+     "employee_roster.xlsx": 2
+    },
+    "miss_cause": null
+   }
+  },
+  {
+   "query_id": "RQ-RDG-021",
+   "source_finding": "RDG-021",
+   "query_text": "Tax support archive cannot be opened",
+   "query_text_note": "finding title used verbatim as the query; a generous proxy for what a reviewer types",
+   "origin": "planted_finding",
+   "severity": "Informational",
+   "ground_truth_classification": "unreviewed",
+   "primary_capability_class": 8,
+   "primary_capability": "inaccessible_document_disposition",
+   "secondary_capability_class": 7,
+   "secondary_capability": "corpus_coverage_or_manifest",
+   "metric_tier": "T3",
+   "expected_source_type": [
+    "zip"
+   ],
+   "directly_responsive_passage_exists": false,
+   "arithmetic_required": false,
+   "multiple_documents_required": false,
+   "explicit_absence_must_be_established": false,
+   "all_source_files_accessible": false,
+   "source_chunk_counts": {
+    "Tax_Support_2023-2025.zip": 0
+   },
+   "retrieval_recall_is_valid_metric": false,
+   "operand_recall_is_valid_metric": false,
+   "expected_disposition": "EXPLICITLY_ABSENT",
+   "r2_dependent": false,
+   "scored_in_r1": true,
+   "sources": [
+    "08_Tax/Tax_Support_2023-2025.zip"
+   ],
+   "ground_truth_anchor": "whole file",
+   "observed": {
+    "abstained": false,
+    "source_document_ranks": [],
+    "first_rank": null,
+    "anchors_available": true,
+    "ranking_only_first_rank_no_floor": null,
+    "ranking_only_deep_ranks": {},
+    "miss_cause": "unretrievable_no_chunks"
+   }
+  },
+  {
+   "query_id": "RQ-RDG-022",
+   "source_finding": "RDG-022",
+   "query_text": "R2 Exhibit B names a different contracting entity",
+   "query_text_note": "finding title used verbatim as the query; a generous proxy for what a reviewer types",
+   "origin": "planted_finding",
+   "severity": "Medium",
+   "ground_truth_classification": "cross_document_contradiction",
+   "primary_capability_class": 5,
+   "primary_capability": "explicit_contradiction_detection",
+   "secondary_capability_class": 3,
+   "secondary_capability": "cross_document_comparison",
+   "metric_tier": "T2",
+   "expected_source_type": [
+    "pdf",
+    "txt"
+   ],
+   "directly_responsive_passage_exists": false,
+   "arithmetic_required": false,
+   "multiple_documents_required": true,
+   "explicit_absence_must_be_established": false,
+   "all_source_files_accessible": null,
+   "source_chunk_counts": {
+    "Hartwell_Exhibit_B_Pricing.txt": null,
+    "Hartwell_Distribution_Agreement.pdf": 1
+   },
+   "retrieval_recall_is_valid_metric": false,
+   "operand_recall_is_valid_metric": true,
+   "expected_disposition": "CONTRADICTED",
+   "r2_dependent": true,
+   "scored_in_r1": false,
+   "sources": [
+    "11_Update_R2/Hartwell_Exhibit_B_Pricing.txt",
+    "04_Suppliers/Hartwell_Distribution_Agreement.pdf"
+   ],
+   "ground_truth_anchor": "Hartwell_Exhibit_B_Pricing.txt line 3; agreement page 1 line 2",
+   "accessibility_note": "not evaluated in R1 \u2014 sources live in 11_Update_R2, which the R1 run excludes by design. Accessibility is undetermined here, not false."
+  },
+  {
+   "query_id": "CQ-A01",
+   "query_text": "no single customer exceeds 11% of revenue",
+   "origin": "calibration_answerable",
+   "primary_capability_class": 1,
+   "primary_capability": "direct_passage_retrieval",
+   "secondary_capability_class": null,
+   "secondary_capability": null,
+   "metric_tier": "T1",
+   "expected_source_type": [],
+   "directly_responsive_passage_exists": true,
+   "arithmetic_required": false,
+   "multiple_documents_required": false,
+   "explicit_absence_must_be_established": false,
+   "all_source_files_accessible": true,
+   "retrieval_recall_is_valid_metric": false,
+   "operand_recall_is_valid_metric": false,
+   "expected_disposition": "SUPPORTED",
+   "scored_in_r1": true,
+   "r2_dependent": false,
+   "note": "used to fit the abstention floor; not independent evidence",
+   "observed": {
+    "abstained": false,
+    "top_document": "seller_qa_log.csv"
+   }
+  },
+  {
+   "query_id": "CQ-A02",
+   "query_text": "change of control consent required by customer",
+   "origin": "calibration_answerable",
+   "primary_capability_class": 1,
+   "primary_capability": "direct_passage_retrieval",
+   "secondary_capability_class": null,
+   "secondary_capability": null,
+   "metric_tier": "T1",
+   "expected_source_type": [],
+   "directly_responsive_passage_exists": true,
+   "arithmetic_required": false,
+   "multiple_documents_required": false,
+   "explicit_absence_must_be_established": false,
+   "all_source_files_accessible": true,
+   "retrieval_recall_is_valid_metric": false,
+   "operand_recall_is_valid_metric": false,
+   "expected_disposition": "SUPPORTED",
+   "scored_in_r1": true,
+   "r2_dependent": false,
+   "note": "used to fit the abstention floor; not independent evidence",
+   "observed": {
+    "abstained": false,
+    "top_document": "Lakeside_Master_Service_Agreement.pdf"
+   }
+  },
+  {
+   "query_id": "CQ-A03",
+   "query_text": "covenant compliance fixed charge coverage ratio",
+   "origin": "calibration_answerable",
+   "primary_capability_class": 1,
+   "primary_capability": "direct_passage_retrieval",
+   "secondary_capability_class": null,
+   "secondary_capability": null,
+   "metric_tier": "T1",
+   "expected_source_type": [],
+   "directly_responsive_passage_exists": true,
+   "arithmetic_required": false,
+   "multiple_documents_required": false,
+   "explicit_absence_must_be_established": false,
+   "all_source_files_accessible": true,
+   "retrieval_recall_is_valid_metric": false,
+   "operand_recall_is_valid_metric": false,
+   "expected_disposition": "SUPPORTED",
+   "scored_in_r1": true,
+   "r2_dependent": false,
+   "note": "used to fit the abstention floor; not independent evidence",
+   "observed": {
+    "abstained": false,
+    "top_document": "Covenant_Compliance_Certificate_FY2025.pdf"
+   }
+  },
+  {
+   "query_id": "CQ-A04",
+   "query_text": "accounts receivable aging over 90 days",
+   "origin": "calibration_answerable",
+   "primary_capability_class": 1,
+   "primary_capability": "direct_passage_retrieval",
+   "secondary_capability_class": null,
+   "secondary_capability": null,
+   "metric_tier": "T1",
+   "expected_source_type": [],
+   "directly_responsive_passage_exists": true,
+   "arithmetic_required": false,
+   "multiple_documents_required": false,
+   "explicit_absence_must_be_established": false,
+   "all_source_files_accessible": true,
+   "retrieval_recall_is_valid_metric": false,
+   "operand_recall_is_valid_metric": false,
+   "expected_disposition": "SUPPORTED",
+   "scored_in_r1": true,
+   "r2_dependent": false,
+   "note": "used to fit the abstention floor; not independent evidence",
+   "observed": {
+    "abstained": false,
+    "top_document": "seller_qa_log.csv"
+   }
+  },
+  {
+   "query_id": "CQ-A05",
+   "query_text": "employee roster headcount",
+   "origin": "calibration_answerable",
+   "primary_capability_class": 1,
+   "primary_capability": "direct_passage_retrieval",
+   "secondary_capability_class": null,
+   "secondary_capability": null,
+   "metric_tier": "T1",
+   "expected_source_type": [],
+   "directly_responsive_passage_exists": true,
+   "arithmetic_required": false,
+   "multiple_documents_required": false,
+   "explicit_absence_must_be_established": false,
+   "all_source_files_accessible": true,
+   "retrieval_recall_is_valid_metric": false,
+   "operand_recall_is_valid_metric": false,
+   "expected_disposition": "SUPPORTED",
+   "scored_in_r1": true,
+   "r2_dependent": false,
+   "note": "used to fit the abstention floor; not independent evidence",
+   "observed": {
+    "abstained": false,
+    "top_document": "request_list.csv"
+   }
+  },
+  {
+   "query_id": "CQ-A06",
+   "query_text": "largest customer share of FY2025 revenue",
+   "origin": "calibration_answerable",
+   "primary_capability_class": 1,
+   "primary_capability": "direct_passage_retrieval",
+   "secondary_capability_class": null,
+   "secondary_capability": null,
+   "metric_tier": "T1",
+   "expected_source_type": [],
+   "directly_responsive_passage_exists": true,
+   "arithmetic_required": false,
+   "multiple_documents_required": false,
+   "explicit_absence_must_be_established": false,
+   "all_source_files_accessible": true,
+   "retrieval_recall_is_valid_metric": false,
+   "operand_recall_is_valid_metric": false,
+   "expected_disposition": "SUPPORTED",
+   "scored_in_r1": true,
+   "r2_dependent": false,
+   "note": "used to fit the abstention floor; not independent evidence",
+   "observed": {
+    "abstained": false,
+    "top_document": "Revenue_by_Customer_FY25.xlsx"
+   }
+  },
+  {
+   "query_id": "CQ-A07",
+   "query_text": "supplier distribution agreement pricing terms",
+   "origin": "calibration_answerable",
+   "primary_capability_class": 1,
+   "primary_capability": "direct_passage_retrieval",
+   "secondary_capability_class": null,
+   "secondary_capability": null,
+   "metric_tier": "T1",
+   "expected_source_type": [],
+   "directly_responsive_passage_exists": true,
+   "arithmetic_required": false,
+   "multiple_documents_required": false,
+   "explicit_absence_must_be_established": false,
+   "all_source_files_accessible": true,
+   "retrieval_recall_is_valid_metric": false,
+   "operand_recall_is_valid_metric": false,
+   "expected_disposition": "SUPPORTED",
+   "scored_in_r1": true,
+   "r2_dependent": false,
+   "note": "used to fit the abstention floor; not independent evidence",
+   "observed": {
+    "abstained": false,
+    "top_document": "request_list.csv"
+   }
+  },
+  {
+   "query_id": "CQ-A08",
+   "query_text": "insurance certificate coverage limits",
+   "origin": "calibration_answerable",
+   "primary_capability_class": 1,
+   "primary_capability": "direct_passage_retrieval",
+   "secondary_capability_class": null,
+   "secondary_capability": null,
+   "metric_tier": "T1",
+   "expected_source_type": [],
+   "directly_responsive_passage_exists": true,
+   "arithmetic_required": false,
+   "multiple_documents_required": false,
+   "explicit_absence_must_be_established": false,
+   "all_source_files_accessible": true,
+   "retrieval_recall_is_valid_metric": false,
+   "operand_recall_is_valid_metric": false,
+   "expected_disposition": "SUPPORTED",
+   "scored_in_r1": true,
+   "r2_dependent": false,
+   "note": "used to fit the abstention floor; not independent evidence",
+   "observed": {
+    "abstained": false,
+    "top_document": "request_list.csv"
+   }
+  },
+  {
+   "query_id": "CQ-A09",
+   "query_text": "capital expenditure register additions",
+   "origin": "calibration_answerable",
+   "primary_capability_class": 1,
+   "primary_capability": "direct_passage_retrieval",
+   "secondary_capability_class": null,
+   "secondary_capability": null,
+   "metric_tier": "T1",
+   "expected_source_type": [],
+   "directly_responsive_passage_exists": true,
+   "arithmetic_required": false,
+   "multiple_documents_required": false,
+   "explicit_absence_must_be_established": false,
+   "all_source_files_accessible": true,
+   "retrieval_recall_is_valid_metric": false,
+   "operand_recall_is_valid_metric": false,
+   "expected_disposition": "SUPPORTED",
+   "scored_in_r1": true,
+   "r2_dependent": false,
+   "note": "used to fit the abstention floor; not independent evidence",
+   "observed": {
+    "abstained": false,
+    "top_document": "request_list.csv"
+   }
+  },
+  {
+   "query_id": "CQ-A10",
+   "query_text": "owner compensation adjustment",
+   "origin": "calibration_answerable",
+   "primary_capability_class": 1,
+   "primary_capability": "direct_passage_retrieval",
+   "secondary_capability_class": null,
+   "secondary_capability": null,
+   "metric_tier": "T1",
+   "expected_source_type": [],
+   "directly_responsive_passage_exists": true,
+   "arithmetic_required": false,
+   "multiple_documents_required": false,
+   "explicit_absence_must_be_established": false,
+   "all_source_files_accessible": true,
+   "retrieval_recall_is_valid_metric": false,
+   "operand_recall_is_valid_metric": false,
+   "expected_disposition": "SUPPORTED",
+   "scored_in_r1": true,
+   "r2_dependent": false,
+   "note": "used to fit the abstention floor; not independent evidence",
+   "observed": {
+    "abstained": false,
+    "top_document": "qoe_notes_draft.md"
+   }
+  },
+  {
+   "query_id": "CQ-N01",
+   "query_text": "what cryptocurrency does the company hold in treasury",
+   "origin": "calibration_negative",
+   "primary_capability_class": 9,
+   "primary_capability": "evidence_sufficiency",
+   "secondary_capability_class": null,
+   "secondary_capability": null,
+   "metric_tier": "T2",
+   "expected_source_type": [],
+   "directly_responsive_passage_exists": false,
+   "arithmetic_required": false,
+   "multiple_documents_required": false,
+   "explicit_absence_must_be_established": false,
+   "all_source_files_accessible": true,
+   "retrieval_recall_is_valid_metric": false,
+   "operand_recall_is_valid_metric": false,
+   "expected_disposition": "OUT_OF_SCOPE",
+   "scored_in_r1": true,
+   "r2_dependent": false,
+   "note": "used to fit the abstention floor; passing is by construction",
+   "observed": {
+    "abstained": true,
+    "top_document": null
+   }
+  },
+  {
+   "query_id": "CQ-N02",
+   "query_text": "describe the company's manufacturing operations in Singapore",
+   "origin": "calibration_negative",
+   "primary_capability_class": 9,
+   "primary_capability": "evidence_sufficiency",
+   "secondary_capability_class": null,
+   "secondary_capability": null,
+   "metric_tier": "T2",
+   "expected_source_type": [],
+   "directly_responsive_passage_exists": false,
+   "arithmetic_required": false,
+   "multiple_documents_required": false,
+   "explicit_absence_must_be_established": false,
+   "all_source_files_accessible": true,
+   "retrieval_recall_is_valid_metric": false,
+   "operand_recall_is_valid_metric": false,
+   "expected_disposition": "OUT_OF_SCOPE",
+   "scored_in_r1": true,
+   "r2_dependent": false,
+   "note": "used to fit the abstention floor; passing is by construction",
+   "observed": {
+    "abstained": true,
+    "top_document": null
+   }
+  },
+  {
+   "query_id": "CQ-N03",
+   "query_text": "list the company's registered patents in the European Union",
+   "origin": "calibration_negative",
+   "primary_capability_class": 9,
+   "primary_capability": "evidence_sufficiency",
+   "secondary_capability_class": null,
+   "secondary_capability": null,
+   "metric_tier": "T2",
+   "expected_source_type": [],
+   "directly_responsive_passage_exists": false,
+   "arithmetic_required": false,
+   "multiple_documents_required": false,
+   "explicit_absence_must_be_established": false,
+   "all_source_files_accessible": true,
+   "retrieval_recall_is_valid_metric": false,
+   "operand_recall_is_valid_metric": false,
+   "expected_disposition": "OUT_OF_SCOPE",
+   "scored_in_r1": true,
+   "r2_dependent": false,
+   "note": "used to fit the abstention floor; passing is by construction",
+   "observed": {
+    "abstained": true,
+    "top_document": null
+   }
+  },
+  {
+   "query_id": "CQ-N04",
+   "query_text": "what dividend was paid to preferred shareholders in fiscal 2022",
+   "origin": "calibration_negative",
+   "primary_capability_class": 9,
+   "primary_capability": "evidence_sufficiency",
+   "secondary_capability_class": null,
+   "secondary_capability": null,
+   "metric_tier": "T2",
+   "expected_source_type": [],
+   "directly_responsive_passage_exists": false,
+   "arithmetic_required": false,
+   "multiple_documents_required": false,
+   "explicit_absence_must_be_established": false,
+   "all_source_files_accessible": true,
+   "retrieval_recall_is_valid_metric": false,
+   "operand_recall_is_valid_metric": false,
+   "expected_disposition": "OUT_OF_SCOPE",
+   "scored_in_r1": true,
+   "r2_dependent": false,
+   "note": "used to fit the abstention floor; passing is by construction",
+   "observed": {
+    "abstained": true,
+    "top_document": null
+   }
+  },
+  {
+   "query_id": "CQ-N05",
+   "query_text": "describe the joint venture with the Osaka subsidiary",
+   "origin": "calibration_negative",
+   "primary_capability_class": 9,
+   "primary_capability": "evidence_sufficiency",
+   "secondary_capability_class": null,
+   "secondary_capability": null,
+   "metric_tier": "T2",
+   "expected_source_type": [],
+   "directly_responsive_passage_exists": false,
+   "arithmetic_required": false,
+   "multiple_documents_required": false,
+   "explicit_absence_must_be_established": false,
+   "all_source_files_accessible": true,
+   "retrieval_recall_is_valid_metric": false,
+   "operand_recall_is_valid_metric": false,
+   "expected_disposition": "OUT_OF_SCOPE",
+   "scored_in_r1": true,
+   "r2_dependent": false,
+   "note": "used to fit the abstention floor; passing is by construction",
+   "observed": {
+    "abstained": true,
+    "top_document": null
+   }
+  },
+  {
+   "query_id": "CQ-N06",
+   "query_text": "what were the findings of the environmental remediation order in Nevada",
+   "origin": "calibration_negative",
+   "primary_capability_class": 9,
+   "primary_capability": "evidence_sufficiency",
+   "secondary_capability_class": null,
+   "secondary_capability": null,
+   "metric_tier": "T2",
+   "expected_source_type": [],
+   "directly_responsive_passage_exists": false,
+   "arithmetic_required": false,
+   "multiple_documents_required": false,
+   "explicit_absence_must_be_established": false,
+   "all_source_files_accessible": true,
+   "retrieval_recall_is_valid_metric": false,
+   "operand_recall_is_valid_metric": false,
+   "expected_disposition": "OUT_OF_SCOPE",
+   "scored_in_r1": true,
+   "r2_dependent": false,
+   "note": "used to fit the abstention floor; passing is by construction",
+   "observed": {
+    "abstained": true,
+    "top_document": null
+   }
+  },
+  {
+   "query_id": "HQ-N01",
+   "query_text": "what is the company's employee stock ownership plan vesting schedule",
+   "origin": "heldout_negative",
+   "primary_capability_class": 9,
+   "primary_capability": "evidence_sufficiency",
+   "secondary_capability_class": null,
+   "secondary_capability": null,
+   "metric_tier": "T2",
+   "expected_source_type": [],
+   "directly_responsive_passage_exists": false,
+   "arithmetic_required": false,
+   "multiple_documents_required": false,
+   "explicit_absence_must_be_established": false,
+   "all_source_files_accessible": true,
+   "retrieval_recall_is_valid_metric": false,
+   "operand_recall_is_valid_metric": false,
+   "expected_disposition": "OUT_OF_SCOPE",
+   "scored_in_r1": true,
+   "r2_dependent": false,
+   "note": "CONTAMINATED: inspected repeatedly during the abstention investigation; diagnostic-only",
+   "observed": {
+    "abstained": false,
+    "top_document": "request_list.csv"
+   }
+  },
+  {
+   "query_id": "HQ-N02",
+   "query_text": "describe the recall of the 2019 product line",
+   "origin": "heldout_negative",
+   "primary_capability_class": 9,
+   "primary_capability": "evidence_sufficiency",
+   "secondary_capability_class": null,
+   "secondary_capability": null,
+   "metric_tier": "T2",
+   "expected_source_type": [],
+   "directly_responsive_passage_exists": false,
+   "arithmetic_required": false,
+   "multiple_documents_required": false,
+   "explicit_absence_must_be_established": false,
+   "all_source_files_accessible": true,
+   "retrieval_recall_is_valid_metric": false,
+   "operand_recall_is_valid_metric": false,
+   "expected_disposition": "OUT_OF_SCOPE",
+   "scored_in_r1": true,
+   "r2_dependent": false,
+   "note": "CONTAMINATED: inspected repeatedly during the abstention investigation; diagnostic-only",
+   "observed": {
+    "abstained": true,
+    "top_document": null
+   }
+  },
+  {
+   "query_id": "HQ-N03",
+   "query_text": "how much did the company spend on television advertising",
+   "origin": "heldout_negative",
+   "primary_capability_class": 9,
+   "primary_capability": "evidence_sufficiency",
+   "secondary_capability_class": null,
+   "secondary_capability": null,
+   "metric_tier": "T2",
+   "expected_source_type": [],
+   "directly_responsive_passage_exists": false,
+   "arithmetic_required": false,
+   "multiple_documents_required": false,
+   "explicit_absence_must_be_established": false,
+   "all_source_files_accessible": true,
+   "retrieval_recall_is_valid_metric": false,
+   "operand_recall_is_valid_metric": false,
+   "expected_disposition": "OUT_OF_SCOPE",
+   "scored_in_r1": true,
+   "r2_dependent": false,
+   "note": "CONTAMINATED: inspected repeatedly during the abstention investigation; diagnostic-only",
+   "observed": {
+    "abstained": true,
+    "top_document": null
+   }
+  },
+  {
+   "query_id": "HQ-N04",
+   "query_text": "what are the terms of the interest rate swap",
+   "origin": "heldout_negative",
+   "primary_capability_class": 9,
+   "primary_capability": "evidence_sufficiency",
+   "secondary_capability_class": null,
+   "secondary_capability": null,
+   "metric_tier": "T2",
+   "expected_source_type": [],
+   "directly_responsive_passage_exists": false,
+   "arithmetic_required": false,
+   "multiple_documents_required": false,
+   "explicit_absence_must_be_established": false,
+   "all_source_files_accessible": true,
+   "retrieval_recall_is_valid_metric": false,
+   "operand_recall_is_valid_metric": false,
+   "expected_disposition": "OUT_OF_SCOPE",
+   "scored_in_r1": true,
+   "r2_dependent": false,
+   "note": "CONTAMINATED: inspected repeatedly during the abstention investigation; diagnostic-only",
+   "observed": {
+    "abstained": false,
+    "top_document": "debt_schedule.csv"
+   }
+  },
+  {
+   "query_id": "HQ-N05",
+   "query_text": "list the company's subsidiaries incorporated in Delaware",
+   "origin": "heldout_negative",
+   "primary_capability_class": 9,
+   "primary_capability": "evidence_sufficiency",
+   "secondary_capability_class": null,
+   "secondary_capability": null,
+   "metric_tier": "T2",
+   "expected_source_type": [],
+   "directly_responsive_passage_exists": false,
+   "arithmetic_required": false,
+   "multiple_documents_required": false,
+   "explicit_absence_must_be_established": false,
+   "all_source_files_accessible": true,
+   "retrieval_recall_is_valid_metric": false,
+   "operand_recall_is_valid_metric": false,
+   "expected_disposition": "OUT_OF_SCOPE",
+   "scored_in_r1": true,
+   "r2_dependent": false,
+   "note": "CONTAMINATED: inspected repeatedly during the abstention investigation; diagnostic-only",
+   "observed": {
+    "abstained": false,
+    "top_document": "request_list.csv"
+   }
+  },
+  {
+   "query_id": "HQ-N06",
+   "query_text": "what did the pension actuary report for fiscal 2024",
+   "origin": "heldout_negative",
+   "primary_capability_class": 9,
+   "primary_capability": "evidence_sufficiency",
+   "secondary_capability_class": null,
+   "secondary_capability": null,
+   "metric_tier": "T2",
+   "expected_source_type": [],
+   "directly_responsive_passage_exists": false,
+   "arithmetic_required": false,
+   "multiple_documents_required": false,
+   "explicit_absence_must_be_established": false,
+   "all_source_files_accessible": true,
+   "retrieval_recall_is_valid_metric": false,
+   "operand_recall_is_valid_metric": false,
+   "expected_disposition": "OUT_OF_SCOPE",
+   "scored_in_r1": true,
+   "r2_dependent": false,
+   "note": "CONTAMINATED: inspected repeatedly during the abstention investigation; diagnostic-only",
+   "observed": {
+    "abstained": true,
+    "top_document": null
+   }
+  }
+ ]
+}

@@ -1,0 +1,52 @@
+{
+  "$comment": "Copy to cold-review-queries.json, fill in, and COMMIT BEFORE running the engine.",
+  "reviewer": {
+    "initials": "XX",
+    "date": "YYYY-MM-DD",
+    "diligence_experience": "none | some | professional",
+    "read_any_disqualifying_material_before_freezing": false,
+    "disqualifying_material_disclosure": ""
+  },
+  "corpus_notes": {
+    "folders_and_contents": "",
+    "subjects_substantively_covered": [],
+    "subjects_mentioned_but_thin": [],
+    "referenced_but_not_found": [],
+    "could_not_open": []
+  },
+  "$distribution_required": {
+    "directly_answerable": 10,
+    "subject_present_fact_may_be_absent": 5,
+    "outside_corpus_scope": 5,
+    "requires_calculation_or_comparison": 5,
+    "missing_inaccessible_stale_or_unreviewed": 3
+  },
+  "$expected_disposition_values": [
+    "SUPPORTED", "CONTRADICTED", "SUBJECT_PRESENT_FACT_ABSENT", "EXPLICITLY_ABSENT",
+    "INSUFFICIENT_EVIDENCE", "OUT_OF_SCOPE", "REQUIRES_COMPARISON", "REQUIRES_CALCULATION"
+  ],
+  "queries": [
+    {
+      "query_id": "CR-001",
+      "query_text": "What is the fixed charge coverage ratio the lender requires?",
+      "intended_class": "directly_answerable",
+      "expected_disposition": "SUPPORTED",
+      "why": "I read a covenant certificate that states a required ratio.",
+      "supporting_document": "02_Financial/Covenant_Compliance_Certificate_FY2025.pdf",
+      "expected_anchor_hint": "the covenant line",
+      "confidence": "high",
+      "notes": ""
+    },
+    {
+      "query_id": "CR-002",
+      "query_text": "What are the terms of any interest rate hedge on the term loan?",
+      "intended_class": "subject_present_fact_may_be_absent",
+      "expected_disposition": "SUBJECT_PRESENT_FACT_ABSENT",
+      "why": "There is a debt schedule with rates, but I saw nothing about hedging.",
+      "supporting_document": "",
+      "expected_anchor_hint": "",
+      "confidence": "medium",
+      "notes": "The subject (debt terms) is clearly covered."
+    }
+  ]
+}
