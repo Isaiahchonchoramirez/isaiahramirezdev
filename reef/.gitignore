@@ -1,0 +1,17 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Local secrets. Never commit.
+.env
+
+# Local object storage. Originals and page renders live here under the filesystem
+# backend; nothing in it belongs in git.
+.reef-storage/
+
+# Build artifacts
+dist/
+*.egg-info/

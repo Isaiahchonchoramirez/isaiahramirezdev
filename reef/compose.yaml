@@ -1,0 +1,57 @@
+name: reef
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg17
+    environment:
+      POSTGRES_USER: reef
+      POSTGRES_PASSWORD: reef
+      POSTGRES_DB: reef
+      # The application connects as a non-superuser so row-level security is
+      # actually enforced. Superusers bypass RLS, which would make the tenant
+      # boundary a decoration.
+      POSTGRES_INITDB_ARGS: "--data-checksums"
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./ops/postgres-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U reef -d reef"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: reef
+      MINIO_ROOT_PASSWORD: reefreef
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - miniodata:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+
+  createbuckets:
+    image: minio/mc:latest
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set local http://minio:9000 reef reefreef &&
+      mc mb --ignore-existing local/reef-originals &&
+      mc mb --ignore-existing local/reef-renders &&
+      echo 'buckets ready'
+      "
+
+volumes:
+  pgdata:
+  miniodata:

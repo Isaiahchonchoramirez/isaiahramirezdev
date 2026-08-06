@@ -1,0 +1,160 @@
+{
+  "record_version": "1",
+  "name": "ridgeline-m1-baseline",
+  "recorded_at": "2026-08-06T14:36:00Z",
+  "authority": "docs/decisions/ADR-003-m1-engine-authorization.md",
+  "what_this_is_not": [
+    "This is a synthetic-fixture mechanics result. It does not validate real-package performance.",
+    "It is not customer evidence, demand evidence, or payment evidence. Counting it as any of those is an automatic-fail condition on docs/validation/SCORECARD.md.",
+    "It does not validate hypothesis T1. The fixture's PDFs were generated rather than scanned and its one degraded scan was degraded programmatically; docs/validation/SYNTHETIC_DEAL_ROOM_SPEC.md records that synthetic degradation is kinder than a decade-old fax.",
+    "M1 is not validated, not production-ready, and not approved for customer data."
+  ],
+
+  "fixture": {
+    "name": "reef-deal-room",
+    "version": "1.0.0",
+    "seed": 20260805,
+    "corpus_sha256": "02379a0ac08a0d91422e34dc33acc00d6b0c0bcd7a693c3e51d46b373ac8dd69",
+    "corpus_sha256_method": "sha256 over the sorted per-file sha256 list, excluding ground-truth.json, GROUND_TRUTH.md, README.md and outputs/",
+    "answer_key_sha256": "934ced1e5ec5abce4b278f0b5ba42ed6340090c8b7dad964ad957d9c3470020c",
+    "answer_key_withheld_from_engine": true,
+    "run": "R1",
+    "r2_delta_excluded": true
+  },
+
+  "pipeline": {
+    "version": "1",
+    "version_meaning": "boundary-compatibility version; bumping re-keys every derived span and chunk identifier",
+    "identifier_scheme": "uuid5 derived from namespace + pipeline version + document sha256 + coordinates",
+    "extractors": {
+      "application/pdf": "pymupdf 1.28.0",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "openpyxl 3.1.5",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "python-docx 1.2.0",
+      "text/csv": "stdlib-csv",
+      "text/plain": "stdlib-text",
+      "text/markdown": "stdlib-text"
+    },
+    "embedding_model": "BAAI/bge-small-en-v1.5",
+    "embedding_dimensions": 384,
+    "embedding_max_tokens": 512,
+    "chunk_target_tokens": 420,
+    "chunk_max_tokens": 500,
+    "ocr_provider": "tesseract 5.5.3",
+    "retrieval": "pgvector cosine + postgres FTS, reciprocal rank fusion (k=60)",
+    "abstention_floor_cosine": 0.42
+  },
+
+  "environment": {
+    "os": "macOS-26.3.1-arm64-arm-64bit-Mach-O",
+    "python": "3.13.5",
+    "postgres": "17.10 (Homebrew)",
+    "pgvector": "0.5.0",
+    "sqlalchemy": "2.0.51",
+    "sentence_transformers": "5.6.1",
+    "object_storage": "filesystem backend",
+    "network_calls_during_run": "none for document content; the embedding model is downloaded once from the Hugging Face hub on first use and cached locally"
+  },
+
+  "corpus": {
+    "files_supplied": 121,
+    "files_indexed": 120,
+    "files_inaccessible": 1,
+    "inaccessible_detail": [
+      {
+        "path": "08_Tax/Tax_Support_2023-2025.zip",
+        "state": "unsupported",
+        "reason": "archive is password-protected; supply the password to process",
+        "note": "registered explicitly and distinguishable from a missing file"
+      }
+    ],
+    "chunks_indexed": 869,
+    "chunks_embedded": 869,
+    "spans_extracted": 1739,
+    "runtime_seconds": 13.8,
+    "runtime_scope": "intake through embedding and indexing, single process, cold page cache, model already downloaded"
+  },
+
+  "gates": {
+    "G1_inventory_recall": { "value": 1.0, "threshold": 1.0, "passed": true },
+    "G2_processing_status_correctness": { "value": 1.0, "threshold": 1.0, "passed": true },
+    "G3_parsing_success_supported_formats": { "value": 1.0, "threshold": 0.95, "passed": true },
+    "G9_citation_presence": { "value": 1.0, "threshold": 1.0, "passed": true },
+    "G10_citation_location_accuracy": {
+      "value": 1.0,
+      "threshold": 0.95,
+      "passed": true,
+      "anchors_checked": 1739,
+      "mismatched": 0
+    },
+    "G11_deterministic_reproducibility": {
+      "value": 1.0,
+      "threshold": 1.0,
+      "passed": true,
+      "documents_reextracted": 116,
+      "drifted": 0
+    },
+    "G12_fabricated_citations": { "value": 0, "threshold": 0, "passed": true },
+    "ABS_abstention_on_absent_subjects": {
+      "value": 1.0,
+      "threshold": 1.0,
+      "passed": true,
+      "questions": 6
+    }
+  },
+
+  "gates_not_scored": {
+    "gates": ["G4", "G5", "G6", "G7", "G8", "G13", "G14", "G15"],
+    "reason": "these score the finding layer, which ADR-003 section 4 does not authorize. Reporting a value for them would be inventing a number."
+  },
+
+  "retrieval": {
+    "metric": "recall@12 on planted-finding source documents, queried by finding title only",
+    "reported_as": "baseline",
+    "is_a_product_gate": false,
+    "threshold": null,
+    "threshold_note": "ADR-003 section 6 sets no threshold; this run establishes the baseline",
+    "value": 0.7368,
+    "recalled": 14,
+    "scored": 19,
+    "scored_note": "19 of 22 planted findings are reachable from the R1 corpus; the other 3 depend on the R2 delta",
+    "r1_plus_r2_value": 0.6818,
+    "r1_plus_r2_recalled": 15,
+    "r1_plus_r2_scored": 22,
+    "known_misses_r1": [
+      { "id": "RDG-004", "title": "Recurring revenue share unsupported as stated" },
+      { "id": "RDG-015", "title": "Referenced Exhibit B absent from baseline room" },
+      { "id": "RDG-018", "title": "Entity name inconsistent across records" },
+      { "id": "RDG-019", "title": "Customer identifier zero-padding lost" },
+      { "id": "RDG-021", "title": "Tax support archive cannot be opened" }
+    ],
+    "additional_misses_with_r2": [
+      { "id": "RDG-013", "title": "Two revenue schedules with different totals" },
+      { "id": "RDG-022", "title": "R2 Exhibit B names a different contracting entity" }
+    ],
+    "miss_interpretation": "several misses describe an absence or a cross-document comparison rather than a passage of text, which retrieval alone cannot surface. They are candidates for the finding layer, not necessarily retrieval defects. Failure analysis is pending."
+  },
+
+  "diagnostics": {
+    "table_type_coercion": {
+      "cells_sampled": 911,
+      "zero_padded_values_preserved": 120,
+      "examples": ["002156", "000418", "000742"],
+      "canonical_failure_checked": "000418 becoming 418"
+    },
+    "abstention_boundary_not_gated": {
+      "questions": 3,
+      "reason": "questions whose subject the corpus covers but whose specific fact is absent. Retrieval cannot distinguish these even in principle; deferred to the finding layer.",
+      "examples": ["how many electric vehicles are in the delivery fleet"]
+    }
+  },
+
+  "verification": {
+    "tests_passed": 83,
+    "tests_failed": 0,
+    "ruff": "clean",
+    "ruff_format": "clean",
+    "mypy_strict": "clean, 23 source files",
+    "package_build": "wheel and sdist built",
+    "clean_install": "wheel installed into an empty virtualenv and exercised outside the source checkout"
+  }
+}

@@ -1,0 +1,115 @@
+[project]
+name = "reef"
+version = "0.1.0"
+description = "Evidence-linked document ingestion engine. Every extracted fact traces to its exact source location."
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+    "pydantic>=2.9",
+    "pydantic-settings>=2.6",
+    "sqlalchemy>=2.0.36",
+    "alembic>=1.14",
+    "psycopg[binary]>=3.2",
+    "pgvector>=0.3.6",
+    "boto3>=1.35",
+    "typer>=0.15",
+    "rich>=13.9",
+    # Document extraction
+    "pymupdf>=1.24",          # PDF text + coordinates + page rendering
+    "python-docx>=1.1",       # DOCX
+    "openpyxl>=3.1",          # XLSX, read-only with raw cell values
+    "chardet>=5.2",           # Encoding detection for CSV/TXT
+    "puremagic>=1.28",        # Magic-byte type detection, pure python
+    "structlog>=24.4",
+]
+
+[project.optional-dependencies]
+ocr = [
+    "pytesseract>=0.3.13",
+    "pillow>=11.0",
+]
+embed = [
+    # Local-first default so the engine runs with no API key and no network.
+    "sentence-transformers>=3.3",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "pytest-asyncio>=0.24",
+    "httpx>=0.28",
+    "ruff>=0.8",
+    "mypy>=1.13",
+    "types-boto3>=1.35",
+]
+
+[project.scripts]
+reef = "reef.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/reef"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "UP", "B", "A", "C4", "PT", "SIM", "RUF"]
+ignore = [
+    "A003",  # Class attribute shadowing a builtin — `id`, `type` are correct domain names
+    # Ambiguous-unicode rules. Reef uses "›" as the breadcrumb separator and "—" in prose
+    # deliberately; the breadcrumb character is part of the chunk format and is asserted
+    # in tests, so it is not a typo to be normalised away.
+    "RUF001",
+    "RUF002",
+    "RUF003",
+    "N818",  # EvidenceNotFound subclasses LookupError; "…NotFound" reads better than "…Error"
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = [
+    "S101",
+    # `with pytest.raises(...)` wrapping `with room_session(...)` is intentional: the
+    # transaction must close inside the raises block for a commit-time constraint to fire.
+    "SIM117",
+]
+
+[tool.mypy]
+python_version = "3.13"
+strict = true
+warn_return_any = true
+plugins = []
+mypy_path = "src"
+
+# Libraries that ship neither stubs nor a py.typed marker. Listed explicitly rather than
+# globally silenced, so a dependency that later gains types starts being checked.
+[[tool.mypy.overrides]]
+module = [
+    "pgvector.*",
+    "puremagic.*",
+    "pytesseract.*",
+    "sentence_transformers.*",
+    "transformers.*",
+    "openpyxl.*",
+    "fitz.*",
+    "docx.*",
+    "chardet.*",
+    "mypy_boto3_s3.*",
+    "botocore.*",
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-q --strict-markers"
+markers = [
+    "integration: requires the Compose stack (postgres, minio)",
+    "eval: scores against fixtures/reef-deal-room",
+]

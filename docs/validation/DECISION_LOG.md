@@ -359,3 +359,82 @@ interviews still do not happen, in which case the problem was never the roadmap.
 **Also recorded:** the `projects/reef-showcase/` work from 2026-08-05 was lost to a terminal
 crash before it was ever committed. The directory contained one empty lockfile. Nothing is
 being reconstructed — ADR-003 supersedes the showcase approach with the engine.
+
+---
+
+## 2026-08-06 · M1 engine built and scored; three defects found before commit
+
+**What exists.** The headless pipeline authorized by ADR-003 §4 runs end to end: intake →
+extract → structure → chunk → embed → index, plus a search API, an evidence API and a CLI.
+83 tests, ruff clean, strict mypy clean, wheel builds and runs from a clean install outside
+the source checkout. Against `fixtures/reef-deal-room` v1.0.0 it registers 121 files,
+indexes 120 and produces 869 chunks in about fourteen seconds. Every scored engine gate
+passes; the baseline is recorded in `reef/benchmarks/ridgeline-m1-baseline.json`.
+
+| Gate | Value | Bar |
+|---|---|---|
+| G1 inventory recall | 100% | ≥100% |
+| G2 processing status correctness | 100% | ≥100% |
+| G3 parsing success | 100% | ≥95% |
+| G9 citation presence | 100% | ≥100% |
+| G10 citation location accuracy | 100% (0 of 1,739 mismatched) | ≥95% |
+| G11 deterministic reproducibility | 100% | ≥100% |
+| G12 fabricated citations | 0 | 0 |
+| ABS abstention on absent subjects | 100% | ≥100% |
+| R@12 retrieval recall | 73.7% (14/19) | baseline, no bar set |
+
+**`T1` has provisional support only.** Anchor correctness is the hypothesis with a 95%
+threshold and the one deciding whether the differentiating claim is deliverable. It is at
+100% on synthetic data. `SYNTHETIC_DEAL_ROOM_SPEC.md` already records the caveat: synthetic
+degradation is kinder than a decade-old fax. `T1` is not answered until governed real
+packages exist, which `D1` gates and `L1` blocks.
+
+**Three defects the fixture and the pre-commit review caught**, which is the strongest
+argument for building the harness alongside the engine rather than after it.
+
+*Chunks cited spans they did not contain.* When a chunk was split for size, every part kept
+the full span list, so parts claimed provenance over text sitting in a sibling part.
+Measured G10 at 34.8%. This is exactly the failure the design exists to prevent — a
+confident citation pointing at the wrong place — and no unit test caught it because each
+component was individually correct. Fixed by making span attribution correct by
+construction.
+
+*The abstention gate admitted every nonsense query.* The first implementation gated on the
+reciprocal-rank-fusion score, which is rank-based and therefore discards the one number
+saying whether anything matched: a vector search always returns its top-k, and its worst
+result still ranks first among them. "Best of a bad lot" scored identically to a real hit.
+Fixed by gating on absolute cosine similarity. The floor is calibrated on ten hand-written
+queries and is recorded in `search.SIMILARITY_FLOOR` as under-evidenced rather than settled.
+
+*Evidence identifiers were random.* Span, chunk and document primary keys were `uuid4`, so
+re-ingesting an unchanged room minted entirely new ids and orphaned every citation already
+issued into it. Identifiers are now derived — UUIDv5 over a fixed namespace, the pipeline
+version, the document SHA-256 and the coordinates — so the same bytes through the same
+pipeline always produce the same ids, and a revision produces different ones. Making them
+deterministic exposed a second bug: intake treated a re-ingested file as a duplicate of
+itself and collided on the primary key. Intake is now idempotent, which the architecture
+required all along.
+
+**Three deviations from the architecture documents, each with a reason.**
+
+1. **Chunk size 420/500, not 800/1500.** `05-architecture.md` set those numbers without
+   reference to an encoder. The encoder accepts 512 tokens and truncates silently past it,
+   so an 800-token chunk would store text its vector never represented.
+2. **Python/FastAPI per `docs/architecture/**`,** not the one-language TypeScript proposal
+   in `docs/reef/05-architecture.md`, which ADR-001 marked historical. That document's
+   ingest decomposition, chunking rules and evidence schema were adopted on merit.
+3. **Local Postgres and filesystem object storage for development.** Docker Desktop is not
+   installed on the build machine; `compose.yaml` is retained for CI and deployment.
+
+**What the engine still cannot do, stated plainly.** No finding layer, so G4–G8 and G13–G15
+are unscored rather than estimated. Retrieval-only abstention cannot distinguish "the corpus
+covers this subject" from "the corpus states this fact" — a search for electric vehicles
+correctly returns the fleet register, and only a finding layer can decline to answer from
+it. That boundary is measured and reported rather than hidden by choosing easier negatives.
+Five R1 retrieval targets are missed; several describe an absence or a cross-document
+comparison, which retrieval alone cannot surface. Failure analysis is queued in
+`reef/NEXT-EVALUATIONS.md` and is deliberately not addressed by tuning against the answers.
+
+**The tripwire is unchanged and now matters more.** Building the engine advanced `L1`, `D1`,
+`N1`, `C1`, `W1`, `P1`, `PAY1` and `S1` by exactly nothing, and every one of them still
+gates the product. A green eval board is not customer evidence.
