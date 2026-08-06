@@ -438,3 +438,67 @@ comparison, which retrieval alone cannot surface. Failure analysis is queued in
 **The tripwire is unchanged and now matters more.** Building the engine advanced `L1`, `D1`,
 `N1`, `C1`, `W1`, `P1`, `PAY1` and `S1` by exactly nothing, and every one of them still
 gates the product. A green eval board is not customer evidence.
+
+---
+
+## 2026-08-06 · Benchmark v1 invalidated; embedding contract added
+
+**Do not cite the retrieval or abstention figures from the entry above.** The 2026-08-06
+entry "M1 engine built and scored" reports retrieval recall 73.7% (14/19) and abstention
+100%. Both are invalid. They were measured on a corpus embedded with
+`all-MiniLM-L6-v2` while every document — the benchmark record, the commit message and that
+log entry — named `BAAI/bge-small-en-v1.5`. A local `.env` pinned MiniLM, the code default
+was bge-small, and nothing reported the resolved value.
+
+The evidence-integrity gates in that entry are **unaffected** and were re-confirmed: G1, G2,
+G3, G9, G10, G11 at 100% and G12 at zero are model-independent.
+
+**Three defects, all now fixed.**
+
+*D1 — equal dimension was treated as compatibility.* Both models are 384-dimensional, so
+pgvector compared vectors from different spaces without complaint. Querying a MiniLM room
+with bge vectors abstained on 19 of 19 answerable questions: the engine reported "not found
+in this corpus" for content that was present. It did not fabricate, but a silent omission is
+the failure G1 and G2 exist to prevent, and it is worse than an error because nothing
+announces it. Vector search now resolves the room's stored model first and raises.
+
+*D2 — the abstention floor was a bare global constant.* `SIMILARITY_FLOOR = 0.42` was fitted
+to MiniLM and silently governed bge, taking abstention from 100% to 0%. A floor is now a
+record bound to a model, carrying the query sets, score ranges, fixture hash and a held-out
+validation. A model with no record raises rather than falling back.
+
+*D3 — configuration drift.* `.env.example` and `config.py` disagreed on the model. There is
+now one canonical constant, a test that fails the build if the two diverge, and `reef config`
+to report the resolved value and its origin.
+
+**The corrected numbers are worse, and that is the point.** Retrieval recall rises to 78.9%
+(15/19), but abstention measured on *held-out* negatives is **50%** — three of six leak. The
+calibration record states plainly that the floor does not generalise: a held-out negative
+scores 0.7308, inside the answerable range of 0.6789-0.7939, so no floor separates the sets.
+The floor was not raised to chase the leaks, because that would reject genuinely answerable
+queries and would be fitting the gate to its own evaluation.
+
+All three leaks are subjects the corpus covers whose specific fact is absent — an ESOP
+schedule, an interest-rate swap, a Delaware subsidiary list. This confirms structurally what
+was previously recorded as a boundary: retrieval cannot distinguish "the corpus covers this
+subject" from "the corpus states this fact". A working abstention gate needs a layer that
+does not exist.
+
+**The verified R1 miss set is RDG-008, RDG-009, RDG-015, RDG-021** — not the five previously
+recorded. RDG-004, RDG-018 and RDG-019 were artifacts of the model mismatch and retrieve
+their sources at rank 1-3 under the corrected configuration.
+
+**What this says about the process.** The v1 error survived a full verification pass — 83
+tests, lint, strict typing, a clean-install check — two commits and a written report. Tests
+passed because they never asserted that the configuration a benchmark *claims* is the one it
+*ran*. That is now asserted. The independent cold-run review in `NEXT-EVALUATIONS.md` §2 is
+the strongest remaining control and has still not been done.
+
+Canonical model is `BAAI/bge-small-en-v1.5`, chosen on a criterion unrelated to retrieval
+scores: its 512-token window covers the 500-token chunk ceiling, where MiniLM's 256-token
+window truncates 15 of 862 chunks and discards 14.2% of indexed text while the chunk still
+claims provenance over text that never reached the model.
+
+Records: `reef/benchmarks/ridgeline-m1-baseline-v2.json` supersedes
+`ridgeline-m1-baseline-invalidated.json`, which is preserved rather than deleted so the
+error, its detection and its correction stay legible.

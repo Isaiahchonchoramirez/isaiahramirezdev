@@ -50,11 +50,17 @@ uv run reef evaluate --r2       # with the R2 delta
 uv run uvicorn reef.api:app --reload
 ```
 
+```bash
+# Show the resolved configuration and where every value came from
+uv run reef config
+```
+
 `reef coverage`, `reef rooms` and `reef drop` round out the CLI.
 
 ## Current results
 
-Against `fixtures/reef-deal-room` v1.0.0, R1 run, OCR enabled:
+Against `fixtures/reef-deal-room` v1.0.0, R1 run, OCR enabled, on an empty database with no
+`.env`. Full record: [`benchmarks/ridgeline-m1-baseline-v2.json`](benchmarks/ridgeline-m1-baseline-v2.json).
 
 | Gate | Measure | Value | Bar |
 |---|---|---|---|
@@ -65,18 +71,25 @@ Against `fixtures/reef-deal-room` v1.0.0, R1 run, OCR enabled:
 | G10 | Citation location accuracy | 100% | ≥95% |
 | G11 | Deterministic extraction reproducibility | 100% | ≥100% |
 | G12 | Fabricated citations | 0 | 0 |
-| ABS | Abstention on absent subjects | 100% | ≥100% |
-| R@12 | Retrieval recall on planted findings | 73.7% (14/19) | baseline, no bar yet |
+| **ABS** | **Abstention on held-out absent subjects** | **50% (3 of 6 leak)** | **≥100% — FAILS** |
+| R@12 | Retrieval recall on planted findings | 78.9% (15/19) | baseline, no bar yet |
 
-121 files, 120 indexed, 869 chunks, ~12 seconds. The one unindexed file is a
-password-protected archive, correctly registered as unsupported with an actionable reason
-rather than silently dropped.
+117 files, 116 indexed, 862 chunks, ~14 seconds (R1 subset; the full fixture is 121/120/869).
+The one unindexed file is a password-protected archive, correctly registered as unsupported
+with an actionable reason rather than silently dropped.
+
+**The abstention gate fails and cannot be fixed by moving the floor.** The answerable and
+held-out-negative score distributions overlap: a negative scores 0.7308 inside an answerable
+range of 0.6789–0.7939. All three leaks are subjects the corpus covers whose specific fact is
+absent. See [`NEXT-EVALUATIONS.md`](NEXT-EVALUATIONS.md) §0.
 
 **G4–G8 and G13–G15 are not scored.** They measure the finding layer, which this engine
 does not have. Reporting a number for them would be inventing one.
 
-Reports: [`docs/evaluation/eval-run-r1.json`](../docs/evaluation/eval-run-r1.json) and
-[`eval-run-r1r2.json`](../docs/evaluation/eval-run-r1r2.json).
+An earlier record ([`ridgeline-m1-baseline-invalidated.json`](benchmarks/ridgeline-m1-baseline-invalidated.json))
+reported 73.7% recall and 100% abstention. Those figures are **invalid**: it documented
+bge-small while its corpus was embedded with MiniLM. It is preserved, labelled, rather than
+deleted.
 
 ## Design notes
 
@@ -106,8 +119,19 @@ encoder changes, these move with it.
 **The abstention gate reads absolute similarity, not the fused score.** Reciprocal rank
 fusion is rank-based and discards the one number that says whether anything matched — a
 vector search always returns its top-k, and its worst result still ranks first among them.
-An earlier rank-based gate admitted every nonsense query put to it. The floor
-(`search.SIMILARITY_FLOOR`) is calibrated on ten queries and is explicitly provisional.
+An earlier rank-based gate admitted every nonsense query put to it.
+
+**The floor belongs to the model, not to Reef.** It lives in `calibration_data/<model>.json`
+with the evidence that produced it: the query sets, the score ranges, the fixture hash, and
+a held-out validation. A bare module constant is what let a floor fitted to MiniLM govern
+bge-small and take abstention from 100% to 0% with no error. Searching a model with no
+calibration record raises rather than falling back to a default.
+
+**Equal vector dimension is not embedding compatibility.** MiniLM and bge-small are both
+384-dimensional, so pgvector compares them without complaint and every similarity is
+meaningless. `corpus.py` resolves the room's stored model before any vector search and
+refuses to proceed on a mismatch, a mixed-model room, or unattributed vectors. Nothing is
+re-embedded as a side effect of a query.
 
 **OCR preprocessing order was measured, not reasoned.** Render at the page's native raster
 resolution, upscale with LANCZOS, then median filter. Reversing the last two steps turns
@@ -121,7 +145,10 @@ looks like glyphs. See `extract/ocr.py`.
 
 ```
 src/reef/
-  config.py            settings; chunk sizes derive from the encoder window
+  config.py            settings, and the single source of truth for the embedding identity
+  calibration.py       model-bound abstention floors, read at request time
+  calibrate_floor.py   the offline procedure that fits a floor and records its evidence
+  corpus.py            the embedding compatibility contract; equal dimension is not enough
   models.py            the evidence schema — document, page, span, chunk, claim, support
   db.py                room_session() binds the tenant to the transaction; RLS reads it
   storage.py           object storage — filesystem or S3 behind one interface
@@ -146,7 +173,7 @@ src/reef/
 ## Tests
 
 ```bash
-uv run pytest              # 73 tests, needs the database
+uv run pytest              # 111 tests, needs the database
 uv run ruff check src tests
 uv run mypy src
 ```

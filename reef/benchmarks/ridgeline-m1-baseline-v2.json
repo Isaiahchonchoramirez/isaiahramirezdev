@@ -1,0 +1,189 @@
+{
+  "record_version": "2",
+  "name": "ridgeline-m1-baseline-v2",
+  "recorded_at": "2026-08-06T14:45:00Z",
+  "supersedes": "reef/benchmarks/ridgeline-m1-baseline-invalidated.json",
+  "authority": "docs/decisions/ADR-003-m1-engine-authorization.md",
+
+  "what_this_is_not": [
+    "A synthetic-fixture mechanics result. It does not validate real-package performance.",
+    "Not customer evidence, demand evidence, or payment evidence. Counting it as any of those is an automatic-fail condition on docs/validation/SCORECARD.md.",
+    "It does not validate hypothesis T1. The fixture's PDFs were generated rather than scanned; docs/validation/SYNTHETIC_DEAL_ROOM_SPEC.md records that synthetic degradation is kinder than a decade-old fax.",
+    "M1 is not validated, not production-ready, and not approved for customer data.",
+    "The abstention gate FAILS on held-out negatives. This record does not claim a working abstention gate."
+  ],
+
+  "why_v2_exists": "The v1 record documented BAAI/bge-small-en-v1.5 while its corpus was embedded with all-MiniLM-L6-v2. A local .env pinned MiniLM, the code default was bge-small, and nothing reported the resolved value. This run was produced on an empty database, an empty storage directory, and no .env, with the resolved configuration printed before the run.",
+
+  "reproducibility": {
+    "database": "created empty for this run (reef_v2); no room reused from any prior run",
+    "storage_root": "created empty for this run",
+    "dotenv_present": false,
+    "resolved_configuration_source": "code defaults in src/reef/config.py, verified with `reef config`",
+    "environment_overrides_at_run_time": [
+      "REEF_DATABASE_URL", "REEF_MIGRATION_DATABASE_URL", "REEF_STORAGE_ROOT", "REEF_OCR_PROVIDER"
+    ],
+    "overrides_affecting_model_identity": "none",
+    "repeat_run": "a second ingest under identical configuration produced 862 chunks and the single model BAAI/bge-small-en-v1.5, with identical derived identifiers"
+  },
+
+  "fixture": {
+    "name": "reef-deal-room",
+    "version": "1.0.0",
+    "seed": 20260805,
+    "corpus_sha256": "02379a0ac08a0d91422e34dc33acc00d6b0c0bcd7a693c3e51d46b373ac8dd69",
+    "corpus_sha256_method": "sha256 over the sorted per-file sha256 list, excluding ground-truth.json, GROUND_TRUTH.md, README.md and outputs/",
+    "answer_key_withheld_from_engine": true,
+    "run": "R1",
+    "r2_delta_excluded": true
+  },
+
+  "pipeline": {
+    "version": "1",
+    "identifier_scheme": "uuid5 over namespace + pipeline version + document sha256 + coordinates",
+    "embedding_model": "BAAI/bge-small-en-v1.5",
+    "embedding_dimension": 384,
+    "embedding_max_tokens": 512,
+    "embedding_model_verified_against_stored_vectors": true,
+    "stored_model_census": { "BAAI/bge-small-en-v1.5": 862 },
+    "chunk_target_tokens": 420,
+    "chunk_max_tokens": 500,
+    "chunk_truncation_under_this_model": 0,
+    "ocr_provider": "tesseract 5.5.3",
+    "retrieval": "pgvector cosine + postgres FTS, reciprocal rank fusion (k=60)",
+    "extractors": {
+      "application/pdf": "pymupdf 1.28.0",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "openpyxl 3.1.5",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "python-docx 1.2.0",
+      "text/csv": "stdlib-csv",
+      "text/plain": "stdlib-text",
+      "text/markdown": "stdlib-text"
+    }
+  },
+
+  "model_selection": {
+    "selected": "BAAI/bge-small-en-v1.5",
+    "rejected": "sentence-transformers/all-MiniLM-L6-v2",
+    "decisive_criterion": "encoder window versus chunk ceiling",
+    "evidence": {
+      "bge_max_tokens": 512,
+      "minilm_max_tokens": 256,
+      "chunk_max_tokens": 500,
+      "chunks_truncated_under_minilm": 15,
+      "chunks_total": 862,
+      "indexed_text_discarded_under_minilm_pct": 14.2,
+      "chunks_truncated_under_bge": 0
+    },
+    "secondary_and_not_decisive": {
+      "encode_256_texts_seconds": { "bge": 0.16, "minilm": 0.37 },
+      "on_disk_mb": { "bge": 269.0, "minilm": 183.2 },
+      "dimension": { "bge": 384, "minilm": 384 }
+    },
+    "rationale": "A chunk larger than the encoder window is truncated at embed time while the chunk still claims provenance over the text that never reached the model. That is the failure ingest/chunk.py was sized to prevent, and MiniLM reintroduces it on 1.7% of chunks covering 14.2% of indexed text. The choice was not made on fixture recall.",
+    "scope_limit": "One fixture. This establishes suitability for these chunk sizes, not general superiority."
+  },
+
+  "calibration": {
+    "record": "src/reef/calibration_data/BAAI--bge-small-en-v1.5.json",
+    "status": "calibrated",
+    "similarity_metric": "cosine",
+    "similarity_floor": 0.6555,
+    "method": "midpoint of the gap between the weakest answerable score and the strongest fitted-negative score; not selected by searching for the value that maximises fixture recall",
+    "answerable_scores": { "n": 10, "min": 0.6789, "max": 0.7939, "mean": 0.7461 },
+    "fitted_negative_scores": { "n": 6, "min": 0.595, "max": 0.6322, "mean": 0.6118 },
+    "heldout_negative_scores": { "n": 6, "min": 0.581, "max": 0.7308 },
+    "separation_fitted": 0.0467,
+    "separation_heldout": -0.052,
+    "generalises": false,
+    "finding": "The held-out negatives reach 0.7308, inside the answerable range (0.6789-0.7939). No floor separates the two sets. The positive fitted separation was an artifact of a six-query calibration set. The floor was NOT raised to chase the leaks, because doing so would reject genuinely answerable queries and would be fitting the gate to the evaluation."
+  },
+
+  "corpus": {
+    "files_supplied": 117,
+    "files_indexed": 116,
+    "files_inaccessible": 1,
+    "inaccessible_detail": [
+      {
+        "path": "08_Tax/Tax_Support_2023-2025.zip",
+        "state": "unsupported",
+        "reason": "archive is password-protected; supply the password to process",
+        "note": "registered explicitly and distinguishable from a missing file"
+      }
+    ],
+    "chunks_indexed": 862,
+    "spans_extracted": 1739,
+    "runtime_seconds": 14.4,
+    "runtime_scope": "intake through embedding and indexing, single process, empty database, model already downloaded",
+    "note": "counts are the R1 subset (11_Update_R2 excluded); the full fixture is 121/120/869"
+  },
+
+  "evidence_integrity_gates": {
+    "note": "model-independent; unchanged from the invalidated record and re-confirmed here",
+    "G1_inventory_recall": { "value": 1.0, "threshold": 1.0, "passed": true },
+    "G2_processing_status_correctness": { "value": 1.0, "threshold": 1.0, "passed": true },
+    "G3_parsing_success_supported_formats": { "value": 1.0, "threshold": 0.95, "passed": true },
+    "G9_citation_presence": { "value": 1.0, "threshold": 1.0, "passed": true },
+    "G10_citation_location_accuracy": { "value": 1.0, "threshold": 0.95, "passed": true, "anchors_checked": 1739, "mismatched": 0 },
+    "G11_deterministic_reproducibility": { "value": 1.0, "threshold": 1.0, "passed": true, "documents_reextracted": 116, "drifted": 0 },
+    "G12_fabricated_citations": { "value": 0, "threshold": 0, "passed": true }
+  },
+
+  "gates_not_scored": {
+    "gates": ["G4", "G5", "G6", "G7", "G8", "G13", "G14", "G15"],
+    "reason": "these score the finding layer, which ADR-003 section 4 does not authorize. Reporting a value for them would be inventing a number."
+  },
+
+  "retrieval": {
+    "metric": "recall@12 on planted-finding source documents, queried by finding title only",
+    "reported_as": "baseline",
+    "is_a_product_gate": false,
+    "threshold": null,
+    "value": 0.7895,
+    "recalled": 15,
+    "scored": 19,
+    "scored_note": "19 of 22 planted findings are reachable from the R1 corpus; the other 3 depend on the R2 delta",
+    "verified_miss_set": [
+      { "id": "RDG-008", "title": "Single-supplier dependency with 60-day termination" },
+      { "id": "RDG-009", "title": "Unbilled work in process grew far faster than revenue", "note": "abstained at 0.6488, just below the 0.6555 floor — a recall cost of the calibrated floor, not a retrieval failure" },
+      { "id": "RDG-015", "title": "Referenced Exhibit B absent from baseline room", "note": "abstained at 0.5735; the finding is an absence, and no passage states it" },
+      { "id": "RDG-021", "title": "Tax support archive cannot be opened", "note": "the source is the encrypted archive, which has no chunks by construction and cannot be retrieved" }
+    ],
+    "supersedes_miss_set": "The invalidated record listed RDG-004, RDG-015, RDG-018, RDG-019, RDG-021. Three of those were artifacts of the model mismatch and retrieve correctly under the corrected configuration.",
+    "miss_interpretation": "Several misses describe an absence or a cross-document comparison rather than a passage of text. Classification is pending; see reef/NEXT-EVALUATIONS.md."
+  },
+
+  "abstention": {
+    "scored_on": "held-out negatives, disjoint from the calibration set and from the planted findings",
+    "value": 0.5,
+    "threshold": 1.0,
+    "passed": false,
+    "leaked": 3,
+    "of": 6,
+    "leaks": [
+      { "query": "what is the company's employee stock ownership plan vesting schedule", "similarity": 0.7308, "surfaced": "request_list.csv" },
+      { "query": "what are the terms of the interest rate swap", "similarity": 0.665, "surfaced": "debt_schedule.csv" },
+      { "query": "list the company's subsidiaries incorporated in Delaware", "similarity": 0.6623, "surfaced": "request_list.csv" }
+    ],
+    "calibration_set_result": "6 of 6 abstained — reported for transparency only; the floor was fitted to separate exactly these, so passing them is not evidence",
+    "interpretation": "All three leaks are subjects the corpus covers whose specific fact is absent: it has a request list, a debt schedule and corporate records, but no ESOP schedule, no swap and no Delaware subsidiary list. Retrieval cannot distinguish 'the corpus covers this subject' from 'the corpus states this fact'. That separation belongs to a findings layer, which does not exist.",
+    "honesty_note": "The invalidated record claimed 100% here. That number was measured on a small non-held-out set under a different model. 50% on held-out negatives is the reproducible figure."
+  },
+
+  "verification": {
+    "tests_passed": 111,
+    "tests_failed": 0,
+    "ruff": "clean",
+    "ruff_format": "clean",
+    "mypy_strict": "clean, 26 source files",
+    "package_build": "wheel and sdist built",
+    "clean_install": "wheel installed into an empty virtualenv and exercised outside the source checkout"
+  },
+
+  "known_limitations": [
+    "One synthetic fixture. Nothing here generalises to real packages.",
+    "The abstention floor does not generalise to held-out negatives and the gate fails at 50%.",
+    "Calibration used 10 answerable and 6 fitted-negative queries. That is a small sample.",
+    "The answerable, negative and held-out query sets were all written by the party that built the engine and the fixture. No independent cold-run review has been done.",
+    "Retrieval recall is scored by finding title, which is a generous proxy for what a reviewer would type."
+  ]
+}
