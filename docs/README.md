@@ -13,6 +13,12 @@ customer validation and paid concierge work, not M1 application implementation.
 Read [ADR-001](decisions/ADR-001-initial-market-wedge.md) before relying on any market,
 customer, workflow, pricing, or MVP statement.
 
+[ADR-003](decisions/ADR-003-m1-engine-authorization.md) splits the M1 gate in two. The
+**engine gate is open** — the headless ingestion and evidence pipeline in `reef/` is
+authorized against the synthetic fixture only. The **product gate is closed** — pricing,
+offers, pilots, live customer documents, the review UI and export all still require the
+six conditions below. Read ADR-003 before writing or reading application code.
+
 ## Required reading order
 
 1. [ADR-001: initial market wedge](decisions/ADR-001-initial-market-wedge.md)
@@ -79,10 +85,19 @@ replacement and the reason it was superseded.
 
 ## What must be true before application development begins
 
-M1 is blocked. Permitted work today: interviews, desk research, synthetic fixtures,
-manual pilot delivery, legal and security preparation, and documentation.
+> **Amended by [ADR-003](decisions/ADR-003-m1-engine-authorization.md), 2026-08-06.** The
+> six conditions below are unchanged and still binding, but they now scope to the
+> **product gate**: pricing, pilot offers, live customer documents, the review UI, export,
+> and launch. The **engine gate** — the headless pipeline in `reef/`, validated on the
+> synthetic fixture and nothing else — is open under ADR-003 §4. No threshold in
+> [SCORECARD.md](validation/SCORECARD.md) was changed; all nineteen mandatory rows remain
+> without evidence.
 
-All six must hold:
+The product is blocked. Permitted work today: interviews, desk research, synthetic
+fixtures, manual pilot delivery, legal and security preparation, documentation, and the
+engine scope authorized by ADR-003 §4.
+
+All six must hold before the product gate opens:
 
 1. Every mandatory row in [SCORECARD.md](validation/SCORECARD.md) is Pass — including
    the blocking hypotheses `L1` (lawful third-party processing) and `N1` (the buyer, or
@@ -92,10 +107,12 @@ All six must hold:
 4. A written review of rejected and contradictory evidence exists in
    [DECISION_LOG.md](validation/DECISION_LOG.md), including the sealed prediction
    comparison.
-5. **ADR-003** records one of four decisions: build M1, narrow and revalidate, pivot to
-   the engineering wedge, or stop.
-6. If ADR-003 says build, it names the exact user, input boundary, five or fewer first
-   checks, deliverable, security boundary, owner, evaluation set, and M1 exit criteria.
+5. **A superseding ADR** records one of four decisions: build the product, narrow and
+   revalidate, pivot to the engineering wedge, or stop. (This condition originally named
+   ADR-003; ADR-003 was instead written to authorize the engine and explicitly declines to
+   decide the product. The next ADR in sequence satisfies this row.)
+6. If it says build, it names the exact user, input boundary, five or fewer first checks,
+   deliverable, security boundary, owner, evaluation set, and product exit criteria.
 
 Synthetic-fixture results satisfy none of these. They validate mechanics only, and
 counting them as customer or payment evidence is an automatic-fail condition.
@@ -106,7 +123,9 @@ counting them as customer or payment evidence is an automatic-fail condition.
 2. This index defines which documents are canonical.
 3. Canonical product and business documents define current scope.
 4. Historical documents preserve reasoning but never authorize work.
-5. Application code cannot begin until the six conditions above are satisfied.
+5. Product code cannot begin until the six conditions above are satisfied. Engine code is
+   bounded by [ADR-003](decisions/ADR-003-m1-engine-authorization.md) §4, and an eval score
+   is never customer or payment evidence.
 6. When observed customer evidence contradicts a canonical document, amend or supersede
    the governing ADR **before** changing implementation scope — never edit the document
    quietly to match the evidence.

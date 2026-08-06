@@ -309,3 +309,53 @@ tests.
 5. **Has anyone actually tried their VDR's AI?** `X1`. If most have not, incumbent
    strength is unknown rather than low.
 6. **Does the register get used in a real meeting?** The outcome gate.
+
+---
+
+## 2026-08-06 · M1 gate split; engine authorized, product still blocked
+
+**Decision.** Build the headless ingestion and evidence engine now, validated against
+`fixtures/reef-deal-room` only. Recorded in
+[ADR-003](../decisions/ADR-003-m1-engine-authorization.md). Everything commercial —
+pricing, offers, pilots, live customer documents, the review UI, export — remains blocked
+by the nineteen mandatory scorecard rows, none of which has evidence.
+
+**Why the gate could be split.** The engine is wedge-independent. Ingestion, coordinate-
+preserving anchors, chunking, hybrid retrieval and the evidence join are identical whether
+the buyer is a searcher, an independent sponsor, a QoE provider, a sell-side advisor, or an
+AEC firm under the deferred engineering wedge. Every reversal candidate ADR-001 and ADR-002
+keep live consumes the same pipeline, so the engine survives all four outcomes of the
+build/narrow/pivot/stop decision — including *stop*.
+
+**The second reason, which is the stronger one.** `T1` (anchors reach 95%) and `T2` (checks
+reach precision) are the only two hypotheses in `HYPOTHESES.md` that interviews cannot
+answer. They need a working extractor measured against labeled findings. Deferring them
+behind interviews that structurally cannot test them means they get tested after
+commitments exist, which is the wrong order for the two rows whose failure mode is
+technical.
+
+**No threshold moved.** Every number in `SCORECARD.md` is unchanged. No row was
+reclassified. The anti-gaming rule that matters — a superseding ADR written before the data
+is seen — is satisfied: no eval had been run when the decision was taken.
+
+**The honest risk, recorded rather than argued away.** Engine work is more enjoyable than
+cold outreach, and this repository holds roughly five thousand lines of documentation and
+zero customer conversations. That ratio is the actual finding of the last two days and it is
+not a good one. ADR-003 §7 sets a tripwire: if no qualified interview has been conducted by
+**2026-09-06**, engine work stops until five are booked, and the reason for the displacement
+is written here. `L1` needs one call with a transaction attorney and can be answered in a
+week without any of the engine existing.
+
+**Deferred deliberately.** The recommendation to reposition Reef as an intelligence platform
+with diligence as the first paid vertical is *not* decided by ADR-003. It changes nothing
+about the engine scope, and rewriting canonical strategy on zero customer evidence is the
+same defect ADR-002 recorded about the original $1,500 price. Revisit with eval results in
+hand.
+
+**What would reverse it.** Anchor accuracy misses 95% after one bounded remediation cycle —
+`T1` fails and the differentiating claim is undeliverable. Or the tripwire fires and
+interviews still do not happen, in which case the problem was never the roadmap.
+
+**Also recorded:** the `projects/reef-showcase/` work from 2026-08-05 was lost to a terminal
+crash before it was ever committed. The directory contained one empty lockfile. Nothing is
+being reconstructed — ADR-003 supersedes the showcase approach with the engine.
