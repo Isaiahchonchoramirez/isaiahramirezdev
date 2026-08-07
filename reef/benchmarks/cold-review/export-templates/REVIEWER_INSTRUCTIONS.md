@@ -10,14 +10,24 @@ what is actually in front of them.
 
 ## Phase 0 · Verify and install (20 min)
 
+Pick a **reviewer id** first: 2–16 characters, lowercase letters, digits and underscores.
+Your initials are fine. It names your database and your room, so that nothing another
+review left on this machine can reach yours.
+
 ```bash
 bash verify_blinding.sh .          # must print PASS
-cd engine && bash setup.sh         # see ENGINE_USAGE.md if this fails
+cd engine && bash setup.sh <your-id>   # see ENGINE_USAGE.md if this fails
 ```
+
+`setup.sh` installs the engine, creates an empty database called `reef_cr_<your-id>`, and
+applies the schema. **It does not load the data room.** That happens in Phase 3, after your
+questions are frozen — loading it now would show you what the engine covers before you have
+committed to what you expect, and that is the thing being measured.
 
 Record the output of `reef config` when `setup.sh` prints it. If the line reporting a
 `dotenv` file says anything other than "none present", **stop and report it** — it means the
-engine is running on configuration you were not shown.
+engine is running on configuration you were not shown. Everything `setup.sh` sets is written
+to `engine/reviewer-env.sh`, which you can read.
 
 ---
 
@@ -72,38 +82,37 @@ Fill in `cold-review-queries.json` following `QUERY_SUBMISSION_TEMPLATE.json`.
 
 ### Freeze your questions before running anything
 
-Either hash them:
+One mechanism, a detached hash file:
 
 ```bash
 shasum -a 256 cold-review-queries.json > cold-review-queries.sha256
 cat cold-review-queries.sha256
 ```
 
-or start a fresh repository inside this export — it has none, so anything you create is
-yours alone and connects to nothing:
-
-```bash
-git init -q . && git add cold-review-queries.json
-git commit -q -m "cold review: pre-registered queries and labels"
-git rev-parse HEAD
-```
-
 Record the hash in your results. **This is what makes your labels pre-registered.** Without
 it the review demonstrates nothing, because nobody can later tell what you expected before
 you saw the answers.
 
+Nothing stops you from also committing to a repository you create here, and
+`verify_blinding.sh` accepts one it can tell was created after the export was built. It is
+not required, and the hash file is what the adjudicator reads.
+
 ---
 
-## Phase 3 · Run the engine (20 min)
+## Phase 3 · Load the room and run the engine (25 min)
 
-See `engine/ENGINE_USAGE.md`. In outline:
+Your questions are frozen. Now — and not before — load the data room.
 
 ```bash
+bash verify_blinding.sh .          # confirms your database is still empty and still yours
 cd engine
-./run.sh ingest ../deal-room --room cold-review
-./run.sh coverage cold-review
-./run.sh query "<your question>" --room cold-review
+./run.sh ingest ../deal-room --room cold-review-<your-id>
+./run.sh coverage cold-review-<your-id>
+./run.sh query "<your question>" --room cold-review-<your-id>
 ```
+
+`run.sh` reads your room name from `reviewer-env.sh`; `setup.sh` printed the exact commands
+with your id already filled in. See `engine/ENGINE_USAGE.md` for the rest.
 
 Run `reef coverage` early. It reports what the engine did with every file, including any it
 could not process — useful context, and worth checking against what you noticed by hand.
@@ -128,9 +137,27 @@ Follow `SCORING_PROTOCOL.md`. Produce `cold-review-results.json` matching
 
 ## Phase 5 · Observations (30 min)
 
-Fill in `REVIEWER_OBSERVATIONS_TEMPLATE.md`. Then hash or commit both files.
+Fill in `REVIEWER_OBSERVATIONS_TEMPLATE.md`. Then hash both files the same way:
+
+```bash
+shasum -a 256 cold-review-results.json REVIEWER_OBSERVATIONS.md > cold-review-results.sha256
+```
 
 **Your results are now frozen.** Request the answer key and follow `ADJUDICATION_HANDOFF.md`.
+
+---
+
+## Phase 6 · Tear down
+
+After the adjudicator has your results, remove the database. It is the one part of this
+review that lives outside the export directory, and leaving it behind is how the next
+reviewer inherits your index.
+
+```bash
+cd engine && bash teardown.sh <your-id>
+```
+
+Keep the directory and your hash files.
 
 ---
 

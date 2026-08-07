@@ -37,7 +37,11 @@ FIXTURE = REPO / "fixtures" / "reef-deal-room"
 TEMPLATES = COLD_REVIEW / "export-templates"
 
 DEFAULT_OUT = Path.home() / "Developer" / "reef-cold-review-export"
-PROTOCOL_VERSION = "1"
+#: Bumped when a protocol change makes two reviews non-comparable. Version 2 gives each
+#: reviewer a dedicated database and a namespaced room, fixes the freeze mechanism on one
+#: detached hash file, and moves ingestion out of setup into a phase of its own — see
+#: COLD_REVIEW_ADJUDICATION_001.md §6. Review 001 ran under version 1.
+PROTOCOL_VERSION = "2"
 
 #: Document folders a buyer would receive. Everything else under the fixture — the answer
 #: key, the worked outputs, the fixture's own README describing what was planted — is simply
@@ -55,7 +59,7 @@ ROOT_DOCS = (
     "RESULT_STATES.md", "REVIEWER_OBSERVATIONS_TEMPLATE.md", "ADJUDICATION_HANDOFF.md",
     "QUERY_SUBMISSION_TEMPLATE.json", "EXPECTED_OUTPUT_SCHEMA.json",
 )
-ENGINE_DOCS = ("ENGINE_USAGE.md", "setup.sh")
+ENGINE_DOCS = ("ENGINE_USAGE.md", "setup.sh", "teardown.sh")
 
 #: Names that must never appear in the export, whatever the allowlist says. A second,
 #: independent guard: if a permitted directory ever gains one of these, the build aborts
@@ -279,6 +283,7 @@ def main() -> int:
     for name in ENGINE_DOCS:
         copy_file(TEMPLATES / name, engine / name, report)
     (engine / "setup.sh").chmod(0o755)
+    (engine / "teardown.sh").chmod(0o755)
 
     patch_alembic_ini(REEF / "alembic.ini", engine / "alembic.ini", report)
     copy_tree(REEF / "alembic", engine / "alembic", report, suffixes=(".py", ".mako"))

@@ -10,9 +10,11 @@ that no engine test would catch.
 from __future__ import annotations
 
 import json
+import os
 import re
 import shutil
 import subprocess
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import pytest
@@ -196,6 +198,34 @@ class TestHeldOutContaminationIsDeclared:
         assert "contaminated" in source.lower()
 
 
+#: A fixed, comfortably-past build time for synthetic exports. The verifier's `.git` check
+#: is a comparison against it, so tests need commits it can fall on either side of.
+_BUILT_AT = datetime(2026, 6, 1, tzinfo=UTC)
+
+
+def _git(root: Path, *args: str, when: datetime | None = None) -> None:
+    """Run git in `root` with a fixed identity, and optionally a fixed commit time."""
+    env = {
+        **os.environ,
+        "GIT_AUTHOR_NAME": "reviewer",
+        "GIT_AUTHOR_EMAIL": "reviewer@example.invalid",
+        "GIT_COMMITTER_NAME": "reviewer",
+        "GIT_COMMITTER_EMAIL": "reviewer@example.invalid",
+    }
+    if when is not None:
+        env["GIT_AUTHOR_DATE"] = env["GIT_COMMITTER_DATE"] = when.isoformat()
+    subprocess.run(
+        ["git", "-C", str(root), *args], check=True, capture_output=True, text=True, env=env
+    )
+
+
+def _freeze_repository(root: Path, when: datetime) -> None:
+    """What a reviewer does if they reach for git: init here, add, commit. Nothing else."""
+    _git(root, "init", "-q", ".")
+    _git(root, "add", "QUERY_SUBMISSION_TEMPLATE.json")
+    _git(root, "commit", "-q", "-m", "pre-registered queries", when=when)
+
+
 def _minimal_export(root: Path) -> Path:
     """A structurally valid export, so the verifier's own checks can be exercised."""
     (root / "engine").mkdir(parents=True)
@@ -214,11 +244,19 @@ def _minimal_export(root: Path) -> Path:
     ):
         (root / name).write_text("placeholder\n")
     (root / "BLINDED_EXPORT_MANIFEST.json").write_text(
-        json.dumps({"manifest_sha256": "x", "engine": {"wheel_sha256": "y"}})
+        json.dumps(
+            {
+                "manifest_sha256": "x",
+                "engine": {"wheel_sha256": "y"},
+                # The verifier dates a reviewer's own `.git` against this.
+                "built_at": _BUILT_AT.isoformat(timespec="seconds"),
+            }
+        )
     )
     shutil.copyfile(VERIFIER, root / "verify_blinding.sh")
     (root / "engine" / "ENGINE_USAGE.md").write_text("x\n")
     (root / "engine" / "setup.sh").write_text("x\n")
+    (root / "engine" / "teardown.sh").write_text("x\n")
     (root / "engine" / "alembic.ini").write_text("x\n")
     (root / "engine" / "reef-0.1.0-py3-none-any.whl").write_bytes(b"PK\x05\x06" + b"\0" * 18)
     for i in range(13):
@@ -250,6 +288,7 @@ class TestExportTemplates:
         "RESULT_STATES.md",
         "ENGINE_USAGE.md",
         "setup.sh",
+        "teardown.sh",
     )
 
     def test_every_required_template_exists(self) -> None:
@@ -391,6 +430,231 @@ class TestBlindingVerifier:
         result = _run_verifier(root)
         assert result.returncode != 0
         assert "history" in result.stdout.lower()
+
+    def test_it_detects_other_version_control_systems(self, tmp_path: Path) -> None:
+        for vc in (".hg", ".svn", ".jj"):
+            root = _minimal_export(tmp_path / f"vc{vc}")
+            (root / vc).mkdir()
+            result = _run_verifier(root)
+            assert result.returncode != 0, f"{vc} was accepted"
+
+
+class TestVerifierDistinguishesReviewerGitFromInherited:
+    """Adjudication 001 §6.2: the verifier failed any `.git`, including the reviewer's own.
+
+    The instructions offered `git init` as a way to freeze pre-registered questions, and a
+    reviewer who took it could no longer run the check on their own export. The freeze is
+    now a detached hash file, but the distinction still has to work: history inherited from
+    the source repository is recoverable, and a repository created here after the export was
+    built holds only what the reviewer put in it.
+    """
+
+    def test_a_repository_created_after_the_export_is_accepted(self, tmp_path: Path) -> None:
+        root = _minimal_export(tmp_path / "reviewer-git")
+        _freeze_repository(root, when=_BUILT_AT + timedelta(hours=3))
+        result = _run_verifier(root)
+        assert result.returncode == 0, result.stdout
+        assert "created after this export" in result.stdout
+
+    def test_history_predating_the_export_is_rejected(self, tmp_path: Path) -> None:
+        root = _minimal_export(tmp_path / "inherited-git")
+        _freeze_repository(root, when=_BUILT_AT - timedelta(days=30))
+        result = _run_verifier(root)
+        assert result.returncode != 0
+        assert "predating this export" in result.stdout
+
+    def test_a_repository_with_remotes_is_rejected(self, tmp_path: Path) -> None:
+        """A remote is a route back to the repository holding the answer key."""
+        root = _minimal_export(tmp_path / "remote-git")
+        _freeze_repository(root, when=_BUILT_AT + timedelta(hours=3))
+        _git(root, "remote", "add", "origin", "https://example.invalid/reef.git")
+        result = _run_verifier(root)
+        assert result.returncode != 0
+        assert "remotes" in result.stdout
+
+    def test_a_nested_repository_is_always_rejected(self, tmp_path: Path) -> None:
+        """Following these instructions never produces one below the export root."""
+        root = _minimal_export(tmp_path / "nested-git")
+        _freeze_repository(root, when=_BUILT_AT + timedelta(hours=3))
+        (root / "deal-room" / ".git").mkdir()
+        result = _run_verifier(root)
+        assert result.returncode != 0
+        assert "nested .git" in result.stdout
+
+    def test_a_gitdir_link_is_rejected(self, tmp_path: Path) -> None:
+        """A `.git` file points at storage outside the export, which nothing here checks."""
+        root = _minimal_export(tmp_path / "linked-git")
+        (root / ".git").write_text(f"gitdir: {tmp_path / 'elsewhere'}\n")
+        result = _run_verifier(root)
+        assert result.returncode != 0
+        assert "external git directory" in result.stdout
+
+    def test_a_repository_is_rejected_when_the_export_has_no_build_time(
+        self, tmp_path: Path
+    ) -> None:
+        """Without a build time there is nothing to date the commits against."""
+        root = _minimal_export(tmp_path / "undated")
+        manifest = root / "BLINDED_EXPORT_MANIFEST.json"
+        record = json.loads(manifest.read_text())
+        del record["built_at"]
+        manifest.write_text(json.dumps(record))
+        _freeze_repository(root, when=_BUILT_AT + timedelta(hours=3))
+        result = _run_verifier(root)
+        assert result.returncode != 0
+        assert "no build time" in result.stdout
+
+
+class TestVerifierChecksDatabaseIsolation:
+    """Adjudication 001 §6.1: every filesystem check passed while a foreign room existed.
+
+    These assert the shape of the check without a database. Whether it reads Postgres
+    correctly is exercised by running it against a real export; what is pinned here is that
+    it refuses the configurations that made the first contamination possible.
+    """
+
+    def test_an_unprovisioned_export_passes(self, tmp_path: Path) -> None:
+        """Before setup runs there is no database, so there is nothing to have leaked."""
+        result = _run_verifier(_minimal_export(tmp_path / "unprovisioned"))
+        assert result.returncode == 0, result.stdout
+        assert "no reviewer database provisioned yet" in result.stdout
+
+    def test_a_shared_database_is_rejected(self, tmp_path: Path) -> None:
+        """`reef` is the host's development database — the one review 001 was polluted by."""
+        root = _minimal_export(tmp_path / "shared-db")
+        (root / "engine" / "reviewer-env.sh").write_text(
+            'export REEF_ROOM="cold-review-ab"\n'
+            'export REEF_DB_NAME="reef"\n'
+            'export REEF_DATABASE_URL="postgresql+psycopg://reef_app:reef_app@localhost:5432/reef"\n'
+        )
+        result = _run_verifier(root)
+        assert result.returncode != 0
+        assert "not a per-reviewer database" in result.stdout
+
+    def test_an_unnamespaced_room_is_rejected(self, tmp_path: Path) -> None:
+        """`cold-review` is the name review 001 told every reviewer to use."""
+        root = _minimal_export(tmp_path / "shared-room")
+        (root / "engine" / "reviewer-env.sh").write_text(
+            'export REEF_ROOM="cold-review"\n'
+            'export REEF_DB_NAME="reef_cr_ab"\n'
+            'export REEF_DATABASE_URL="postgresql+psycopg://x:x@localhost:5432/reef_cr_ab"\n'
+        )
+        result = _run_verifier(root)
+        assert result.returncode != 0
+        assert "not namespaced" in result.stdout
+
+    def test_a_url_pointing_elsewhere_is_rejected(self, tmp_path: Path) -> None:
+        """The name and the connection string must agree, or the check verifies nothing."""
+        root = _minimal_export(tmp_path / "mismatched-db")
+        (root / "engine" / "reviewer-env.sh").write_text(
+            'export REEF_ROOM="cold-review-ab"\n'
+            'export REEF_DB_NAME="reef_cr_ab"\n'
+            'export REEF_DATABASE_URL="postgresql+psycopg://x:x@localhost:5432/reef"\n'
+        )
+        result = _run_verifier(root)
+        assert result.returncode != 0
+        assert "points at" in result.stdout
+
+
+class TestReviewerDatabaseScripts:
+    """`setup.sh` and `teardown.sh` as shipped. Neither is run here; both are read."""
+
+    SETUP = TEMPLATES / "setup.sh"
+    TEARDOWN = TEMPLATES / "teardown.sh"
+
+    def test_setup_requires_a_reviewer_id(self) -> None:
+        result = subprocess.run(
+            ["bash", str(self.SETUP)],
+            capture_output=True,
+            text=True,
+            check=False,
+            cwd=TEMPLATES,
+            env={**os.environ, "REEF_REVIEWER_ID": ""},
+        )
+        assert result.returncode == 2
+        assert "reviewer-id" in result.stderr
+
+    def test_setup_rejects_a_malformed_reviewer_id(self) -> None:
+        result = subprocess.run(
+            ["bash", str(self.SETUP), "Not A Valid Id"],
+            capture_output=True,
+            text=True,
+            check=False,
+            cwd=TEMPLATES,
+        )
+        assert result.returncode == 2
+        assert "reviewer id must match" in result.stderr
+
+    def test_setup_namespaces_both_the_database_and_the_room(self) -> None:
+        source = self.SETUP.read_text(encoding="utf-8")
+        assert 'DB_NAME="reef_cr_${REVIEWER_ID}"' in source
+        assert 'ROOM_NAME="cold-review-${REVIEWER_ID}"' in source
+
+    def test_setup_refuses_a_database_that_already_holds_rooms(self) -> None:
+        source = self.SETUP.read_text(encoding="utf-8")
+        assert "SELECT count(*) FROM room" in source
+        assert "must start from an empty database" in source
+
+    def test_setup_does_not_ingest(self) -> None:
+        """Adjudication 001 §6.3: installing must not reveal coverage before the freeze.
+
+        The closing message *names* the Phase 3 commands, with the reviewer's room already
+        filled in, which is the point. What must not happen is setup running them.
+        """
+        source = self.SETUP.read_text(encoding="utf-8")
+        executed = source.split("cat <<DONE", 1)[0]
+        commands = [
+            line
+            for line in executed.splitlines()
+            if line.strip().startswith(("uv run", "./run.sh", "bash ", "reef "))
+        ]
+        assert commands, "no commands found — has setup.sh been restructured?"
+        assert not any("ingest" in line for line in commands), commands
+        assert not any("coverage" in line for line in commands), commands
+
+    def test_setup_writes_configuration_to_a_readable_file_not_a_dotenv(self) -> None:
+        """A `.env` would be picked up invisibly; the export tells reviewers to expect none."""
+        source = self.SETUP.read_text(encoding="utf-8")
+        assert "reviewer-env.sh" in source
+        assert "> .env" not in source
+
+    def test_teardown_only_drops_per_reviewer_databases(self) -> None:
+        source = self.TEARDOWN.read_text(encoding="utf-8")
+        assert "reef_cr_*)" in source
+        assert "refusing to drop" in source
+
+    def test_teardown_rejects_a_malformed_reviewer_id(self, tmp_path: Path) -> None:
+        script = tmp_path / "teardown.sh"
+        shutil.copyfile(self.TEARDOWN, script)
+        result = subprocess.run(
+            ["bash", str(script), "../reef"], capture_output=True, text=True, check=False
+        )
+        assert result.returncode == 2
+
+    def test_the_bootstrap_script_takes_the_database_name_as_a_parameter(self) -> None:
+        """Row-level security separates rooms; it does not separate two reviews on a host."""
+        source = (Path(__file__).resolve().parents[1] / "ops/bootstrap-local-db.sh").read_text()
+        assert 'DB_NAME="${REEF_DB_NAME:-reef}"' in source
+        assert "REEF_DB_NAME must match" in source
+
+
+class TestOneFreezeMechanism:
+    """Adjudication 001 §6.2: two freeze mechanisms, one of which broke the verifier."""
+
+    def test_the_instructions_name_the_hash_file_as_the_freeze(self) -> None:
+        text = (TEMPLATES / "REVIEWER_INSTRUCTIONS.md").read_text(encoding="utf-8")
+        assert "cold-review-queries.sha256" in text
+        assert "One mechanism" in text
+
+    def test_the_instructions_do_not_offer_git_as_an_alternative_freeze(self) -> None:
+        text = (TEMPLATES / "REVIEWER_INSTRUCTIONS.md").read_text(encoding="utf-8")
+        assert "git init -q ." not in text
+        assert "git rev-parse HEAD" not in text
+
+    def test_the_reviewer_is_told_to_ingest_after_freezing(self) -> None:
+        """Adjudication 001 §6.3: the phase order must be followable without contradiction."""
+        text = (TEMPLATES / "REVIEWER_INSTRUCTIONS.md").read_text(encoding="utf-8")
+        assert text.index("Freeze your questions") < text.index("./run.sh ingest")
+        assert "It does not load the data room" in text
 
     def test_it_detects_symlinks(self, tmp_path: Path) -> None:
         root = _minimal_export(tmp_path / "links")

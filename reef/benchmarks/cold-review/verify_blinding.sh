@@ -92,22 +92,89 @@ done
 [ "$hits" -eq 0 ] && ok "no planted identifiers or answer labels"
 
 # ------------------------------------------------------------- 3 · version-control storage
+#
+# The point of this check is that history inherited from the source repository can be read
+# back, whatever was deleted from the working tree. A repository the *reviewer* created
+# after the export was built carries no such history — it holds only what they committed.
+#
+# Earlier versions of this script could not tell the two apart and failed both, which made
+# the export trip its own check whenever a reviewer froze their questions with `git init`.
+# The freeze mechanism is now a detached SHA-256 file (REVIEWER_INSTRUCTIONS.md, Phase 2),
+# but a reviewer who reaches for git anyway should not be punished for it.
 echo "[3] version-control history"
 hits=0
-for vc in ".git" ".hg" ".svn" ".jj"; do
+for vc in ".hg" ".svn" ".jj"; do
     if find "$ROOT" -maxdepth 3 -name "$vc" 2>/dev/null | grep -q .; then
         note "$vc present — history is recoverable"; hits=1
     fi
 done
+
+# Only the export root may hold a reviewer-created repository. One nested inside deal-room/
+# or engine/ was never created by following these instructions.
+nested="$(find "$ROOT" -mindepth 2 -maxdepth 4 -name ".git" 2>/dev/null)"
+if [ -n "$nested" ]; then
+    note "nested .git — history is recoverable:"
+    echo "$nested" | sed "s|$ROOT/|          |"
+    hits=1
+fi
+
+#: Set when a root `.git` has been shown to postdate the export; its storage is then
+#: exempt from the scans below, which would otherwise flag it as inherited.
+ROOT_GIT_OK=0
+if [ -e "$ROOT/.git" ]; then
+    built_at="$(python3 - "$ROOT/BLINDED_EXPORT_MANIFEST.json" <<'PY' 2>/dev/null
+import datetime, json, sys
+print(int(datetime.datetime.fromisoformat(json.load(open(sys.argv[1]))["built_at"]).timestamp()))
+PY
+)"
+    first_commit="$(git -C "$ROOT" log --all --format=%ct --reverse 2>/dev/null | head -1)"
+    remotes="$(git -C "$ROOT" remote 2>/dev/null)"
+    gitdir="$(git -C "$ROOT" rev-parse --absolute-git-dir 2>/dev/null)"
+
+    if [ ! -d "$ROOT/.git" ]; then
+        # A `.git` file rather than a directory points at storage somewhere else, and that
+        # storage is not covered by any check here.
+        note ".git is a link to an external git directory"; hits=1
+    elif [ "$gitdir" != "$ROOT/.git" ]; then
+        # Either git cannot read it — in which case nothing below can classify it — or it
+        # resolves somewhere this script does not inspect. Both are disqualifying: the
+        # exemption exists for a repository whose contents are demonstrably the reviewer's,
+        # and this is not one.
+        note ".git is not a readable repository rooted here${gitdir:+ (resolves to $gitdir)}"
+        hits=1
+    elif [ -z "$built_at" ]; then
+        note ".git present and the manifest has no build time to compare it against"; hits=1
+    elif [ -n "$remotes" ]; then
+        note ".git has remotes configured — it is connected to another repository"; hits=1
+    elif [ -z "$first_commit" ]; then
+        ok ".git present but empty — created here, nothing committed"
+        ROOT_GIT_OK=1
+    elif [ "$first_commit" -lt "$built_at" ]; then
+        note ".git holds commits predating this export — history is inherited"; hits=1
+    else
+        ok ".git present, created after this export ($(git -C "$ROOT" rev-list --count --all) commit(s), no remotes)"
+        ROOT_GIT_OK=1
+    fi
+fi
+
+# Storage that belongs to an accepted root repository is excluded by path; anything else
+# under that name is git-like storage the builder never put there.
+git_storage() {
+    if [ "$ROOT_GIT_OK" -eq 1 ]; then
+        find "$ROOT" -path "$ROOT/.git" -prune -o "$@" -print 2>/dev/null
+    else
+        find "$ROOT" "$@" -print 2>/dev/null
+    fi
+}
 for extra in "objects" "packed-refs" "logs/HEAD" "ORIG_HEAD" "gitdir"; do
-    if find "$ROOT" -path "*$extra" 2>/dev/null | grep -q .; then
+    if git_storage -path "*$extra" | grep -q .; then
         note "git-like storage present: $extra"; hits=1
     fi
 done
-if find "$ROOT" -name "*.pack" -o -name "*.idx" 2>/dev/null | grep -q .; then
+if git_storage \( -name "*.pack" -o -name "*.idx" \) | grep -q .; then
     note "packfiles present"; hits=1
 fi
-[ "$hits" -eq 0 ] && ok "no repository history"
+[ "$hits" -eq 0 ] && ok "no inherited repository history"
 
 # -------------------------------------------------------------------------- 4 · symlinks
 echo "[4] symlinks and external references"
@@ -151,7 +218,7 @@ REQUIRED=(
     "RESULT_STATES.md" "REVIEWER_OBSERVATIONS_TEMPLATE.md" "ADJUDICATION_HANDOFF.md"
     "QUERY_SUBMISSION_TEMPLATE.json" "EXPECTED_OUTPUT_SCHEMA.json"
     "BLINDED_EXPORT_MANIFEST.json" "verify_blinding.sh"
-    "engine/ENGINE_USAGE.md" "engine/setup.sh" "engine/alembic.ini"
+    "engine/ENGINE_USAGE.md" "engine/setup.sh" "engine/teardown.sh" "engine/alembic.ini"
     "DOCUMENT_INDEX.md"
 )
 hits=0
@@ -185,6 +252,58 @@ if [ -f "$MANIFEST" ]; then
     fi
 else
     note "no BLINDED_EXPORT_MANIFEST.json"
+fi
+
+# ---------------------------------------------------------------- 9 · database isolation
+#
+# The export is a directory. The index it produces is not: it lives in Postgres, on the
+# host, and outlives the directory. Every check above passed once while a foreign
+# `cold-review` room — ingested from the answer-key branch before the reviewer's session
+# began — sat in the shared `reef` database, because a filesystem check cannot see it.
+#
+# So the boundary is a database of its own, named for the reviewer, holding exactly one
+# room named for the same reviewer. Anything else in there came from somewhere this export
+# cannot account for.
+echo "[9] database isolation"
+ENVFILE="$ROOT/engine/reviewer-env.sh"
+if [ ! -f "$ENVFILE" ]; then
+    ok "no reviewer database provisioned yet — run engine/setup.sh, then re-run this script"
+else
+    # Parsed rather than sourced. This script should not execute a file whose integrity is
+    # the thing in question.
+    field() { sed -n "s/^export $1=\"\(.*\)\"\$/\1/p" "$ENVFILE" | head -1; }
+    DB_NAME="$(field REEF_DB_NAME)"
+    ROOM_NAME="$(field REEF_ROOM)"
+    DB_URL="$(field REEF_DATABASE_URL)"
+
+    for bin in "/opt/homebrew/opt/postgresql@17/bin" "/usr/lib/postgresql/17/bin" \
+               "/usr/local/opt/postgresql@17/bin"; do
+        [ -d "$bin" ] && export PATH="$bin:$PATH" && break
+    done
+
+    if ! printf '%s' "$DB_NAME" | grep -qE '^reef_cr_[a-z0-9_]{2,16}$'; then
+        note "database '$DB_NAME' is not a per-reviewer database (expected reef_cr_<id>)"
+    elif ! printf '%s' "$ROOM_NAME" | grep -qE '^cold-review-[a-z0-9_]{2,16}$'; then
+        note "room '$ROOM_NAME' is not namespaced (expected cold-review-<id>)"
+    elif [ "${DB_URL##*/}" != "$DB_NAME" ]; then
+        note "REEF_DATABASE_URL points at '${DB_URL##*/}', not at '$DB_NAME'"
+    elif ! command -v psql >/dev/null; then
+        note "psql not found — database isolation cannot be verified"
+    elif ! psql -d postgres -tAc \
+            "SELECT 1 FROM pg_database WHERE datname='$DB_NAME'" 2>/dev/null | grep -q 1; then
+        ok "$DB_NAME does not exist yet — nothing can have leaked into it"
+    else
+        FOREIGN="$(psql -d "$DB_NAME" -tAc \
+            "SELECT name FROM room WHERE name <> '$ROOM_NAME'" 2>/dev/null || true)"
+        if [ -n "$FOREIGN" ]; then
+            note "$DB_NAME holds room(s) that are not yours — this review is contaminated:"
+            echo "$FOREIGN" | sed 's|^|          |'
+        else
+            OWN="$(psql -d "$DB_NAME" -tAc \
+                "SELECT count(*) FROM room WHERE name = '$ROOM_NAME'" 2>/dev/null || echo 0)"
+            ok "$DB_NAME holds only $ROOM_NAME (${OWN:-0} room(s))"
+        fi
+    fi
 fi
 
 echo

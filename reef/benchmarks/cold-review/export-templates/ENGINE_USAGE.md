@@ -29,11 +29,26 @@ behaviour and worth observing either way.
 
 ```bash
 cd engine
-bash setup.sh
+bash setup.sh <your-reviewer-id>
 ```
 
-That creates the database and its roles, applies the schema, installs the wheel into a local
-environment, and prints the resolved configuration.
+Your reviewer id is 2–16 characters of `a-z 0-9 _` — anything that is yours alone on this
+machine. Setup creates a database called `reef_cr_<your-id>`, applies the schema, installs
+the wheel into a local environment, and prints the resolved configuration.
+
+**It does not load the data room.** Ingestion is a separate step you run later, after your
+questions are frozen. See `../REVIEWER_INSTRUCTIONS.md`.
+
+### Why the database is named for you
+
+Postgres runs on this host, not inside the export directory. A review that used a shared
+`reef` database once inherited a room ingested before the reviewer's session began, and the
+blinding check passed anyway because it only inspects files. A database per reviewer, a room
+name per reviewer, and a verifier that refuses any room that is not yours is what replaced
+that.
+
+`setup.sh` writes `reviewer-env.sh` with the exact connection settings. Read it — nothing is
+configured anywhere else, and there is no `.env`.
 
 **Read the configuration output.** The line reporting a `dotenv` file should say
 "none present". If it names a file, the engine is running on settings you were not shown —
@@ -41,28 +56,24 @@ stop and report it.
 
 ## Commands
 
-All commands run from `engine/`:
+All commands run from `engine/`. `run.sh`, written by `setup.sh`, loads `reviewer-env.sh`
+and the wheel for you:
 
 ```bash
-W="$(ls reef-*.whl)"
-E="uv run --with reef[embed] @ file://$PWD/$W"
-
-$E reef config                    # resolved settings and where each came from
-$E reef init                      # check the database is reachable and migrated
-$E reef ingest ../deal-room --room cold-review
-$E reef coverage cold-review      # every file and what the engine did with it
-$E reef query "your question" --room cold-review
-$E reef rooms                     # list rooms
-$E reef drop cold-review --yes    # delete a room and start over
+./run.sh config                            # resolved settings and where each came from
+./run.sh init                              # check the database is reachable and migrated
+./run.sh ingest ../deal-room --room cold-review-<your-id>
+./run.sh coverage cold-review-<your-id>    # every file and what the engine did with it
+./run.sh query "your question" --room cold-review-<your-id>
+./run.sh rooms                             # list rooms
+./run.sh drop cold-review-<your-id> --yes  # delete a room and start over
 ```
 
-In practice use the shorthand `setup.sh` writes for you:
+The long form, if you would rather see what `run.sh` does:
 
 ```bash
-./run.sh config
-./run.sh ingest ../deal-room --room cold-review
-./run.sh coverage cold-review
-./run.sh query "your question" --room cold-review
+. ./reviewer-env.sh
+uv run --with "reef[embed] @ file://$PWD/$(ls reef-*.whl)" reef config
 ```
 
 The `[embed]` extra matters: without it the engine ingests documents but cannot build the
@@ -102,7 +113,9 @@ Interactive docs at `http://localhost:8000/docs`.
   (about 270 MB) and needs network access once; nothing else contacts the network, and no
   document content is sent anywhere.
 - Re-ingesting the same room is safe and produces the same identifiers.
-- `reef drop <room> --yes` then re-ingesting gives a clean start.
+- `./run.sh drop <room> --yes` then re-ingesting gives a clean start.
+- `bash teardown.sh <your-id>` drops the whole database. Run it when the review is over —
+  the directory is yours to keep, but the database is shared infrastructure on this host.
 
 ## If something breaks
 

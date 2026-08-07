@@ -502,3 +502,58 @@ claims provenance over text that never reached the model.
 Records: `reef/benchmarks/ridgeline-m1-baseline-v2.json` supersedes
 `ridgeline-m1-baseline-invalidated.json`, which is preserved rather than deleted so the
 error, its detection and its correction stay legible.
+
+---
+
+## 2026-08-07 · Cold-review protocol v2; the three defects that blocked a repeat
+
+The first blinded cold review produced a result worth having — 200 of 200 citations resolved
+correctly, confirmed by someone with no stake in the outcome — and three defects in the
+apparatus that would make a second review's numbers unattributable. All three are fixed.
+None is an engine change. `COLD_REVIEW_ADJUDICATION_001.md` §6 is the record of what went
+wrong; this is what replaced it.
+
+**The export's boundary stopped at the filesystem.** Every reviewer was told to ingest into
+a room called `cold-review` in a database called `reef`, and both are shared per host. The
+first reviewer found a `cold-review` room that predated their session — built from the
+answer-key branch — and `verify_blinding.sh` passed anyway, because it inspects a directory
+and an index is not in the directory. A blinded export can sit beside a fully populated index
+and nothing in the protocol notices.
+
+`setup.sh` now takes a reviewer id and creates `reef_cr_<id>` holding one room,
+`cold-review-<id>`. `ops/bootstrap-local-db.sh` takes the database name as a parameter
+rather than hardcoding `reef`. `verify_blinding.sh` connects to that database and fails on
+any room that is not the reviewer's — so the check reads true before ingestion and stays true
+during it, rather than being a one-shot emptiness assertion nobody re-runs. `teardown.sh`
+drops the database, because the one part of a review that outlives the export directory is
+the part that contaminated the next one.
+
+**The freeze mechanism defeated its own verifier.** The instructions offered two ways to
+pre-register questions: a detached SHA-256 file, or `git init` inside the export. The
+verifier failed any directory containing `.git`. A reviewer who took the second path could
+no longer verify their own export, and the one who ran the review used both, in the only
+order that works, with nothing telling them to.
+
+The hash file is now the only documented freeze. The verifier still had to learn the
+distinction, because a reviewer may reach for git regardless: history inherited from the
+source repository is recoverable and disqualifying, while a repository created inside the
+export after it was built holds only what the reviewer put there. It is accepted only when
+git can read it, it is rooted at the export, it has no remotes, and its earliest commit
+postdates the manifest's `built_at`. Nested repositories and `.git` files pointing at
+external storage are rejected outright — following these instructions never produces either.
+
+**Installing revealed coverage before questions were frozen.** Phase 0 ran `setup.sh`, which
+printed coverage-adjacent output, and Phase 1 then said "do not run the engine yet". Two of
+33 questions were contaminated by the contradiction. Installation and ingestion are now
+separate phases: setup installs and provisions an empty database and stops, and ingestion
+opens Phase 3 after the hash is recorded.
+
+**Protocol version is now 2 and is recorded in the export manifest.** Review 001 ran under
+version 1. **Results from different protocol versions are not directly comparable**, and the
+version exists so that a later reader cannot mistake one for the other.
+
+What this does not change: nothing about the engine, its ranking, or any measured number.
+The abstention floor was not touched. The engine remains authorized for synthetic fixture
+evaluation only under ADR-003, and the 2026-09-06 interview tripwire is unmoved — **zero
+qualified customer interviews have happened**, and that gates the product regardless of how
+sound the evaluation apparatus becomes.

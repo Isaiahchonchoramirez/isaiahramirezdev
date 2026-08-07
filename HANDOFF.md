@@ -24,18 +24,12 @@ documents, the review UI and export are all still blocked by the nineteen mandat
 
 ## 2 · Current blocker
 
-**Two P1 protocol defects block the next cold review. Nothing else is blocked on code.**
+**The P1 protocol defects are fixed. Cold-review protocol is now version 2** — see §6 Step 1
+and the 2026-08-07 entry in `docs/validation/DECISION_LOG.md`. Each reviewer gets a dedicated
+database and a namespaced room, the verifier reads that database, there is one freeze
+mechanism, and installation no longer reveals coverage before questions are frozen.
 
-1. **Database isolation.** The export ships a wheel and documents; the database lives on the
-   host. A reviewer found a `cold-review` room in the shared `reef` database that predated
-   their session, and `verify_blinding.sh` — which only inspects the filesystem — passed
-   anyway. Room names also collide, because the instructions tell every reviewer to use the
-   same name.
-2. **Freeze mechanism.** `REVIEWER_INSTRUCTIONS.md` offers two ways to freeze work; one is
-   `git init` inside the export, and `verify_blinding.sh` fails any directory containing
-   `.git`. A reviewer who follows that path can no longer verify their own export.
-
-Until both are fixed, a second cold review's results are not attributable to the export.
+**Next on code: Step 2, document status at query time.** Nothing blocks it.
 
 **The larger blocker is unchanged and is not technical.** Zero customer conversations have
 happened. `L1` (may a buyer lawfully route seller-confidential documents to a third party?)
@@ -50,7 +44,7 @@ stops until five are booked.** That is 30 days from today.
 ### The engine — built and working
 
 `reef/` — Python 3.13, FastAPI, PostgreSQL 17 + pgvector, 26 source modules, 11 test modules,
-**188 tests passing**, ruff clean, strict mypy clean.
+**211 tests passing**, ruff clean, strict mypy clean.
 
 ```
 intake → extract → structure → chunk → embed → index → search API + evidence API + CLI
@@ -158,7 +152,7 @@ deleted, with a header naming what was wrong.
 | `reef/src/reef/corpus.py` | embedding compatibility contract |
 | `reef/src/reef/calibration.py` | model-bound abstention floors |
 | `reef/src/reef/calibration_data/` | calibration records, shipped in the wheel |
-| `reef/tests/` | 188 tests |
+| `reef/tests/` | 211 tests |
 | `reef/benchmarks/` | baselines, query manifest, taxonomy, thresholds |
 | `reef/benchmarks/cold-review/` | export builder, templates, protocols, adjudication |
 | `reef/NEXT-EVALUATIONS.md` | queued evaluations, abstention first |
@@ -181,29 +175,35 @@ deleted, with a header naming what was wrong.
 
 ## 6 · Exact next steps
 
-### Step 1 — Unblock the next cold review (P1, do first)
+### Step 1 — Unblock the next cold review (P1) — **done, 2026-08-07**
 
-Both are protocol fixes, not engine changes.
+Protocol version 2. All three were protocol fixes; no engine code changed.
 
-**1a. Isolate the database per reviewer.** Give the export its own database, created empty
-and dropped afterwards, with a room name namespaced per reviewer. Extend
-`verify_blinding.sh` to check the target database is empty before ingestion — today it
-verifies only the directory and passed while a foreign room existed.
+**1a. Database isolated per reviewer.** `setup.sh <reviewer-id>` creates `reef_cr_<id>`
+holding one room, `cold-review-<id>`; `ops/bootstrap-local-db.sh` now takes the database
+name as a parameter; `teardown.sh` drops it afterwards. `verify_blinding.sh` gained section
+9, which connects to that database and fails on any room that is not the reviewer's — so it
+reads true before ingestion and stays true during it. `setup.sh` independently refuses a
+database that already holds rooms.
 
-Files: `reef/benchmarks/cold-review/build_blinded_export.py`,
-`reef/benchmarks/cold-review/verify_blinding.sh`,
-`reef/benchmarks/cold-review/export-templates/setup.sh`.
+**1b. One freeze mechanism.** The detached SHA-256 file; the git option is gone from
+`REVIEWER_INSTRUCTIONS.md`. The verifier now classifies a `.git` rather than rejecting it:
+accepted only when git can read it, it is rooted at the export, it has no remotes, and its
+earliest commit postdates the manifest's `built_at`. Nested repositories and `.git` files
+pointing at external storage are rejected outright.
 
-**1b. Pick one freeze mechanism.** Recommend the detached SHA-256 file. Make the verifier
-distinguish a `.git` created *after* export from one inherited from the source — it cannot
-today, and that distinction is the entire point. Remove the git option from
-`REVIEWER_INSTRUCTIONS.md`, or make it work.
+**1c. Install separated from ingest.** `setup.sh` installs and provisions, and stops.
+Ingestion opens Phase 3, after the hash is recorded.
 
-**1c. Separate install from ingest.** Move ingestion out of Phase 0 into Phase 3, so setup
-does not reveal coverage before questions are frozen. Two of 33 questions were contaminated
-by this and are marked in the adjudication.
+Verified end to end against a real export: build → verify → setup → verify (empty) → ingest
+→ query → verify (own room only) → teardown. Contamination, inherited history, remotes,
+nested and linked `.git`, shared database and unnamespaced room are each covered by a test —
+211 tests pass, up from 188.
 
-### Step 2 — Consult document status before answering (P0-1)
+**Before handing out an export, rebuild it.** The one at
+`~/Developer/reef-cold-review-export` is current as of this commit.
+
+### Step 2 — Consult document status before answering (P0-1) — **next**
 
 The cheapest real correctness win. At query time, join retrieved documents against their
 processing state and any withdrawal notices, and surface status with each hit. Fixes three of
@@ -262,7 +262,7 @@ uv run reef config          # shows resolved settings and where each came from
 uv run reef ingest ../fixtures/reef-deal-room --room dev
 uv run reef query "covenant compliance fixed charge coverage ratio" --room dev
 uv run reef evaluate        # scores against the fixture
-uv run pytest               # 188 tests
+uv run pytest               # 211 tests
 ```
 
 Requires PostgreSQL 17 with `pgvector` (`brew install postgresql@17 pgvector`). Docker Desktop
@@ -289,6 +289,9 @@ Learned the hard way on this branch; each one has a scar behind it.
   diagnostic-only after repeated inspection; they cannot validate a new mechanism.
 - **Reviewer verdicts are never relabelled after unsealing.** The adjudicator adds ownership
   and cause; the frozen scores stand.
+- **A blinding boundary that stops at the filesystem is not a boundary.** The index lives in
+  Postgres, outlives the export directory, and was invisible to every check for a full
+  review. Anything that outlives the artifact has to be named, namespaced and verified.
 - **A synthetic result is never customer evidence.** Counting one as such is an automatic-fail
   condition on the scorecard.
 - **Do not describe M1 as validated, production-ready, or approved for customer data.** It is
@@ -313,4 +316,5 @@ unchanged as the pre-fix state. The portfolio checkout at
 `/Users/irmac/Developer/isaiahramirezdev` is on `reef/product-foundation` and holds unrelated
 work that must not be disturbed.
 
-188 tests, ruff, format and strict mypy all clean at HEAD.
+211 tests, ruff, format and strict mypy all clean at HEAD (src scope; `alembic/versions/` is
+generated and has never been lint-clean).

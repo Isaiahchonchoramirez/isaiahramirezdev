@@ -30,19 +30,27 @@ repository would not affect you.
 
 ## Quick start
 
+Pick a reviewer id first — 2–16 characters of `a-z 0-9 _`, yours alone on this machine. It
+names your database and your room.
+
 ```bash
 # 1 · confirm the export is blinded
 bash verify_blinding.sh .
 
-# 2 · install the engine (see engine/ENGINE_USAGE.md for prerequisites)
-cd engine && bash setup.sh && cd ..
+# 2 · install the engine and create an empty database of your own
+#     (see engine/ENGINE_USAGE.md for prerequisites)
+cd engine && bash setup.sh <your-id> && cd ..
 
-# 3 · load the data room
-cd engine && ./run.sh ingest ../deal-room --room cold-review && cd ..
+# 3 · read the room by hand, write your questions, freeze them with a SHA-256 file
+#     — see REVIEWER_INSTRUCTIONS.md. Do not run the engine yet.
 
-# 4 · read the room, write questions, freeze them
-#     — see REVIEWER_INSTRUCTIONS.md
+# 4 · only then, load the data room
+cd engine && ./run.sh ingest ../deal-room --room cold-review-<your-id> && cd ..
 ```
+
+Steps 3 and 4 are in that order deliberately. Loading the room first shows you what the
+engine covers before you have committed to what you expect, and a question written after
+that measures nothing.
 
 ---
 
@@ -84,7 +92,8 @@ About three hours: 45 minutes reading the room, 60 writing questions, 20 running
 ├── BLINDED_EXPORT_MANIFEST.json       hashes of everything here
 ├── engine/                            the Reef engine, as a wheel
 │   ├── ENGINE_USAGE.md
-│   ├── setup.sh
+│   ├── setup.sh                       install + create your database
+│   ├── teardown.sh                    drop it again when you are done
 │   ├── reef-<version>-py3-none-any.whl
 │   ├── alembic/  alembic.ini  ops/    database setup
 │   └── .env.example

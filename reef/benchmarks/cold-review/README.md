@@ -14,6 +14,27 @@
 > directory with no history, no answer key, and no path back here. `export-templates/`
 > holds the reviewer-facing documents it ships; the files below are the authors' design
 > record and are **not** given to the reviewer.
+>
+> **`export-templates/` is canonical for anything a reviewer does.** The same-named files
+> below predate the builder and describe a worktree-based process that is no longer used.
+> They are kept for the rationale, not the steps.
+
+## Protocol version 2
+
+Review 001 ran under version 1 and exposed three defects in the apparatus rather than the
+engine ([`COLD_REVIEW_ADJUDICATION_001.md`](COLD_REVIEW_ADJUDICATION_001.md) §6). Version 2
+answers each:
+
+| Defect | Version 1 | Version 2 |
+|---|---|---|
+| Shared database | every reviewer ingested into `reef`, room `cold-review` | `setup.sh <id>` creates `reef_cr_<id>`, room `cold-review-<id>` |
+| Database invisible to the verifier | filesystem checks only | `verify_blinding.sh` connects and fails on any room that is not the reviewer's |
+| Two freeze mechanisms, one self-defeating | SHA-256 **or** `git init`, which the verifier then failed | detached SHA-256 only; the verifier accepts a `.git` it can prove postdates the export |
+| Setup revealed coverage before questions were frozen | `setup.sh` ingested in Phase 0 | `setup.sh` installs only; ingestion opens Phase 3 |
+| Database outlived the review | nothing removed it | `teardown.sh <id>` drops it |
+
+The version is recorded in `BLINDED_EXPORT_MANIFEST.json`. **Results from different protocol
+versions are not directly comparable.**
 
 Everything a second reviewer needs to evaluate Reef's retrieval and abstention without
 seeing the expected answers.
