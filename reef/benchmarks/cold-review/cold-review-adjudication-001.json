@@ -1,0 +1,1952 @@
+{
+  "record_version": "1",
+  "adjudication_id": "COLD_REVIEW_ADJUDICATION_001",
+  "adjudicated_at": "2026-08-06T22:04:01+00:00",
+  "source_branch": "reef/m1-embedding-contract-fix",
+  "engine_behaviour_changed": false,
+  "reviewer_files_modified": false,
+  "integrity": {
+    "supplied_hashes_verified": {
+      "export_manifest": {
+        "expected": "38a5e11b6f7048dae589dfb2d335ae7dad56f6f0fdd8a6925e64524e258f03d4",
+        "status": "MATCH"
+      },
+      "query_set": {
+        "expected": "ff63b8f1a92b81fb5001dea37119e26bc1fc8d4a6f71f661b858eaf0db50cf01",
+        "status": "MATCH"
+      },
+      "results": {
+        "expected": "43aa9b903a2bca2f8eec4a44a417ed2705a21401ea96b9a670cab9bcfb82a407",
+        "status": "MATCH"
+      },
+      "observations": {
+        "expected": "60f583a2b359af7ab78c16541f0b9a2d3b01171af38dbafe52c83d5994480491",
+        "status": "MATCH"
+      },
+      "raw_output_manifest": {
+        "expected": "809b88370c9879cf8c03b142ed2638268a617fa9f0df12feb1f9b49b4a9c858e",
+        "status": "MATCH"
+      }
+    },
+    "transcripts_verified": "33 of 33 OK against cold-review-outputs.sha256 (36 entries: 33 transcripts + 3 artifacts)",
+    "query_set_unchanged_after_freezing": true,
+    "freeze_evidence": "reviewer wrote cold-review-queries.sha256 at 17:05:42 containing the same digest supplied here; results 17:27, observations 17:36. A single git commit at 17:36 contains everything, so ordering rests on the standalone hash file and mtimes rather than on commit sequence.",
+    "reviewer_labels_preserved_verbatim": true,
+    "adjudicator_relabelled_any_reviewer_verdict": false,
+    "disclosed_protocol_deviation": "Per the operating instruction given to me, setup.sh, ingest and coverage were run BEFORE Phase 1 reading and question writing, whereas REVIEWER_INSTRUCTIONS.md Phase 1 says not to run the engine until questions are written. Only setup/ingest/coverage were run; no query was issued and no retrieval result was seen before this file was hashed. Coverage output (2 unprocessed files) was therefore known while writing questions and did inform the three unreadable-material questions; those would likely have been written anyway from the file listing (a *_scan.pdf and a .zip). A pre-existing 'cold-review' room ingested at 16:44:40 local was found in the shared database; it was dropped and re-ingested so the index under test is from my own run. Its document/sha set was identical to mine."
+  },
+  "metrics": {
+    "$note": "Reported separately by concern. Deliberately not combined into a single accuracy figure.",
+    "citation_integrity": {
+      "citations_sampled": 200,
+      "citation_resolution": {
+        "k": 200,
+        "n": 200,
+        "rate": 1.0
+      },
+      "anchor_accuracy": {
+        "k": 200,
+        "n": 200,
+        "rate": 1.0,
+        "note": "197 matched on a strict substring test; 3 differed only by a breadcrumb prefix or markdown table pipes and were confirmed accurate by hand."
+      },
+      "fabricated_citations": 0,
+      "unlabeled_inference": 0,
+      "verdict": "PASS \u2014 both hard gates hold under independent check"
+    },
+    "direct_support": {
+      "supported_query_precision": {
+        "k": 7,
+        "n": 25,
+        "rate": 0.28,
+        "wilson_95": [
+          0.143,
+          0.476
+        ],
+        "underpowered": false
+      },
+      "supported_query_recall": {
+        "k": 7,
+        "n": 9,
+        "rate": 0.778,
+        "wilson_95": [
+          0.453,
+          0.937
+        ],
+        "underpowered": true
+      },
+      "false_support_rate": {
+        "k": 9,
+        "n": 33,
+        "rate": 0.273,
+        "wilson_95": [
+          0.151,
+          0.442
+        ],
+        "underpowered": false
+      },
+      "false_abstention_rate": {
+        "k": 2,
+        "n": 33,
+        "rate": 0.061,
+        "wilson_95": [
+          0.017,
+          0.196
+        ],
+        "underpowered": false
+      },
+      "escalation_worthy_false_supports": {
+        "count": 4,
+        "ids": [
+          "CR-016",
+          "CR-031",
+          "CR-032",
+          "CR-033"
+        ],
+        "gate": "target is zero",
+        "status": "FAIL"
+      }
+    },
+    "capability_specific": {
+      "direct_retrieval": {
+        "k": 7,
+        "n": 9,
+        "rate": 0.778,
+        "wilson_95": [
+          0.453,
+          0.937
+        ],
+        "underpowered": true,
+        "query_ids": [
+          "CR-001",
+          "CR-002",
+          "CR-003",
+          "CR-004",
+          "CR-005",
+          "CR-006",
+          "CR-007",
+          "CR-008",
+          "CR-009"
+        ],
+        "verdicts": {
+          "false_abstention": 2,
+          "correct": 7
+        }
+      },
+      "calculation": {
+        "k": 0,
+        "n": 4,
+        "rate": 0.0,
+        "wilson_95": [
+          0,
+          0.49
+        ],
+        "underpowered": true,
+        "query_ids": [
+          "CR-024",
+          "CR-025",
+          "CR-026",
+          "CR-027"
+        ],
+        "verdicts": {
+          "wrong_state": 4
+        }
+      },
+      "comparison": {
+        "k": 0,
+        "n": 2,
+        "rate": 0.0,
+        "wilson_95": [
+          0,
+          0.658
+        ],
+        "underpowered": true,
+        "query_ids": [
+          "CR-028",
+          "CR-029"
+        ],
+        "verdicts": {
+          "wrong_state": 2
+        }
+      },
+      "absence_detection": {
+        "k": 0,
+        "n": 1,
+        "rate": 0.0,
+        "wilson_95": [
+          0,
+          0.793
+        ],
+        "underpowered": true,
+        "query_ids": [
+          "CR-030"
+        ],
+        "verdicts": {
+          "wrong_state": 1
+        }
+      },
+      "contradiction": {
+        "k": 0,
+        "n": 3,
+        "rate": 0.0,
+        "wilson_95": [
+          0,
+          0.562
+        ],
+        "underpowered": true,
+        "query_ids": [
+          "CR-010",
+          "CR-011",
+          "CR-012"
+        ],
+        "verdicts": {
+          "wrong_state": 3
+        }
+      },
+      "inaccessible_document_disposition": {
+        "k": 0,
+        "n": 2,
+        "rate": 0.0,
+        "wilson_95": [
+          0,
+          0.658
+        ],
+        "underpowered": true,
+        "query_ids": [
+          "CR-031",
+          "CR-032"
+        ],
+        "verdicts": {
+          "false_support": 2
+        }
+      },
+      "stale_or_withdrawn_handling": {
+        "k": 0,
+        "n": 1,
+        "rate": 0.0,
+        "wilson_95": [
+          0,
+          0.793
+        ],
+        "underpowered": true,
+        "query_ids": [
+          "CR-033"
+        ],
+        "verdicts": {
+          "false_support": 1
+        }
+      },
+      "outside_scope_handling": {
+        "k": 3,
+        "n": 5,
+        "rate": 0.6,
+        "wilson_95": [
+          0.231,
+          0.882
+        ],
+        "underpowered": true,
+        "query_ids": [
+          "CR-019",
+          "CR-020",
+          "CR-021",
+          "CR-022",
+          "CR-023"
+        ],
+        "verdicts": {
+          "correct": 3,
+          "false_support": 2
+        }
+      },
+      "subject_present_fact_absent": {
+        "k": 0,
+        "n": 6,
+        "rate": 0.0,
+        "wilson_95": [
+          0,
+          0.39
+        ],
+        "underpowered": true,
+        "query_ids": [
+          "CR-013",
+          "CR-014",
+          "CR-015",
+          "CR-016",
+          "CR-017",
+          "CR-018"
+        ],
+        "verdicts": {
+          "false_support": 4,
+          "wrong_state": 2
+        }
+      }
+    },
+    "result_state_usability": {
+      "valid_state_mapping": {
+        "k": 28,
+        "n": 33,
+        "rate": 0.848,
+        "wilson_95": [
+          0.691,
+          0.933
+        ],
+        "underpowered": false
+      },
+      "unmappable_count": 5,
+      "unmappable_ids": [
+        "CR-001",
+        "CR-009",
+        "CR-030",
+        "CR-031",
+        "CR-032"
+      ],
+      "ambiguous_mapping_count": 12,
+      "understandable_user_facing_results": {
+        "k": 10,
+        "n": 33,
+        "rate": 0.303,
+        "wilson_95": [
+          0.174,
+          0.473
+        ],
+        "underpowered": false
+      },
+      "note": "Engine returns 2 states; reviewer labelled in 8. Every wrong_state verdict is a case where the engine's behaviour was defensible and its output could not say why."
+    }
+  },
+  "false_support_cases": [
+    {
+      "id": "CR-013",
+      "classification": "abstention or evidence sufficiency",
+      "severity": "medium",
+      "determination": "Returned the correct lease at 0.7919 as though it answered. Subject covered, attribute absent."
+    },
+    {
+      "id": "CR-015",
+      "classification": "abstention or evidence sufficiency",
+      "severity": "medium",
+      "determination": "Returned the certificate schedule at 0.6937 as though it answered."
+    },
+    {
+      "id": "CR-016",
+      "classification": "abstention or evidence sufficiency",
+      "severity": "high",
+      "determination": "Escalation-worthy. Rank 2 is 02_Financial/ap_aging.csv 'Hartwell Supply Company 704000 38' \u2014 a payables balance and days-outstanding that reads as payment terms. Related-but-insufficient evidence presented as support."
+    },
+    {
+      "id": "CR-018",
+      "classification": "abstention or evidence sufficiency",
+      "severity": "medium",
+      "determination": "Returned contractor_schedule and roster rows at 0.6896 as though they answered."
+    },
+    {
+      "id": "CR-021",
+      "classification": "abstention or evidence sufficiency",
+      "severity": "medium",
+      "determination": "Returned seller_qa_log Q-022 (contractor classification) at 0.6600 \u2014 0.0045 above the floor. A different employment question presented as an answer."
+    },
+    {
+      "id": "CR-023",
+      "classification": "abstention or evidence sufficiency",
+      "severity": "medium",
+      "determination": "Returned seller_qa_log rows about customer concentration at 0.6693."
+    },
+    {
+      "id": "CR-031",
+      "classification": "document-status handling",
+      "severity": "high",
+      "determination": "Escalation-worthy. Returned 07_Legal_Insurance/Facility_Lease_Erie.md \u2014 a different Erie document \u2014 at 0.7176. The engine knows the permit is unreadable and never says so; it silently substitutes an adjacent document."
+    },
+    {
+      "id": "CR-032",
+      "classification": "document-status handling",
+      "severity": "high",
+      "determination": "Escalation-worthy. Top hit at 0.7402 is the index row asserting 'Supplied' \u2014 true in form only. A reviewer could close the item believing the workpapers were received and read. Matches planted RDG-021."
+    },
+    {
+      "id": "CR-033",
+      "classification": "document-status handling",
+      "severity": "high",
+      "determination": "Escalation-worthy. Ranks 1 and 2 differ by 0.0026 and carry different figures for the same customer; nothing indicates one was formally withdrawn. The correct file happens to rank first by luck. Matches planted RDG-013."
+    }
+  ],
+  "false_abstention_cases": [
+    {
+      "id": "CR-001",
+      "top_lexical_evidence": "none \u2014 0 lexical hits",
+      "top_semantic_evidence": [
+        {
+          "rank": 1,
+          "document": "00_Request_List/request_list.csv",
+          "similarity": 0.6394
+        },
+        {
+          "rank": 2,
+          "document": "01_Corporate/ownership_schedule.csv",
+          "similarity": 0.6358
+        },
+        {
+          "rank": 3,
+          "document": "11_Update_R2/seller_qa_log_revised.csv",
+          "similarity": 0.6216
+        }
+      ],
+      "fused_rank_of_source": 2,
+      "cosine_similarity": 0.6394,
+      "floor": 0.6555,
+      "floor_decision": "suppressed \u2014 below floor",
+      "margin_below_floor": 0.0161,
+      "direct_source_available": true,
+      "generalises_beyond_fixture_phrasing": true,
+      "note": "Source ranked #2 at 0.6358; best 0.6394 sat 0.0161 under the floor. Retrieval succeeded; the gate discarded a correct answer."
+    },
+    {
+      "id": "CR-009",
+      "top_lexical_evidence": "none \u2014 0 lexical hits",
+      "top_semantic_evidence": [
+        {
+          "rank": 1,
+          "document": "06_Operations/wip_schedule.txt",
+          "similarity": 0.6406
+        },
+        {
+          "rank": 2,
+          "document": "02_Financial/Balance_Sheet_FY2025.pdf",
+          "similarity": 0.6269
+        },
+        {
+          "rank": 3,
+          "document": "11_Update_R2/withdrawal_notice.txt",
+          "similarity": 0.5416
+        }
+      ],
+      "fused_rank_of_source": 1,
+      "cosine_similarity": 0.6406,
+      "floor": 0.6555,
+      "floor_decision": "suppressed \u2014 below floor",
+      "margin_below_floor": 0.0149,
+      "direct_source_available": true,
+      "generalises_beyond_fixture_phrasing": true,
+      "note": "Source ranked #1 at 0.6406; 0.0149 under the floor. Retrieval was perfect; the gate discarded it."
+    }
+  ],
+  "queries": [
+    {
+      "query_id": "CR-001",
+      "reviewer_question": "Who are the members of the company and what percentage does each one hold?",
+      "reviewer_capability_class": "directly_answerable",
+      "reviewer_expected_disposition": "SUPPORTED",
+      "reviewer_confidence": "high",
+      "reviewer_verdict": "false_abstention",
+      "reviewer_mapped_state": "UNMAPPABLE",
+      "actual_fixture_evidence": "01_Corporate/ownership_schedule.csv rows 2-4 (member, units, pct)",
+      "canonical_source_anchors": "01_Corporate/ownership_schedule.csv rows 2-4 (member, units, pct)",
+      "fact_directly_stated": true,
+      "calculation_required": false,
+      "cross_document_comparison_required": false,
+      "absence_legitimately_concludable": false,
+      "relevant_document_inaccessible": false,
+      "source_stale_withdrawn_or_superseded": false,
+      "engine_result": "not_found",
+      "engine_best_similarity": 0.6394,
+      "engine_lexical_hits": 0,
+      "engine_top_documents": [
+        {
+          "rank": 1,
+          "document": "00_Request_List/request_list.csv",
+          "similarity": 0.6394
+        },
+        {
+          "rank": 2,
+          "document": "01_Corporate/ownership_schedule.csv",
+          "similarity": 0.6358
+        },
+        {
+          "rank": 3,
+          "document": "11_Update_R2/seller_qa_log_revised.csv",
+          "similarity": 0.6216
+        }
+      ],
+      "citations_resolve": true,
+      "result_supports_requested_fact": false,
+      "final_adjudicated_disposition": "SUPPORTED",
+      "reviewer_engine_agreement": "disagree",
+      "adjudicator_agrees_with_reviewer": true,
+      "defect_owner": "abstention or evidence sufficiency",
+      "severity": "high",
+      "confidence": "high",
+      "adjudicator_note": "Source ranked #2 at 0.6358; best 0.6394 sat 0.0161 under the floor. Retrieval succeeded; the gate discarded a correct answer."
+    },
+    {
+      "query_id": "CR-002",
+      "reviewer_question": "When was Ridgeline Industrial Services formed and in which state?",
+      "reviewer_capability_class": "directly_answerable",
+      "reviewer_expected_disposition": "SUPPORTED",
+      "reviewer_confidence": "high",
+      "reviewer_verdict": "correct",
+      "reviewer_mapped_state": "SUPPORTED",
+      "actual_fixture_evidence": "01_Corporate/Articles_of_Organization.pdf p1 (State of Ohio, 2011-03-14)",
+      "canonical_source_anchors": "01_Corporate/Articles_of_Organization.pdf p1 (State of Ohio, 2011-03-14)",
+      "fact_directly_stated": true,
+      "calculation_required": false,
+      "cross_document_comparison_required": false,
+      "absence_legitimately_concludable": false,
+      "relevant_document_inaccessible": false,
+      "source_stale_withdrawn_or_superseded": false,
+      "engine_result": "found",
+      "engine_best_similarity": 0.7197,
+      "engine_lexical_hits": 0,
+      "engine_top_documents": [
+        {
+          "rank": 1,
+          "document": "01_Corporate/ownership_schedule.csv",
+          "similarity": 0.7197
+        },
+        {
+          "rank": 2,
+          "document": "01_Corporate/Articles_of_Organization.pdf",
+          "similarity": 0.6854
+        },
+        {
+          "rank": 3,
+          "document": "01_Corporate/ownership_schedule.csv",
+          "similarity": 0.6805
+        }
+      ],
+      "citations_resolve": true,
+      "result_supports_requested_fact": true,
+      "final_adjudicated_disposition": "SUPPORTED",
+      "reviewer_engine_agreement": "agree",
+      "adjudicator_agrees_with_reviewer": true,
+      "defect_owner": "no defect",
+      "severity": "none",
+      "confidence": "high",
+      "adjudicator_note": ""
+    },
+    {
+      "query_id": "CR-003",
+      "reviewer_question": "What interest rate does the company pay on its term loan?",
+      "reviewer_capability_class": "directly_answerable",
+      "reviewer_expected_disposition": "SUPPORTED",
+      "reviewer_confidence": "high",
+      "reviewer_verdict": "correct",
+      "reviewer_mapped_state": "SUPPORTED",
+      "actual_fixture_evidence": "02_Financial/debt_schedule.csv row 2 (Term loan A, 7.25%)",
+      "canonical_source_anchors": "02_Financial/debt_schedule.csv row 2 (Term loan A, 7.25%)",
+      "fact_directly_stated": true,
+      "calculation_required": false,
+      "cross_document_comparison_required": false,
+      "absence_legitimately_concludable": false,
+      "relevant_document_inaccessible": false,
+      "source_stale_withdrawn_or_superseded": false,
+      "engine_result": "found",
+      "engine_best_similarity": 0.7064,
+      "engine_lexical_hits": 0,
+      "engine_top_documents": [
+        {
+          "rank": 1,
+          "document": "02_Financial/debt_schedule.csv",
+          "similarity": 0.7064
+        },
+        {
+          "rank": 2,
+          "document": "02_Financial/debt_schedule.csv",
+          "similarity": 0.6935
+        },
+        {
+          "rank": 3,
+          "document": "02_Financial/debt_schedule.csv",
+          "similarity": 0.6539
+        }
+      ],
+      "citations_resolve": true,
+      "result_supports_requested_fact": true,
+      "final_adjudicated_disposition": "SUPPORTED",
+      "reviewer_engine_agreement": "agree",
+      "adjudicator_agrees_with_reviewer": true,
+      "defect_owner": "no defect",
+      "severity": "none",
+      "confidence": "high",
+      "adjudicator_note": ""
+    },
+    {
+      "query_id": "CR-004",
+      "reviewer_question": "How much notice does either party need to give to terminate the Hartwell distribution agreement for convenience?",
+      "reviewer_capability_class": "directly_answerable",
+      "reviewer_expected_disposition": "SUPPORTED",
+      "reviewer_confidence": "high",
+      "reviewer_verdict": "correct",
+      "reviewer_mapped_state": "SUPPORTED",
+      "actual_fixture_evidence": "04_Suppliers/Hartwell_Distribution_Agreement.pdf Section 11.2 (60 days)",
+      "canonical_source_anchors": "04_Suppliers/Hartwell_Distribution_Agreement.pdf Section 11.2 (60 days)",
+      "fact_directly_stated": true,
+      "calculation_required": false,
+      "cross_document_comparison_required": false,
+      "absence_legitimately_concludable": false,
+      "relevant_document_inaccessible": false,
+      "source_stale_withdrawn_or_superseded": false,
+      "engine_result": "found",
+      "engine_best_similarity": 0.7126,
+      "engine_lexical_hits": 0,
+      "engine_top_documents": [
+        {
+          "rank": 1,
+          "document": "04_Suppliers/Hartwell_Distribution_Agreement.pdf",
+          "similarity": 0.7126
+        },
+        {
+          "rank": 2,
+          "document": "11_Update_R2/Hartwell_Exhibit_B_Pricing.txt",
+          "similarity": 0.6556
+        },
+        {
+          "rank": 3,
+          "document": "02_Financial/ap_aging.csv",
+          "similarity": 0.645
+        }
+      ],
+      "citations_resolve": true,
+      "result_supports_requested_fact": true,
+      "final_adjudicated_disposition": "SUPPORTED",
+      "reviewer_engine_agreement": "agree",
+      "adjudicator_agrees_with_reviewer": true,
+      "defect_owner": "no defect",
+      "severity": "none",
+      "confidence": "high",
+      "adjudicator_note": ""
+    },
+    {
+      "query_id": "CR-005",
+      "reviewer_question": "Does the Lakeside contract give the customer any rights if the company is sold?",
+      "reviewer_capability_class": "directly_answerable",
+      "reviewer_expected_disposition": "SUPPORTED",
+      "reviewer_confidence": "high",
+      "reviewer_verdict": "correct",
+      "reviewer_mapped_state": "SUPPORTED",
+      "actual_fixture_evidence": "03_Customers/Lakeside_Master_Service_Agreement.pdf Sections 14.2-14.3",
+      "canonical_source_anchors": "03_Customers/Lakeside_Master_Service_Agreement.pdf Sections 14.2-14.3",
+      "fact_directly_stated": true,
+      "calculation_required": false,
+      "cross_document_comparison_required": false,
+      "absence_legitimately_concludable": false,
+      "relevant_document_inaccessible": false,
+      "source_stale_withdrawn_or_superseded": false,
+      "engine_result": "found",
+      "engine_best_similarity": 0.7191,
+      "engine_lexical_hits": 0,
+      "engine_top_documents": [
+        {
+          "rank": 1,
+          "document": "03_Customers/Lakeside_Master_Service_Agreement.pdf",
+          "similarity": 0.7191
+        },
+        {
+          "rank": 2,
+          "document": "03_Customers/Lakeside_Master_Service_Agreement.pdf",
+          "similarity": 0.6677
+        },
+        {
+          "rank": 3,
+          "document": "02_Financial/ar_aging.csv",
+          "similarity": 0.6579
+        }
+      ],
+      "citations_resolve": true,
+      "result_supports_requested_fact": true,
+      "final_adjudicated_disposition": "SUPPORTED",
+      "reviewer_engine_agreement": "agree",
+      "adjudicator_agrees_with_reviewer": true,
+      "defect_owner": "no defect",
+      "severity": "none",
+      "confidence": "high",
+      "adjudicator_note": ""
+    },
+    {
+      "query_id": "CR-006",
+      "reviewer_question": "What was total revenue in fiscal year 2025?",
+      "reviewer_capability_class": "directly_answerable",
+      "reviewer_expected_disposition": "SUPPORTED",
+      "reviewer_confidence": "high",
+      "reviewer_verdict": "correct",
+      "reviewer_mapped_state": "SUPPORTED",
+      "actual_fixture_evidence": "02_Financial/Income_Statement_FY2025.pdf (16,412,880)",
+      "canonical_source_anchors": "02_Financial/Income_Statement_FY2025.pdf (16,412,880)",
+      "fact_directly_stated": true,
+      "calculation_required": false,
+      "cross_document_comparison_required": false,
+      "absence_legitimately_concludable": false,
+      "relevant_document_inaccessible": false,
+      "source_stale_withdrawn_or_superseded": false,
+      "engine_result": "found",
+      "engine_best_similarity": 0.7505,
+      "engine_lexical_hits": 2,
+      "engine_top_documents": [
+        {
+          "rank": 1,
+          "document": "02_Financial/Income_Statement_FY2025.pdf",
+          "similarity": 0.6703
+        },
+        {
+          "rank": 2,
+          "document": "06_Operations/Branch_KPI_Deck_FY2025.pdf",
+          "similarity": 0.6628
+        },
+        {
+          "rank": 3,
+          "document": "02_Financial/trial_balance.csv",
+          "similarity": 0.7505
+        }
+      ],
+      "citations_resolve": true,
+      "result_supports_requested_fact": true,
+      "final_adjudicated_disposition": "SUPPORTED",
+      "reviewer_engine_agreement": "agree",
+      "adjudicator_agrees_with_reviewer": true,
+      "defect_owner": "no defect",
+      "severity": "none",
+      "confidence": "high",
+      "adjudicator_note": ""
+    },
+    {
+      "query_id": "CR-007",
+      "reviewer_question": "What is the limit on the general liability policy and who is the carrier?",
+      "reviewer_capability_class": "directly_answerable",
+      "reviewer_expected_disposition": "SUPPORTED",
+      "reviewer_confidence": "high",
+      "reviewer_verdict": "correct",
+      "reviewer_mapped_state": "SUPPORTED",
+      "actual_fixture_evidence": "07_Legal_Insurance/insurance_certificates.csv row 2 (Tri-State Casualty, 2,000,000)",
+      "canonical_source_anchors": "07_Legal_Insurance/insurance_certificates.csv row 2 (Tri-State Casualty, 2,000,000)",
+      "fact_directly_stated": true,
+      "calculation_required": false,
+      "cross_document_comparison_required": false,
+      "absence_legitimately_concludable": false,
+      "relevant_document_inaccessible": false,
+      "source_stale_withdrawn_or_superseded": false,
+      "engine_result": "found",
+      "engine_best_similarity": 0.7555,
+      "engine_lexical_hits": 1,
+      "engine_top_documents": [
+        {
+          "rank": 1,
+          "document": "07_Legal_Insurance/insurance_certificates.csv",
+          "similarity": 0.7555
+        },
+        {
+          "rank": 2,
+          "document": "07_Legal_Insurance/insurance_certificates.csv",
+          "similarity": 0.7187
+        },
+        {
+          "rank": 3,
+          "document": "07_Legal_Insurance/insurance_renewal_notice.txt",
+          "similarity": 0.6985
+        }
+      ],
+      "citations_resolve": true,
+      "result_supports_requested_fact": true,
+      "final_adjudicated_disposition": "SUPPORTED",
+      "reviewer_engine_agreement": "agree",
+      "adjudicator_agrees_with_reviewer": true,
+      "defect_owner": "no defect",
+      "severity": "none",
+      "confidence": "high",
+      "adjudicator_note": ""
+    },
+    {
+      "query_id": "CR-008",
+      "reviewer_question": "When does the Erie facility lease expire and is there a renewal option?",
+      "reviewer_capability_class": "directly_answerable",
+      "reviewer_expected_disposition": "SUPPORTED",
+      "reviewer_confidence": "high",
+      "reviewer_verdict": "correct",
+      "reviewer_mapped_state": "SUPPORTED",
+      "actual_fixture_evidence": "07_Legal_Insurance/Facility_Lease_Erie.md (expiry 2025-11-30, renewal none)",
+      "canonical_source_anchors": "07_Legal_Insurance/Facility_Lease_Erie.md (expiry 2025-11-30, renewal none)",
+      "fact_directly_stated": true,
+      "calculation_required": false,
+      "cross_document_comparison_required": false,
+      "absence_legitimately_concludable": false,
+      "relevant_document_inaccessible": false,
+      "source_stale_withdrawn_or_superseded": false,
+      "engine_result": "found",
+      "engine_best_similarity": 0.7942,
+      "engine_lexical_hits": 0,
+      "engine_top_documents": [
+        {
+          "rank": 1,
+          "document": "07_Legal_Insurance/Facility_Lease_Erie.md",
+          "similarity": 0.7942
+        },
+        {
+          "rank": 2,
+          "document": "07_Legal_Insurance/Facility_Lease_Toledo.md",
+          "similarity": 0.781
+        },
+        {
+          "rank": 3,
+          "document": "07_Legal_Insurance/Facility_Lease_Erie.md",
+          "similarity": 0.709
+        }
+      ],
+      "citations_resolve": true,
+      "result_supports_requested_fact": true,
+      "final_adjudicated_disposition": "SUPPORTED",
+      "reviewer_engine_agreement": "agree",
+      "adjudicator_agrees_with_reviewer": true,
+      "defect_owner": "no defect",
+      "severity": "none",
+      "confidence": "high",
+      "adjudicator_note": ""
+    },
+    {
+      "query_id": "CR-009",
+      "reviewer_question": "How much unbilled work in process was on the books at the end of 2025?",
+      "reviewer_capability_class": "directly_answerable",
+      "reviewer_expected_disposition": "SUPPORTED",
+      "reviewer_confidence": "high",
+      "reviewer_verdict": "false_abstention",
+      "reviewer_mapped_state": "UNMAPPABLE",
+      "actual_fixture_evidence": "06_Operations/wip_schedule.txt (1,020,000 at 2025-12-31)",
+      "canonical_source_anchors": "06_Operations/wip_schedule.txt (1,020,000 at 2025-12-31)",
+      "fact_directly_stated": true,
+      "calculation_required": false,
+      "cross_document_comparison_required": false,
+      "absence_legitimately_concludable": false,
+      "relevant_document_inaccessible": false,
+      "source_stale_withdrawn_or_superseded": false,
+      "engine_result": "not_found",
+      "engine_best_similarity": 0.6406,
+      "engine_lexical_hits": 0,
+      "engine_top_documents": [
+        {
+          "rank": 1,
+          "document": "06_Operations/wip_schedule.txt",
+          "similarity": 0.6406
+        },
+        {
+          "rank": 2,
+          "document": "02_Financial/Balance_Sheet_FY2025.pdf",
+          "similarity": 0.6269
+        },
+        {
+          "rank": 3,
+          "document": "11_Update_R2/withdrawal_notice.txt",
+          "similarity": 0.5416
+        }
+      ],
+      "citations_resolve": true,
+      "result_supports_requested_fact": false,
+      "final_adjudicated_disposition": "SUPPORTED",
+      "reviewer_engine_agreement": "disagree",
+      "adjudicator_agrees_with_reviewer": true,
+      "defect_owner": "abstention or evidence sufficiency",
+      "severity": "high",
+      "confidence": "high",
+      "adjudicator_note": "Source ranked #1 at 0.6406; 0.0149 under the floor. Retrieval was perfect; the gate discarded it."
+    },
+    {
+      "query_id": "CR-010",
+      "reviewer_question": "Are there any pending or threatened legal proceedings against the company?",
+      "reviewer_capability_class": "directly_answerable",
+      "reviewer_expected_disposition": "CONTRADICTED",
+      "reviewer_confidence": "high",
+      "reviewer_verdict": "wrong_state",
+      "reviewer_mapped_state": "CONTRADICTED",
+      "actual_fixture_evidence": "07_Legal_Insurance/Litigation_Summary.pdf (asserts none) vs 07_Legal_Insurance/legal_invoice_2025-11.txt (Mercer arbitration)",
+      "canonical_source_anchors": "07_Legal_Insurance/Litigation_Summary.pdf (asserts none) vs 07_Legal_Insurance/legal_invoice_2025-11.txt (Mercer arbitration)",
+      "fact_directly_stated": true,
+      "calculation_required": false,
+      "cross_document_comparison_required": true,
+      "absence_legitimately_concludable": false,
+      "relevant_document_inaccessible": false,
+      "source_stale_withdrawn_or_superseded": false,
+      "engine_result": "found",
+      "engine_best_similarity": 0.6967,
+      "engine_lexical_hits": 2,
+      "engine_top_documents": [
+        {
+          "rank": 1,
+          "document": "07_Legal_Insurance/Litigation_Summary.pdf",
+          "similarity": 0.6967
+        },
+        {
+          "rank": 2,
+          "document": "10_QA/management_meeting_transcript.md",
+          "similarity": 0.5695
+        },
+        {
+          "rank": 3,
+          "document": "00_Request_List/request_list.csv",
+          "similarity": 0.6362
+        }
+      ],
+      "citations_resolve": true,
+      "result_supports_requested_fact": false,
+      "final_adjudicated_disposition": "CONTRADICTED",
+      "reviewer_engine_agreement": "disagree",
+      "adjudicator_agrees_with_reviewer": true,
+      "defect_owner": "result-state contract",
+      "severity": "medium",
+      "confidence": "high",
+      "adjudicator_note": "Both sides retrieved (ranks 1 and 6). The assertion of 'none' ranks first; nothing signals the conflict. Matches planted RDG-011."
+    },
+    {
+      "query_id": "CR-011",
+      "reviewer_question": "Are all field staff employees of the company rather than contractors?",
+      "reviewer_capability_class": "directly_answerable",
+      "reviewer_expected_disposition": "CONTRADICTED",
+      "reviewer_confidence": "high",
+      "reviewer_verdict": "wrong_state",
+      "reviewer_mapped_state": "CONTRADICTED",
+      "actual_fixture_evidence": "10_QA/seller_qa_log.csv Q-022 (asserts all employees) vs 05_Employees/contractor_schedule.csv (13 x 1099-NEC)",
+      "canonical_source_anchors": "10_QA/seller_qa_log.csv Q-022 (asserts all employees) vs 05_Employees/contractor_schedule.csv (13 x 1099-NEC)",
+      "fact_directly_stated": true,
+      "calculation_required": false,
+      "cross_document_comparison_required": true,
+      "absence_legitimately_concludable": false,
+      "relevant_document_inaccessible": false,
+      "source_stale_withdrawn_or_superseded": false,
+      "engine_result": "found",
+      "engine_best_similarity": 0.8522,
+      "engine_lexical_hits": 0,
+      "engine_top_documents": [
+        {
+          "rank": 1,
+          "document": "10_QA/seller_qa_log.csv",
+          "similarity": 0.8522
+        },
+        {
+          "rank": 2,
+          "document": "05_Employees/contractor_schedule.csv",
+          "similarity": 0.6783
+        },
+        {
+          "rank": 3,
+          "document": "05_Employees/contractor_schedule.csv",
+          "similarity": 0.6769
+        }
+      ],
+      "citations_resolve": true,
+      "result_supports_requested_fact": false,
+      "final_adjudicated_disposition": "CONTRADICTED",
+      "reviewer_engine_agreement": "disagree",
+      "adjudicator_agrees_with_reviewer": true,
+      "defect_owner": "result-state contract",
+      "severity": "medium",
+      "confidence": "high",
+      "adjudicator_note": "Both sides in top 12 (ranks 1 and 2). Seller assertion ranks first at 0.8522. Matches planted RDG-007."
+    },
+    {
+      "query_id": "CR-012",
+      "reviewer_question": "Do all of the company's facility leases run through 2028 or later?",
+      "reviewer_capability_class": "directly_answerable",
+      "reviewer_expected_disposition": "CONTRADICTED",
+      "reviewer_confidence": "high",
+      "reviewer_verdict": "wrong_state",
+      "reviewer_mapped_state": "CONTRADICTED",
+      "actual_fixture_evidence": "10_QA/seller_qa_log.csv Q-019 (asserts all past 2028) vs 07_Legal_Insurance/Facility_Lease_Erie.md (expired 2025-11-30)",
+      "canonical_source_anchors": "10_QA/seller_qa_log.csv Q-019 (asserts all past 2028) vs 07_Legal_Insurance/Facility_Lease_Erie.md (expired 2025-11-30)",
+      "fact_directly_stated": true,
+      "calculation_required": false,
+      "cross_document_comparison_required": true,
+      "absence_legitimately_concludable": false,
+      "relevant_document_inaccessible": false,
+      "source_stale_withdrawn_or_superseded": false,
+      "engine_result": "found",
+      "engine_best_similarity": 0.8154,
+      "engine_lexical_hits": 2,
+      "engine_top_documents": [
+        {
+          "rank": 1,
+          "document": "10_QA/seller_qa_log.csv",
+          "similarity": 0.8154
+        },
+        {
+          "rank": 2,
+          "document": "10_QA/seller_qa_log.csv",
+          "similarity": 0.6772
+        },
+        {
+          "rank": 3,
+          "document": "07_Legal_Insurance/Facility_Lease_Toledo.md",
+          "similarity": 0.7124
+        }
+      ],
+      "citations_resolve": true,
+      "result_supports_requested_fact": false,
+      "final_adjudicated_disposition": "CONTRADICTED",
+      "reviewer_engine_agreement": "disagree",
+      "adjudicator_agrees_with_reviewer": true,
+      "defect_owner": "result-state contract",
+      "severity": "medium",
+      "confidence": "high",
+      "adjudicator_note": "Both sides in top 12 (ranks 1 and 4). Matches planted RDG-005."
+    },
+    {
+      "query_id": "CR-013",
+      "reviewer_question": "What is the monthly base rent under the Toledo facility lease?",
+      "reviewer_capability_class": "subject_present_fact_may_be_absent",
+      "reviewer_expected_disposition": "SUBJECT_PRESENT_FACT_ABSENT",
+      "reviewer_confidence": "high",
+      "reviewer_verdict": "false_support",
+      "reviewer_mapped_state": "SUPPORTED",
+      "actual_fixture_evidence": "07_Legal_Insurance/Facility_Lease_Toledo.md \u2014 verified: contains no rent figure of any kind",
+      "canonical_source_anchors": "07_Legal_Insurance/Facility_Lease_Toledo.md \u2014 verified: contains no rent figure of any kind",
+      "fact_directly_stated": false,
+      "calculation_required": false,
+      "cross_document_comparison_required": false,
+      "absence_legitimately_concludable": true,
+      "relevant_document_inaccessible": false,
+      "source_stale_withdrawn_or_superseded": false,
+      "engine_result": "found",
+      "engine_best_similarity": 0.7919,
+      "engine_lexical_hits": 0,
+      "engine_top_documents": [
+        {
+          "rank": 1,
+          "document": "07_Legal_Insurance/Facility_Lease_Toledo.md",
+          "similarity": 0.7919
+        },
+        {
+          "rank": 2,
+          "document": "07_Legal_Insurance/Facility_Lease_Toledo.md",
+          "similarity": 0.7404
+        },
+        {
+          "rank": 3,
+          "document": "07_Legal_Insurance/Facility_Lease_Erie.md",
+          "similarity": 0.7216
+        }
+      ],
+      "citations_resolve": true,
+      "result_supports_requested_fact": false,
+      "final_adjudicated_disposition": "SUBJECT_PRESENT_FACT_ABSENT",
+      "reviewer_engine_agreement": "disagree",
+      "adjudicator_agrees_with_reviewer": true,
+      "defect_owner": "abstention or evidence sufficiency",
+      "severity": "medium",
+      "confidence": "high",
+      "adjudicator_note": "Returned the correct lease at 0.7919 as though it answered. Subject covered, attribute absent."
+    },
+    {
+      "query_id": "CR-014",
+      "reviewer_question": "By how much does the fixed monthly fee under the Lakeside agreement adjust each year?",
+      "reviewer_capability_class": "subject_present_fact_may_be_absent",
+      "reviewer_expected_disposition": "SUBJECT_PRESENT_FACT_ABSENT",
+      "reviewer_confidence": "high",
+      "reviewer_verdict": "wrong_state",
+      "reviewer_mapped_state": "SUBJECT_PRESENT_FACT_ABSENT",
+      "actual_fixture_evidence": "03_Customers/Lakeside_Master_Service_Agreement.pdf Section 9 (adjustment stated, no rate)",
+      "canonical_source_anchors": "03_Customers/Lakeside_Master_Service_Agreement.pdf Section 9 (adjustment stated, no rate)",
+      "fact_directly_stated": false,
+      "calculation_required": false,
+      "cross_document_comparison_required": false,
+      "absence_legitimately_concludable": true,
+      "relevant_document_inaccessible": false,
+      "source_stale_withdrawn_or_superseded": false,
+      "engine_result": "not_found",
+      "engine_best_similarity": 0.641,
+      "engine_lexical_hits": 0,
+      "engine_top_documents": [
+        {
+          "rank": 1,
+          "document": "00_Request_List/request_list.csv",
+          "similarity": 0.641
+        },
+        {
+          "rank": 2,
+          "document": "02_Financial/debt_schedule.csv",
+          "similarity": 0.6364
+        },
+        {
+          "rank": 3,
+          "document": "02_Financial/debt_schedule.csv",
+          "similarity": 0.6354
+        }
+      ],
+      "citations_resolve": true,
+      "result_supports_requested_fact": false,
+      "final_adjudicated_disposition": "SUBJECT_PRESENT_FACT_ABSENT",
+      "reviewer_engine_agreement": "disagree",
+      "adjudicator_agrees_with_reviewer": true,
+      "defect_owner": "result-state contract",
+      "severity": "low",
+      "confidence": "high",
+      "adjudicator_note": "Correctly declined at 0.6410 but for the wrong reason: silence, not a statement that the clause exists without a figure."
+    },
+    {
+      "query_id": "CR-015",
+      "reviewer_question": "What is the deductible or self-insured retention on the general liability policy?",
+      "reviewer_capability_class": "subject_present_fact_may_be_absent",
+      "reviewer_expected_disposition": "SUBJECT_PRESENT_FACT_ABSENT",
+      "reviewer_confidence": "high",
+      "reviewer_verdict": "false_support",
+      "reviewer_mapped_state": "SUPPORTED",
+      "actual_fixture_evidence": "07_Legal_Insurance/insurance_certificates.csv \u2014 verified columns: policy_type,carrier,policy_number,effective,expiry,limit. No deductible or retention.",
+      "canonical_source_anchors": "07_Legal_Insurance/insurance_certificates.csv \u2014 verified columns: policy_type,carrier,policy_number,effective,expiry,limit. No deductible or retention.",
+      "fact_directly_stated": false,
+      "calculation_required": false,
+      "cross_document_comparison_required": false,
+      "absence_legitimately_concludable": true,
+      "relevant_document_inaccessible": false,
+      "source_stale_withdrawn_or_superseded": false,
+      "engine_result": "found",
+      "engine_best_similarity": 0.6937,
+      "engine_lexical_hits": 0,
+      "engine_top_documents": [
+        {
+          "rank": 1,
+          "document": "07_Legal_Insurance/insurance_certificates.csv",
+          "similarity": 0.6937
+        },
+        {
+          "rank": 2,
+          "document": "07_Legal_Insurance/insurance_renewal_notice.txt",
+          "similarity": 0.6917
+        },
+        {
+          "rank": 3,
+          "document": "07_Legal_Insurance/insurance_certificates.csv",
+          "similarity": 0.6813
+        }
+      ],
+      "citations_resolve": true,
+      "result_supports_requested_fact": false,
+      "final_adjudicated_disposition": "SUBJECT_PRESENT_FACT_ABSENT",
+      "reviewer_engine_agreement": "disagree",
+      "adjudicator_agrees_with_reviewer": true,
+      "defect_owner": "abstention or evidence sufficiency",
+      "severity": "medium",
+      "confidence": "high",
+      "adjudicator_note": "Returned the certificate schedule at 0.6937 as though it answered."
+    },
+    {
+      "query_id": "CR-016",
+      "reviewer_question": "What are the payment terms under the Hartwell distribution agreement?",
+      "reviewer_capability_class": "subject_present_fact_may_be_absent",
+      "reviewer_expected_disposition": "SUBJECT_PRESENT_FACT_ABSENT",
+      "reviewer_confidence": "medium",
+      "reviewer_verdict": "false_support",
+      "reviewer_mapped_state": "SUPPORTED",
+      "actual_fixture_evidence": "04_Suppliers/Hartwell_Distribution_Agreement.pdf \u2014 verified: no payment, credit or invoice term anywhere",
+      "canonical_source_anchors": "04_Suppliers/Hartwell_Distribution_Agreement.pdf \u2014 verified: no payment, credit or invoice term anywhere",
+      "fact_directly_stated": false,
+      "calculation_required": false,
+      "cross_document_comparison_required": false,
+      "absence_legitimately_concludable": true,
+      "relevant_document_inaccessible": false,
+      "source_stale_withdrawn_or_superseded": false,
+      "engine_result": "found",
+      "engine_best_similarity": 0.767,
+      "engine_lexical_hits": 0,
+      "engine_top_documents": [
+        {
+          "rank": 1,
+          "document": "04_Suppliers/Hartwell_Distribution_Agreement.pdf",
+          "similarity": 0.767
+        },
+        {
+          "rank": 2,
+          "document": "02_Financial/ap_aging.csv",
+          "similarity": 0.7462
+        },
+        {
+          "rank": 3,
+          "document": "11_Update_R2/Hartwell_Exhibit_B_Pricing.txt",
+          "similarity": 0.7345
+        }
+      ],
+      "citations_resolve": true,
+      "result_supports_requested_fact": false,
+      "final_adjudicated_disposition": "SUBJECT_PRESENT_FACT_ABSENT",
+      "reviewer_engine_agreement": "disagree",
+      "adjudicator_agrees_with_reviewer": true,
+      "defect_owner": "abstention or evidence sufficiency",
+      "severity": "high",
+      "confidence": "high",
+      "adjudicator_note": "Escalation-worthy. Rank 2 is 02_Financial/ap_aging.csv 'Hartwell Supply Company 704000 38' \u2014 a payables balance and days-outstanding that reads as payment terms. Related-but-insufficient evidence presented as support."
+    },
+    {
+      "query_id": "CR-017",
+      "reviewer_question": "What is the Toledo branch manager paid?",
+      "reviewer_capability_class": "subject_present_fact_may_be_absent",
+      "reviewer_expected_disposition": "SUBJECT_PRESENT_FACT_ABSENT",
+      "reviewer_confidence": "high",
+      "reviewer_verdict": "wrong_state",
+      "reviewer_mapped_state": "SUBJECT_PRESENT_FACT_ABSENT",
+      "actual_fixture_evidence": "05_Employees/employee_roster.xlsx (roles, no pay) and payroll_summary.txt (aggregate only)",
+      "canonical_source_anchors": "05_Employees/employee_roster.xlsx (roles, no pay) and payroll_summary.txt (aggregate only)",
+      "fact_directly_stated": false,
+      "calculation_required": false,
+      "cross_document_comparison_required": false,
+      "absence_legitimately_concludable": true,
+      "relevant_document_inaccessible": false,
+      "source_stale_withdrawn_or_superseded": false,
+      "engine_result": "not_found",
+      "engine_best_similarity": 0.6485,
+      "engine_lexical_hits": 0,
+      "engine_top_documents": [
+        {
+          "rank": 1,
+          "document": "02_Financial/ap_aging.csv",
+          "similarity": 0.6485
+        },
+        {
+          "rank": 2,
+          "document": "05_Employees/org_chart.md",
+          "similarity": 0.6416
+        },
+        {
+          "rank": 3,
+          "document": "05_Employees/employee_roster.xlsx",
+          "similarity": 0.6385
+        }
+      ],
+      "citations_resolve": true,
+      "result_supports_requested_fact": false,
+      "final_adjudicated_disposition": "SUBJECT_PRESENT_FACT_ABSENT",
+      "reviewer_engine_agreement": "disagree",
+      "adjudicator_agrees_with_reviewer": true,
+      "defect_owner": "result-state contract",
+      "severity": "low",
+      "confidence": "high",
+      "adjudicator_note": "Correctly declined at 0.6485. Top vector hit was ap_aging 'Toledo Industrial Gas' \u2014 a vendor payable matched to a compensation question."
+    },
+    {
+      "query_id": "CR-018",
+      "reviewer_question": "How much paid time off do field technicians accrue?",
+      "reviewer_capability_class": "subject_present_fact_may_be_absent",
+      "reviewer_expected_disposition": "SUBJECT_PRESENT_FACT_ABSENT",
+      "reviewer_confidence": "medium",
+      "reviewer_verdict": "false_support",
+      "reviewer_mapped_state": "SUPPORTED",
+      "actual_fixture_evidence": "05_Employees/* \u2014 verified: no PTO, vacation, accrual or benefits policy in the room",
+      "canonical_source_anchors": "05_Employees/* \u2014 verified: no PTO, vacation, accrual or benefits policy in the room",
+      "fact_directly_stated": false,
+      "calculation_required": false,
+      "cross_document_comparison_required": false,
+      "absence_legitimately_concludable": true,
+      "relevant_document_inaccessible": false,
+      "source_stale_withdrawn_or_superseded": false,
+      "engine_result": "found",
+      "engine_best_similarity": 0.6896,
+      "engine_lexical_hits": 0,
+      "engine_top_documents": [
+        {
+          "rank": 1,
+          "document": "05_Employees/contractor_schedule.csv",
+          "similarity": 0.6896
+        },
+        {
+          "rank": 2,
+          "document": "05_Employees/contractor_schedule.csv",
+          "similarity": 0.6782
+        },
+        {
+          "rank": 3,
+          "document": "05_Employees/employee_roster.xlsx",
+          "similarity": 0.6773
+        }
+      ],
+      "citations_resolve": true,
+      "result_supports_requested_fact": false,
+      "final_adjudicated_disposition": "SUBJECT_PRESENT_FACT_ABSENT",
+      "reviewer_engine_agreement": "disagree",
+      "adjudicator_agrees_with_reviewer": true,
+      "defect_owner": "abstention or evidence sufficiency",
+      "severity": "medium",
+      "confidence": "high",
+      "adjudicator_note": "Returned contractor_schedule and roster rows at 0.6896 as though they answered."
+    },
+    {
+      "query_id": "CR-019",
+      "reviewer_question": "What patents or registered trademarks does the company own?",
+      "reviewer_capability_class": "outside_corpus_scope",
+      "reviewer_expected_disposition": "OUT_OF_SCOPE",
+      "reviewer_confidence": "high",
+      "reviewer_verdict": "correct",
+      "reviewer_mapped_state": "OUT_OF_SCOPE",
+      "actual_fixture_evidence": "no IP material in the room (verified)",
+      "canonical_source_anchors": "no IP material in the room (verified)",
+      "fact_directly_stated": false,
+      "calculation_required": false,
+      "cross_document_comparison_required": false,
+      "absence_legitimately_concludable": false,
+      "relevant_document_inaccessible": false,
+      "source_stale_withdrawn_or_superseded": false,
+      "engine_result": "not_found",
+      "engine_best_similarity": 0.6166,
+      "engine_lexical_hits": 0,
+      "engine_top_documents": [
+        {
+          "rank": 1,
+          "document": "01_Corporate/Articles_of_Organization.pdf",
+          "similarity": 0.6166
+        },
+        {
+          "rank": 2,
+          "document": "00_Request_List/responsibility_matrix.md",
+          "similarity": 0.6041
+        },
+        {
+          "rank": 3,
+          "document": "07_Legal_Insurance/Litigation_Summary.pdf",
+          "similarity": 0.5931
+        }
+      ],
+      "citations_resolve": true,
+      "result_supports_requested_fact": false,
+      "final_adjudicated_disposition": "OUT_OF_SCOPE",
+      "reviewer_engine_agreement": "agree",
+      "adjudicator_agrees_with_reviewer": true,
+      "defect_owner": "no defect",
+      "severity": "none",
+      "confidence": "high",
+      "adjudicator_note": ""
+    },
+    {
+      "query_id": "CR-020",
+      "reviewer_question": "Has the company had any cybersecurity incidents or data breaches?",
+      "reviewer_capability_class": "outside_corpus_scope",
+      "reviewer_expected_disposition": "OUT_OF_SCOPE",
+      "reviewer_confidence": "high",
+      "reviewer_verdict": "correct",
+      "reviewer_mapped_state": "OUT_OF_SCOPE",
+      "actual_fixture_evidence": "no IT/security material (verified)",
+      "canonical_source_anchors": "no IT/security material (verified)",
+      "fact_directly_stated": false,
+      "calculation_required": false,
+      "cross_document_comparison_required": false,
+      "absence_legitimately_concludable": false,
+      "relevant_document_inaccessible": false,
+      "source_stale_withdrawn_or_superseded": false,
+      "engine_result": "not_found",
+      "engine_best_similarity": 0.5859,
+      "engine_lexical_hits": 0,
+      "engine_top_documents": [
+        {
+          "rank": 1,
+          "document": "11_Update_R2/withdrawal_notice.txt",
+          "similarity": 0.5859
+        },
+        {
+          "rank": 2,
+          "document": "12_Routine/invoice_25033.txt",
+          "similarity": 0.5824
+        },
+        {
+          "rank": 3,
+          "document": "12_Routine/invoice_25008.txt",
+          "similarity": 0.5793
+        }
+      ],
+      "citations_resolve": true,
+      "result_supports_requested_fact": false,
+      "final_adjudicated_disposition": "OUT_OF_SCOPE",
+      "reviewer_engine_agreement": "agree",
+      "adjudicator_agrees_with_reviewer": true,
+      "defect_owner": "no defect",
+      "severity": "none",
+      "confidence": "high",
+      "adjudicator_note": ""
+    },
+    {
+      "query_id": "CR-021",
+      "reviewer_question": "Are any of the employees covered by a collective bargaining agreement?",
+      "reviewer_capability_class": "outside_corpus_scope",
+      "reviewer_expected_disposition": "OUT_OF_SCOPE",
+      "reviewer_confidence": "medium",
+      "reviewer_verdict": "false_support",
+      "reviewer_mapped_state": "SUPPORTED",
+      "actual_fixture_evidence": "verified: no union or collective-bargaining reference anywhere in the room",
+      "canonical_source_anchors": "verified: no union or collective-bargaining reference anywhere in the room",
+      "fact_directly_stated": false,
+      "calculation_required": false,
+      "cross_document_comparison_required": false,
+      "absence_legitimately_concludable": false,
+      "relevant_document_inaccessible": false,
+      "source_stale_withdrawn_or_superseded": false,
+      "engine_result": "found",
+      "engine_best_similarity": 0.66,
+      "engine_lexical_hits": 0,
+      "engine_top_documents": [
+        {
+          "rank": 1,
+          "document": "10_QA/seller_qa_log.csv",
+          "similarity": 0.66
+        },
+        {
+          "rank": 2,
+          "document": "00_Request_List/request_list.csv",
+          "similarity": 0.6415
+        },
+        {
+          "rank": 3,
+          "document": "05_Employees/payroll_summary.txt",
+          "similarity": 0.6204
+        }
+      ],
+      "citations_resolve": true,
+      "result_supports_requested_fact": false,
+      "final_adjudicated_disposition": "OUT_OF_SCOPE",
+      "reviewer_engine_agreement": "disagree",
+      "adjudicator_agrees_with_reviewer": true,
+      "defect_owner": "abstention or evidence sufficiency",
+      "severity": "medium",
+      "confidence": "high",
+      "adjudicator_note": "Returned seller_qa_log Q-022 (contractor classification) at 0.6600 \u2014 0.0045 above the floor. A different employment question presented as an answer."
+    },
+    {
+      "query_id": "CR-022",
+      "reviewer_question": "What retirement or 401(k) plan does the company sponsor?",
+      "reviewer_capability_class": "outside_corpus_scope",
+      "reviewer_expected_disposition": "OUT_OF_SCOPE",
+      "reviewer_confidence": "medium",
+      "reviewer_verdict": "correct",
+      "reviewer_mapped_state": "OUT_OF_SCOPE",
+      "actual_fixture_evidence": "verified: '401' occurrences are a dollar amount (401,600) in vendor files, not a plan",
+      "canonical_source_anchors": "verified: '401' occurrences are a dollar amount (401,600) in vendor files, not a plan",
+      "fact_directly_stated": false,
+      "calculation_required": false,
+      "cross_document_comparison_required": false,
+      "absence_legitimately_concludable": false,
+      "relevant_document_inaccessible": false,
+      "source_stale_withdrawn_or_superseded": false,
+      "engine_result": "not_found",
+      "engine_best_similarity": 0.588,
+      "engine_lexical_hits": 0,
+      "engine_top_documents": [
+        {
+          "rank": 1,
+          "document": "10_QA/seller_qa_log.csv",
+          "similarity": 0.588
+        },
+        {
+          "rank": 2,
+          "document": "10_QA/seller_qa_log.csv",
+          "similarity": 0.5803
+        },
+        {
+          "rank": 3,
+          "document": "11_Update_R2/seller_qa_log_revised.csv",
+          "similarity": 0.5796
+        }
+      ],
+      "citations_resolve": true,
+      "result_supports_requested_fact": false,
+      "final_adjudicated_disposition": "OUT_OF_SCOPE",
+      "reviewer_engine_agreement": "agree",
+      "adjudicator_agrees_with_reviewer": true,
+      "defect_owner": "no defect",
+      "severity": "none",
+      "confidence": "high",
+      "adjudicator_note": ""
+    },
+    {
+      "query_id": "CR-023",
+      "reviewer_question": "What were the results of the most recent customer satisfaction survey?",
+      "reviewer_capability_class": "outside_corpus_scope",
+      "reviewer_expected_disposition": "OUT_OF_SCOPE",
+      "reviewer_confidence": "high",
+      "reviewer_verdict": "false_support",
+      "reviewer_mapped_state": "SUPPORTED",
+      "actual_fixture_evidence": "verified: no survey, satisfaction or NPS material in the room",
+      "canonical_source_anchors": "verified: no survey, satisfaction or NPS material in the room",
+      "fact_directly_stated": false,
+      "calculation_required": false,
+      "cross_document_comparison_required": false,
+      "absence_legitimately_concludable": false,
+      "relevant_document_inaccessible": false,
+      "source_stale_withdrawn_or_superseded": false,
+      "engine_result": "found",
+      "engine_best_similarity": 0.6693,
+      "engine_lexical_hits": 0,
+      "engine_top_documents": [
+        {
+          "rank": 1,
+          "document": "11_Update_R2/seller_qa_log_revised.csv",
+          "similarity": 0.6693
+        },
+        {
+          "rank": 2,
+          "document": "11_Update_R2/seller_qa_log_revised.csv",
+          "similarity": 0.6589
+        },
+        {
+          "rank": 3,
+          "document": "10_QA/seller_qa_log.csv",
+          "similarity": 0.6549
+        }
+      ],
+      "citations_resolve": true,
+      "result_supports_requested_fact": false,
+      "final_adjudicated_disposition": "OUT_OF_SCOPE",
+      "reviewer_engine_agreement": "disagree",
+      "adjudicator_agrees_with_reviewer": true,
+      "defect_owner": "abstention or evidence sufficiency",
+      "severity": "medium",
+      "confidence": "high",
+      "adjudicator_note": "Returned seller_qa_log rows about customer concentration at 0.6693."
+    },
+    {
+      "query_id": "CR-024",
+      "reviewer_question": "Is the company in compliance with its bank covenants for fiscal 2025?",
+      "reviewer_capability_class": "requires_calculation_or_comparison",
+      "reviewer_expected_disposition": "REQUIRES_COMPARISON",
+      "reviewer_confidence": "high",
+      "reviewer_verdict": "wrong_state",
+      "reviewer_mapped_state": "REQUIRES_COMPARISON",
+      "actual_fixture_evidence": "02_Financial/Covenant_Compliance_Certificate_FY2025.pdf (1.18x actual, 1.25x minimum)",
+      "canonical_source_anchors": "02_Financial/Covenant_Compliance_Certificate_FY2025.pdf (1.18x actual, 1.25x minimum)",
+      "fact_directly_stated": true,
+      "calculation_required": true,
+      "cross_document_comparison_required": false,
+      "absence_legitimately_concludable": false,
+      "relevant_document_inaccessible": false,
+      "source_stale_withdrawn_or_superseded": false,
+      "engine_result": "found",
+      "engine_best_similarity": 0.7065,
+      "engine_lexical_hits": 0,
+      "engine_top_documents": [
+        {
+          "rank": 1,
+          "document": "02_Financial/debt_schedule.csv",
+          "similarity": 0.7065
+        },
+        {
+          "rank": 2,
+          "document": "02_Financial/debt_schedule.csv",
+          "similarity": 0.6968
+        },
+        {
+          "rank": 3,
+          "document": "02_Financial/Covenant_Compliance_Certificate_FY2025.pdf",
+          "similarity": 0.69
+        }
+      ],
+      "citations_resolve": true,
+      "result_supports_requested_fact": false,
+      "final_adjudicated_disposition": "REQUIRES_CALCULATION",
+      "reviewer_engine_agreement": "disagree",
+      "adjudicator_agrees_with_reviewer": true,
+      "defect_owner": "expected unimplemented capability",
+      "severity": "low",
+      "confidence": "high",
+      "adjudicator_note": "Operands retrieved. Comparison not performed and no state can say so. Matches planted RDG-003 (Critical)."
+    },
+    {
+      "query_id": "CR-025",
+      "reviewer_question": "How much did total revenue grow between fiscal 2023 and fiscal 2025?",
+      "reviewer_capability_class": "requires_calculation_or_comparison",
+      "reviewer_expected_disposition": "REQUIRES_CALCULATION",
+      "reviewer_confidence": "high",
+      "reviewer_verdict": "wrong_state",
+      "reviewer_mapped_state": "REQUIRES_CALCULATION",
+      "actual_fixture_evidence": "02_Financial/Income_Statement_FY2023.pdf and _FY2025.pdf",
+      "canonical_source_anchors": "02_Financial/Income_Statement_FY2023.pdf and _FY2025.pdf",
+      "fact_directly_stated": true,
+      "calculation_required": true,
+      "cross_document_comparison_required": true,
+      "absence_legitimately_concludable": false,
+      "relevant_document_inaccessible": false,
+      "source_stale_withdrawn_or_superseded": false,
+      "engine_result": "found",
+      "engine_best_similarity": 0.6949,
+      "engine_lexical_hits": 0,
+      "engine_top_documents": [
+        {
+          "rank": 1,
+          "document": "02_Financial/trial_balance.csv",
+          "similarity": 0.6949
+        },
+        {
+          "rank": 2,
+          "document": "02_Financial/trial_balance.csv",
+          "similarity": 0.692
+        },
+        {
+          "rank": 3,
+          "document": "02_Financial/trial_balance.csv",
+          "similarity": 0.6426
+        }
+      ],
+      "citations_resolve": true,
+      "result_supports_requested_fact": false,
+      "final_adjudicated_disposition": "REQUIRES_CALCULATION",
+      "reviewer_engine_agreement": "disagree",
+      "adjudicator_agrees_with_reviewer": true,
+      "defect_owner": "expected unimplemented capability",
+      "severity": "low",
+      "confidence": "high",
+      "adjudicator_note": "Both operands retrievable; growth figure appears in neither."
+    },
+    {
+      "query_id": "CR-026",
+      "reviewer_question": "What share of fiscal 2025 parts spend went to a single supplier?",
+      "reviewer_capability_class": "requires_calculation_or_comparison",
+      "reviewer_expected_disposition": "REQUIRES_CALCULATION",
+      "reviewer_confidence": "high",
+      "reviewer_verdict": "wrong_state",
+      "reviewer_mapped_state": "UNMAPPABLE",
+      "actual_fixture_evidence": "04_Suppliers/top_vendor_schedule.txt lines 3-4 (Hartwell 2,562,000 of 4,180,000)",
+      "canonical_source_anchors": "04_Suppliers/top_vendor_schedule.txt lines 3-4 (Hartwell 2,562,000 of 4,180,000)",
+      "fact_directly_stated": true,
+      "calculation_required": true,
+      "cross_document_comparison_required": false,
+      "absence_legitimately_concludable": false,
+      "relevant_document_inaccessible": false,
+      "source_stale_withdrawn_or_superseded": false,
+      "engine_result": "not_found",
+      "engine_best_similarity": 0.6308,
+      "engine_lexical_hits": 0,
+      "engine_top_documents": [
+        {
+          "rank": 1,
+          "document": "00_Request_List/request_list.csv",
+          "similarity": 0.6308
+        },
+        {
+          "rank": 2,
+          "document": "00_Request_List/request_list.csv",
+          "similarity": 0.6303
+        },
+        {
+          "rank": 3,
+          "document": "02_Financial/trial_balance.csv",
+          "similarity": 0.6233
+        }
+      ],
+      "citations_resolve": true,
+      "result_supports_requested_fact": false,
+      "final_adjudicated_disposition": "REQUIRES_CALCULATION",
+      "reviewer_engine_agreement": "disagree",
+      "adjudicator_agrees_with_reviewer": true,
+      "defect_owner": "expected unimplemented capability",
+      "severity": "medium",
+      "confidence": "high",
+      "adjudicator_note": "Dual defect: abstained at 0.6308, AND the source sits at deep rank 30 \u2014 outside the top 12 even with the gate disabled. A genuine ranking miss on top of the missing calculation. Matches planted RDG-008."
+    },
+    {
+      "query_id": "CR-027",
+      "reviewer_question": "How much of accounts receivable is more than 90 days old?",
+      "reviewer_capability_class": "requires_calculation_or_comparison",
+      "reviewer_expected_disposition": "REQUIRES_CALCULATION",
+      "reviewer_confidence": "high",
+      "reviewer_verdict": "wrong_state",
+      "reviewer_mapped_state": "REQUIRES_CALCULATION",
+      "actual_fixture_evidence": "02_Financial/ar_aging.csv (four rows summing to 612,400 over 90 days)",
+      "canonical_source_anchors": "02_Financial/ar_aging.csv (four rows summing to 612,400 over 90 days)",
+      "fact_directly_stated": true,
+      "calculation_required": true,
+      "cross_document_comparison_required": false,
+      "absence_legitimately_concludable": false,
+      "relevant_document_inaccessible": false,
+      "source_stale_withdrawn_or_superseded": false,
+      "engine_result": "found",
+      "engine_best_similarity": 0.7189,
+      "engine_lexical_hits": 0,
+      "engine_top_documents": [
+        {
+          "rank": 1,
+          "document": "10_QA/seller_qa_log.csv",
+          "similarity": 0.7189
+        },
+        {
+          "rank": 2,
+          "document": "10_QA/seller_qa_log.csv",
+          "similarity": 0.6824
+        },
+        {
+          "rank": 3,
+          "document": "06_Operations/kpi_definitions.txt",
+          "similarity": 0.6431
+        }
+      ],
+      "citations_resolve": true,
+      "result_supports_requested_fact": false,
+      "final_adjudicated_disposition": "REQUIRES_CALCULATION",
+      "reviewer_engine_agreement": "disagree",
+      "adjudicator_agrees_with_reviewer": true,
+      "defect_owner": "expected unimplemented capability",
+      "severity": "low",
+      "confidence": "high",
+      "adjudicator_note": "Rows retrieved; the sum is not stated anywhere."
+    },
+    {
+      "query_id": "CR-028",
+      "reviewer_question": "Does the headcount in the employee roster agree with the payroll summary?",
+      "reviewer_capability_class": "requires_calculation_or_comparison",
+      "reviewer_expected_disposition": "REQUIRES_COMPARISON",
+      "reviewer_confidence": "high",
+      "reviewer_verdict": "wrong_state",
+      "reviewer_mapped_state": "REQUIRES_COMPARISON",
+      "actual_fixture_evidence": "05_Employees/payroll_summary.txt (71 W-2) vs employee_roster.xlsx (84 active)",
+      "canonical_source_anchors": "05_Employees/payroll_summary.txt (71 W-2) vs employee_roster.xlsx (84 active)",
+      "fact_directly_stated": true,
+      "calculation_required": true,
+      "cross_document_comparison_required": true,
+      "absence_legitimately_concludable": false,
+      "relevant_document_inaccessible": false,
+      "source_stale_withdrawn_or_superseded": false,
+      "engine_result": "found",
+      "engine_best_similarity": 0.7457,
+      "engine_lexical_hits": 0,
+      "engine_top_documents": [
+        {
+          "rank": 1,
+          "document": "00_Request_List/request_list.csv",
+          "similarity": 0.7457
+        },
+        {
+          "rank": 2,
+          "document": "00_Request_List/request_list.csv",
+          "similarity": 0.7047
+        },
+        {
+          "rank": 3,
+          "document": "05_Employees/employee_roster.xlsx",
+          "similarity": 0.6786
+        }
+      ],
+      "citations_resolve": true,
+      "result_supports_requested_fact": false,
+      "final_adjudicated_disposition": "REQUIRES_COMPARISON",
+      "reviewer_engine_agreement": "disagree",
+      "adjudicator_agrees_with_reviewer": true,
+      "defect_owner": "expected unimplemented capability",
+      "severity": "low",
+      "confidence": "high",
+      "adjudicator_note": "Reconciliation exists in neither file. Related to planted RDG-020."
+    },
+    {
+      "query_id": "CR-029",
+      "reviewer_question": "Does the cost recorded for the fiscal 2025 box truck agree between the capex register and the fixed asset register?",
+      "reviewer_capability_class": "requires_calculation_or_comparison",
+      "reviewer_expected_disposition": "REQUIRES_COMPARISON",
+      "reviewer_confidence": "high",
+      "reviewer_verdict": "wrong_state",
+      "reviewer_mapped_state": "REQUIRES_COMPARISON",
+      "actual_fixture_evidence": "09_Capex/capex_register.csv (118,900) vs fixed_asset_register.csv (188,500), unit 43",
+      "canonical_source_anchors": "09_Capex/capex_register.csv (118,900) vs fixed_asset_register.csv (188,500), unit 43",
+      "fact_directly_stated": true,
+      "calculation_required": true,
+      "cross_document_comparison_required": true,
+      "absence_legitimately_concludable": false,
+      "relevant_document_inaccessible": false,
+      "source_stale_withdrawn_or_superseded": false,
+      "engine_result": "found",
+      "engine_best_similarity": 0.7306,
+      "engine_lexical_hits": 0,
+      "engine_top_documents": [
+        {
+          "rank": 1,
+          "document": "00_Request_List/request_list.csv",
+          "similarity": 0.7306
+        },
+        {
+          "rank": 2,
+          "document": "00_Request_List/request_list.csv",
+          "similarity": 0.6744
+        },
+        {
+          "rank": 3,
+          "document": "09_Capex/capex_register.csv",
+          "similarity": 0.6613
+        }
+      ],
+      "citations_resolve": true,
+      "result_supports_requested_fact": false,
+      "final_adjudicated_disposition": "REQUIRES_COMPARISON",
+      "reviewer_engine_agreement": "disagree",
+      "adjudicator_agrees_with_reviewer": true,
+      "defect_owner": "expected unimplemented capability",
+      "severity": "low",
+      "confidence": "high",
+      "adjudicator_note": "Matches planted RDG-012."
+    },
+    {
+      "query_id": "CR-030",
+      "reviewer_question": "What do the fiscal 2024 financial statements show?",
+      "reviewer_capability_class": "missing_inaccessible_stale_or_unreviewed",
+      "reviewer_expected_disposition": "EXPLICITLY_ABSENT",
+      "reviewer_confidence": "high",
+      "reviewer_verdict": "wrong_state",
+      "reviewer_mapped_state": "UNMAPPABLE",
+      "actual_fixture_evidence": "00_Request_List/request_list.csv row 2.2 'Not supplied'; 11_Update_R2/seller_qa_log_revised.csv",
+      "canonical_source_anchors": "00_Request_List/request_list.csv row 2.2 'Not supplied'; 11_Update_R2/seller_qa_log_revised.csv",
+      "fact_directly_stated": false,
+      "calculation_required": false,
+      "cross_document_comparison_required": true,
+      "absence_legitimately_concludable": true,
+      "relevant_document_inaccessible": false,
+      "source_stale_withdrawn_or_superseded": false,
+      "engine_result": "found",
+      "engine_best_similarity": 0.7287,
+      "engine_lexical_hits": 0,
+      "engine_top_documents": [
+        {
+          "rank": 1,
+          "document": "10_QA/seller_qa_log.csv",
+          "similarity": 0.7287
+        },
+        {
+          "rank": 2,
+          "document": "00_Request_List/request_list.csv",
+          "similarity": 0.7039
+        },
+        {
+          "rank": 3,
+          "document": "00_Request_List/request_list.csv",
+          "similarity": 0.7035
+        }
+      ],
+      "citations_resolve": true,
+      "result_supports_requested_fact": false,
+      "final_adjudicated_disposition": "EXPLICITLY_ABSENT",
+      "reviewer_engine_agreement": "disagree",
+      "adjudicator_agrees_with_reviewer": true,
+      "defect_owner": "expected unimplemented capability",
+      "severity": "medium",
+      "confidence": "high",
+      "adjudicator_note": "Engine surfaced the Q&A row saying statements will follow, at 0.7287, with no state able to say the item is absent. Matches planted RDG-014."
+    },
+    {
+      "query_id": "CR-031",
+      "reviewer_question": "When does the Erie operating permit expire?",
+      "reviewer_capability_class": "missing_inaccessible_stale_or_unreviewed",
+      "reviewer_expected_disposition": "INSUFFICIENT_EVIDENCE",
+      "reviewer_confidence": "medium",
+      "reviewer_verdict": "false_support",
+      "reviewer_mapped_state": "UNMAPPABLE",
+      "actual_fixture_evidence": "07_Legal_Insurance/Erie_Operating_Permit_scan.pdf \u2014 registered 'unsupported: no usable text'; expiry is in the image",
+      "canonical_source_anchors": "07_Legal_Insurance/Erie_Operating_Permit_scan.pdf \u2014 registered 'unsupported: no usable text'; expiry is in the image",
+      "fact_directly_stated": false,
+      "calculation_required": false,
+      "cross_document_comparison_required": false,
+      "absence_legitimately_concludable": false,
+      "relevant_document_inaccessible": true,
+      "source_stale_withdrawn_or_superseded": false,
+      "engine_result": "found",
+      "engine_best_similarity": 0.7176,
+      "engine_lexical_hits": 0,
+      "engine_top_documents": [
+        {
+          "rank": 1,
+          "document": "07_Legal_Insurance/Facility_Lease_Erie.md",
+          "similarity": 0.7176
+        },
+        {
+          "rank": 2,
+          "document": "07_Legal_Insurance/Facility_Lease_Toledo.md",
+          "similarity": 0.6984
+        },
+        {
+          "rank": 3,
+          "document": "03_Customers/churn_log.csv",
+          "similarity": 0.6455
+        }
+      ],
+      "citations_resolve": true,
+      "result_supports_requested_fact": false,
+      "final_adjudicated_disposition": "PRESENT_BUT_UNREADABLE",
+      "reviewer_engine_agreement": "disagree",
+      "adjudicator_agrees_with_reviewer": true,
+      "defect_owner": "document-status handling",
+      "severity": "high",
+      "confidence": "high",
+      "adjudicator_note": "Escalation-worthy. Returned 07_Legal_Insurance/Facility_Lease_Erie.md \u2014 a different Erie document \u2014 at 0.7176. The engine knows the permit is unreadable and never says so; it silently substitutes an adjacent document."
+    },
+    {
+      "query_id": "CR-032",
+      "reviewer_question": "What do the tax workpapers for 2023 to 2025 contain?",
+      "reviewer_capability_class": "missing_inaccessible_stale_or_unreviewed",
+      "reviewer_expected_disposition": "INSUFFICIENT_EVIDENCE",
+      "reviewer_confidence": "medium",
+      "reviewer_verdict": "false_support",
+      "reviewer_mapped_state": "UNMAPPABLE",
+      "actual_fixture_evidence": "08_Tax/Tax_Support_2023-2025.zip \u2014 registered 'unsupported: password-protected'; 00_Request_List/request_list.csv row 8.2 says 'Supplied'",
+      "canonical_source_anchors": "08_Tax/Tax_Support_2023-2025.zip \u2014 registered 'unsupported: password-protected'; 00_Request_List/request_list.csv row 8.2 says 'Supplied'",
+      "fact_directly_stated": false,
+      "calculation_required": false,
+      "cross_document_comparison_required": false,
+      "absence_legitimately_concludable": false,
+      "relevant_document_inaccessible": true,
+      "source_stale_withdrawn_or_superseded": false,
+      "engine_result": "found",
+      "engine_best_similarity": 0.7402,
+      "engine_lexical_hits": 0,
+      "engine_top_documents": [
+        {
+          "rank": 1,
+          "document": "00_Request_List/request_list.csv",
+          "similarity": 0.7402
+        },
+        {
+          "rank": 2,
+          "document": "10_QA/seller_qa_log.csv",
+          "similarity": 0.6502
+        },
+        {
+          "rank": 3,
+          "document": "00_Request_List/request_list.csv",
+          "similarity": 0.6363
+        }
+      ],
+      "citations_resolve": true,
+      "result_supports_requested_fact": false,
+      "final_adjudicated_disposition": "PRESENT_BUT_UNREADABLE",
+      "reviewer_engine_agreement": "disagree",
+      "adjudicator_agrees_with_reviewer": true,
+      "defect_owner": "document-status handling",
+      "severity": "high",
+      "confidence": "high",
+      "adjudicator_note": "Escalation-worthy. Top hit at 0.7402 is the index row asserting 'Supplied' \u2014 true in form only. A reviewer could close the item believing the workpapers were received and read. Matches planted RDG-021."
+    },
+    {
+      "query_id": "CR-033",
+      "reviewer_question": "What was Bayfield Paper Mills revenue in fiscal 2025?",
+      "reviewer_capability_class": "missing_inaccessible_stale_or_unreviewed",
+      "reviewer_expected_disposition": "INSUFFICIENT_EVIDENCE",
+      "reviewer_confidence": "high",
+      "reviewer_verdict": "false_support",
+      "reviewer_mapped_state": "UNMAPPABLE",
+      "actual_fixture_evidence": "03_Customers/Revenue_by_Customer_FY25.xlsx (1,204,900 - file of record) vs _v2.xlsx (1,086,900 - withdrawn per 11_Update_R2/withdrawal_notice.txt)",
+      "canonical_source_anchors": "03_Customers/Revenue_by_Customer_FY25.xlsx (1,204,900 - file of record) vs _v2.xlsx (1,086,900 - withdrawn per 11_Update_R2/withdrawal_notice.txt)",
+      "fact_directly_stated": true,
+      "calculation_required": false,
+      "cross_document_comparison_required": true,
+      "absence_legitimately_concludable": false,
+      "relevant_document_inaccessible": false,
+      "source_stale_withdrawn_or_superseded": true,
+      "engine_result": "found",
+      "engine_best_similarity": 0.7721,
+      "engine_lexical_hits": 0,
+      "engine_top_documents": [
+        {
+          "rank": 1,
+          "document": "03_Customers/Revenue_by_Customer_FY25.xlsx",
+          "similarity": 0.7721
+        },
+        {
+          "rank": 2,
+          "document": "03_Customers/Revenue_by_Customer_FY25_v2.xlsx",
+          "similarity": 0.7695
+        },
+        {
+          "rank": 3,
+          "document": "03_Customers/customer_master.csv",
+          "similarity": 0.7337
+        }
+      ],
+      "citations_resolve": true,
+      "result_supports_requested_fact": false,
+      "final_adjudicated_disposition": "SUPERSEDED_OR_WITHDRAWN",
+      "reviewer_engine_agreement": "disagree",
+      "adjudicator_agrees_with_reviewer": true,
+      "defect_owner": "document-status handling",
+      "severity": "high",
+      "confidence": "high",
+      "adjudicator_note": "Escalation-worthy. Ranks 1 and 2 differ by 0.0026 and carry different figures for the same customer; nothing indicates one was formally withdrawn. The correct file happens to rank first by luck. Matches planted RDG-013."
+    }
+  ]
+}

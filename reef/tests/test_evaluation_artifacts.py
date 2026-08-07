@@ -423,3 +423,205 @@ class TestBlindingVerifier:
         (folder / "update_supersedes_prior.txt").write_text("x\n")
         result = _run_verifier(root)
         assert result.returncode == 0, result.stdout
+
+
+ADJUDICATION_JSON = BENCHMARKS / "cold-review" / "cold-review-adjudication-001.json"
+ADJUDICATION_MD = BENCHMARKS / "cold-review" / "COLD_REVIEW_ADJUDICATION_001.md"
+
+VALID_OWNERS = {
+    "retrieval ranking",
+    "abstention or evidence sufficiency",
+    "result-state contract",
+    "document-status handling",
+    "relevance-score presentation",
+    "ingestion or coverage reporting",
+    "protocol or blinding",
+    "expected unimplemented capability",
+    "reviewer misunderstanding",
+    "ambiguous or unresolved",
+    "no defect",
+}
+
+
+@pytest.fixture(scope="module")
+def adjudication() -> dict:
+    return json.loads(ADJUDICATION_JSON.read_text(encoding="utf-8"))
+
+
+class TestColdReviewAdjudication:
+    def test_both_artifacts_exist(self) -> None:
+        assert ADJUDICATION_JSON.is_file()
+        assert ADJUDICATION_MD.is_file()
+
+    def test_all_supplied_hashes_recorded_as_verified(self, adjudication: dict) -> None:
+        """An adjudication that did not check provenance is an opinion, not a finding."""
+        hashes = adjudication["integrity"]["supplied_hashes_verified"]
+        assert len(hashes) == 5
+        for name, entry in hashes.items():
+            assert entry["status"] == "MATCH", f"{name} did not verify"
+            assert len(entry["expected"]) == 64
+
+    def test_reviewer_material_was_not_relabelled(self, adjudication: dict) -> None:
+        """The control against an author revising a verdict after seeing the answer key."""
+        integrity = adjudication["integrity"]
+        assert integrity["reviewer_labels_preserved_verbatim"] is True
+        assert integrity["adjudicator_relabelled_any_reviewer_verdict"] is False
+        assert adjudication["reviewer_files_modified"] is False
+
+    def test_engine_behaviour_declared_unchanged(self, adjudication: dict) -> None:
+        assert adjudication["engine_behaviour_changed"] is False
+
+    def test_the_disclosed_deviation_is_recorded(self, adjudication: dict) -> None:
+        assert adjudication["integrity"]["disclosed_protocol_deviation"].strip()
+
+    def test_every_query_is_adjudicated(self, adjudication: dict) -> None:
+        ids = [q["query_id"] for q in adjudication["queries"]]
+        assert ids == [f"CR-{n:03d}" for n in range(1, 34)]
+
+    def test_every_query_carries_the_required_fields(self, adjudication: dict) -> None:
+        required = (
+            "reviewer_question",
+            "reviewer_capability_class",
+            "reviewer_expected_disposition",
+            "actual_fixture_evidence",
+            "canonical_source_anchors",
+            "fact_directly_stated",
+            "calculation_required",
+            "cross_document_comparison_required",
+            "absence_legitimately_concludable",
+            "relevant_document_inaccessible",
+            "source_stale_withdrawn_or_superseded",
+            "engine_result",
+            "citations_resolve",
+            "result_supports_requested_fact",
+            "final_adjudicated_disposition",
+            "reviewer_engine_agreement",
+            "defect_owner",
+            "severity",
+            "confidence",
+        )
+        for q in adjudication["queries"]:
+            missing = [k for k in required if k not in q]
+            assert not missing, f"{q['query_id']} missing {missing}"
+
+    def test_defect_owners_come_from_the_defined_set(self, adjudication: dict) -> None:
+        for q in adjudication["queries"]:
+            assert q["defect_owner"] in VALID_OWNERS, q["defect_owner"]
+
+    def test_metrics_are_reported_separately_not_combined(self, adjudication: dict) -> None:
+        """Combining these hides the finding: one capability works, five cannot be expressed."""
+        metrics = adjudication["metrics"]
+        for section in (
+            "citation_integrity",
+            "direct_support",
+            "capability_specific",
+            "result_state_usability",
+        ):
+            assert section in metrics
+        assert "accuracy" not in metrics, "a single accuracy score would hide the result"
+
+    def test_citation_hard_gates_hold(self, adjudication: dict) -> None:
+        citation = adjudication["metrics"]["citation_integrity"]
+        assert citation["fabricated_citations"] == 0
+        assert citation["unlabeled_inference"] == 0
+        assert citation["citation_resolution"]["rate"] == 1.0
+
+    def test_rates_carry_confidence_intervals(self, adjudication: dict) -> None:
+        """At n=33 a bare percentage misleads; every rate must show its interval."""
+        support = adjudication["metrics"]["direct_support"]
+        for key in (
+            "supported_query_precision",
+            "supported_query_recall",
+            "false_support_rate",
+            "false_abstention_rate",
+        ):
+            assert "wilson_95" in support[key]
+            low, high = support[key]["wilson_95"]
+            assert 0.0 <= low <= high <= 1.0
+
+    def test_the_nine_false_supports_are_each_classified(self, adjudication: dict) -> None:
+        cases = adjudication["false_support_cases"]
+        assert len(cases) == 9
+        expected = {
+            "CR-013",
+            "CR-015",
+            "CR-016",
+            "CR-018",
+            "CR-021",
+            "CR-023",
+            "CR-031",
+            "CR-032",
+            "CR-033",
+        }
+        assert {c["id"] for c in cases} == expected
+        for case in cases:
+            assert case["classification"] in VALID_OWNERS
+            assert case["determination"].strip()
+
+    def test_the_escalation_worthy_gate_is_reported_as_failing(self, adjudication: dict) -> None:
+        """Four false supports would have changed what the reviewer did. Target is zero."""
+        gate = adjudication["metrics"]["direct_support"]["escalation_worthy_false_supports"]
+        assert gate["count"] == 4
+        assert gate["status"] == "FAIL"
+
+    def test_both_false_abstentions_record_the_floor_decision(self, adjudication: dict) -> None:
+        cases = {c["id"]: c for c in adjudication["false_abstention_cases"]}
+        assert set(cases) == {"CR-001", "CR-009"}
+        for case in cases.values():
+            assert case["floor"] == 0.6555
+            assert case["direct_source_available"] is True
+            # The point of both cases: retrieval worked and the gate discarded it.
+            assert case["fused_rank_of_source"] <= 2
+            assert 0 < case["margin_below_floor"] < 0.02
+            assert case["generalises_beyond_fixture_phrasing"] is True
+
+    def test_capability_results_cover_every_class(self, adjudication: dict) -> None:
+        cap = adjudication["metrics"]["capability_specific"]
+        for name in (
+            "direct_retrieval",
+            "calculation",
+            "comparison",
+            "absence_detection",
+            "contradiction",
+            "inaccessible_document_disposition",
+            "stale_or_withdrawn_handling",
+            "outside_scope_handling",
+        ):
+            assert name in cap, f"missing capability metric: {name}"
+            assert cap[name]["n"] > 0
+
+    def test_the_document_records_protocol_defects_separately(self) -> None:
+        """Protocol defects must not be scored as engine retrieval failures."""
+        text = ADJUDICATION_MD.read_text(encoding="utf-8")
+        assert "Protocol defects" in text
+        for topic in (
+            "Database contamination",
+            "Freeze mechanism",
+            "Phase-order",
+            "Ingestion-report",
+        ):
+            assert topic in text, f"protocol defect not covered: {topic}"
+
+    def test_the_document_reaches_a_relevance_score_conclusion(self) -> None:
+        text = ADJUDICATION_MD.read_text(encoding="utf-8")
+        assert "relevance-score label" in text.lower() or "relevance score" in text.lower()
+        assert "1/(60 + rank)" in text or "1/(60+rank)" in text
+
+    def test_new_states_are_justified_generally_not_by_the_fixture(self) -> None:
+        text = ADJUDICATION_MD.read_text(encoding="utf-8")
+        assert "PRESENT_BUT_UNREADABLE" in text
+        assert "SUPERSEDED_OR_WITHDRAWN" in text
+        assert "General:" in text, "each proposed state needs a general justification"
+
+    def test_recommendations_are_prioritised_with_scope_and_risk(self) -> None:
+        text = ADJUDICATION_MD.read_text(encoding="utf-8")
+        for heading in (
+            "P0 — correctness",
+            "P1 — protocol",
+            "P2 — usability",
+            "Deferred capability",
+        ):
+            assert heading in text, f"missing section: {heading}"
+        assert "Overfitting risk" in text
+        assert "Engine behaviour changes" in text
+        assert "Blocks another cold review" in text
