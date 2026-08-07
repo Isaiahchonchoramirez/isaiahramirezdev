@@ -2,7 +2,8 @@
 
 Everything needed to pick this up cold. Written 2026-08-07.
 
-**Branch:** `reef/m1-embedding-contract-fix` @ `abbcc5e` — not pushed, not merged.
+**Branch:** `reef/m1-embedding-contract-fix` @ `e9fc519` — not pushed, not merged.
+**Last updated:** 2026-08-07, after cold-review protocol v2.
 **Worktree:** `/Users/irmac/Developer/reef-embedding-fix`
 
 ---
@@ -302,6 +303,8 @@ Learned the hard way on this branch; each one has a scar behind it.
 ## 10 · State of the branch
 
 ```
+e9fc519  test(reef): isolate reviewer databases and fix the freeze protocol
+98e687f  docs(reef): add handoff for continuing M1 engine work
 abbcc5e  test(reef): adjudicate first blinded cold review
 18faf06  test(reef): add sanitized cold-review export
 6d721a7  test(reef): separate retrieval metrics and define cold review
@@ -311,7 +314,7 @@ c479535  fix(reef): enforce embedding model compatibility
 0041384  feat(reef): add local evidence-preserving ingestion engine
 ```
 
-Seven commits, none pushed, none merged. `reef/m1-ingestion-engine` @ `0041384` is preserved
+Nine commits, none pushed, none merged. `reef/m1-ingestion-engine` @ `0041384` is preserved
 unchanged as the pre-fix state. The portfolio checkout at
 `/Users/irmac/Developer/isaiahramirezdev` is on `reef/product-foundation` and holds unrelated
 work that must not be disturbed.
