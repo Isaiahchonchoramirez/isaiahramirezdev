@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>lyrx-wave — live vs static</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="./promo-wave.js"></script>
+<style>
+  :root { --bg:#08080B; --surface:#101015; --divider:#24242B; --text:#F4F4F0; --dim:#A6A6A0; --accent:#C8FF2E; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font-family:Archivo,system-ui,sans-serif; }
+  main { max-width:1100px; margin:0 auto; padding:64px clamp(20px,5vw,48px) 120px; }
+  h1 { font-size:clamp(30px,4vw,46px); font-weight:500; letter-spacing:-0.03em; margin:0 0 10px; }
+  h1 span { color:var(--accent); }
+  .lede { color:var(--dim); font-size:15px; line-height:24px; max-width:62ch; margin:0 0 48px; }
+  h2 { font:600 11px/1 'JetBrains Mono',monospace; letter-spacing:.14em; text-transform:uppercase;
+       color:var(--accent); margin:0 0 12px; }
+  .note { color:var(--dim); font-size:13px; line-height:21px; margin:10px 0 0; }
+  section { margin-bottom:56px; }
+  .stage { position:relative; height:220px; border:1px solid var(--divider); background:#0b0b10; overflow:hidden; }
+  .stage.static::before { content:''; position:absolute; inset:0; opacity:.23;
+    background:url('./assets/promo/waveform.png') center/cover no-repeat;
+    mask-image:linear-gradient(to right,transparent,#000 18%,#000 82%,transparent); }
+  lyrx-wave { position:absolute; inset:0;
+    -webkit-mask-image:linear-gradient(to right,transparent,#000 18%,#000 82%,transparent);
+    mask-image:linear-gradient(to right,transparent,#000 18%,#000 82%,transparent); }
+  .row { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  @media (max-width:820px){ .row{ grid-template-columns:1fr; } }
+  pre { background:var(--surface); border:1px solid var(--divider); padding:16px; overflow-x:auto;
+        font:400 12.5px/1.7 'JetBrains Mono',monospace; color:#D2D2CC; margin:16px 0 0; }
+  .k { color:var(--accent); }
+</style>
+</head>
+<body>
+<main>
+  <h1>lyrx-wave <span>—</span> live canvas vs the static plate</h1>
+  <p class="lede">Dozens of strands, a bloom pass, and vertical spectrum columns, keyed blue to violet
+  with the brand lime threaded through every seventh strand. It pauses when it scrolls offscreen and
+  renders one static frame when the visitor asks for reduced motion. The field is drawn into an
+  offscreen buffer so the glow is a single blur rather than a shadow on each of ~340 strokes — that
+  one change took it from 4fps to 49.</p>
+
+  <section>
+    <h2>Side by side</h2>
+    <div class="row">
+      <div>
+        <div class="stage static"></div>
+        <p class="note">waveform.png at 23% — 1.1MB, and it never moves.</p>
+      </div>
+      <div>
+        <div class="stage"><lyrx-wave amp="1" speed="0.4" background="transparent"></lyrx-wave></div>
+        <p class="note">&lt;lyrx-wave&gt; — 8KB, and it breathes.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Amplitude and spread</h2>
+    <div class="row">
+      <div><div class="stage"><lyrx-wave amp="0.45" speed="0.3" spread="0.14" background="transparent"></lyrx-wave></div>
+        <p class="note">amp="0.45" spread="0.14" — a tight band to sit behind copy.</p></div>
+      <div><div class="stage"><lyrx-wave amp="1.5" speed="0.7" spread="0.5" background="transparent"></lyrx-wave></div>
+        <p class="note">amp="1.5" spread="0.5" — fills the frame, works as a divider.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Density, spikes and glow</h2>
+    <div class="row">
+      <div><div class="stage"><lyrx-wave amp="1" speed="0.4" density="14" spikes="60" glow="0.6" background="transparent"></lyrx-wave></div>
+        <p class="note">density="14" spikes="60" glow="0.6" — sparse and quiet.</p></div>
+      <div><div class="stage"><lyrx-wave amp="1" speed="0.4" density="72" spikes="380" glow="2" background="transparent"></lyrx-wave></div>
+        <p class="note">density="72" spikes="380" glow="2" — as dense as it goes.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>The dark wash</h2>
+    <div class="row">
+      <div><div class="stage" style="background:#140b22"><lyrx-wave amp="1" speed="0.4"></lyrx-wave></div>
+        <p class="note">Default — paints its own near-black wash over whatever is behind it.</p></div>
+      <div><div class="stage" style="background:#140b22"><lyrx-wave amp="1" speed="0.4" background="transparent"></lyrx-wave></div>
+        <p class="note">background="transparent" — the violet plate shows through. Use this
+          whenever the element overlays page content.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Wiring it into the sequencer stage</h2>
+    <pre>&lt;script src="./promo-wave.js"&gt;&lt;/script&gt;
+
+&lt;section class="lx-seq-stage"&gt;
+  <span class="k">&lt;lyrx-wave amp="1.15" speed="0.4" density="56" spikes="280"
+              glow="1.4" spread="0.32" background="transparent"&gt;&lt;/lyrx-wave&gt;</span>
+  &lt;div class="lx-seq-wrap"&gt;…&lt;/div&gt;
+&lt;/section&gt;</pre>
+    <pre>/* then drop the static plate */
+.lx-seq-stage::before { <span class="k">/* delete this rule */</span> }
+
+.lx-seq-stage lyrx-wave {
+  /* selected by tag: the template layer rewrites `class` to `classname` on
+     custom elements. !important because the component writes an inline
+     position when it finds itself statically placed. */
+  position: absolute !important; inset: 0; opacity: .9; z-index: 0;
+  /* no mask needed — the component fades its own four edges */
+}
+.lx-seq-wrap { position: relative; z-index: 1; }</pre>
+  </section>
+</main>
+</body>
+</html>
