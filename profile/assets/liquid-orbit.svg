@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="320" viewBox="0 0 960 320" role="img" aria-labelledby="title desc">
+  <title id="title">Isaiah Ramirez liquid data orbit</title>
+  <desc id="desc">A glass orb marked IR separates into a constellation of data nodes, then reforms.</desc>
+  <defs>
+    <linearGradient id="night" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#071526"/><stop offset=".48" stop-color="#092f48"/><stop offset="1" stop-color="#110d2d"/>
+    </linearGradient>
+    <radialGradient id="glass" cx="30%" cy="18%" r="88%">
+      <stop stop-color="#fff" stop-opacity=".88"/><stop offset=".18" stop-color="#9ff6ff" stop-opacity=".34"/><stop offset=".58" stop-color="#54b8ff" stop-opacity=".12"/><stop offset="1" stop-color="#a277ff" stop-opacity=".3"/>
+    </radialGradient>
+    <linearGradient id="word" x1="0" x2="1"><stop stop-color="#c8fbff"/><stop offset="1" stop-color="#d8c7ff"/></linearGradient>
+    <filter id="orb" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="14" result="blur"/>
+      <feColorMatrix in="blur" values="0 0 0 0 .22 0 0 0 0 .8 0 0 0 0 1 0 0 0 .48 0" result="glow"/>
+      <feSpecularLighting in="SourceAlpha" surfaceScale="8" specularConstant=".9" specularExponent="24" lighting-color="#fff" result="spec"><fePointLight x="-40" y="-60" z="120"/></feSpecularLighting>
+      <feComposite in="spec" in2="SourceAlpha" operator="in" result="specClip"/>
+      <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/><feMergeNode in="specClip"/></feMerge>
+    </filter>
+    <filter id="soft"><feGaussianBlur stdDeviation="22"/></filter>
+  </defs>
+  <rect width="960" height="320" rx="28" fill="url(#night)"/>
+  <g opacity=".24" fill="none" stroke="#7deeff" stroke-width="1">
+    <path d="M44 70h210M706 250h210M58 266l126-126M775 70l126 126"/>
+    <circle cx="106" cy="80" r="3" fill="#7deeff"/><circle cx="846" cy="244" r="3" fill="#b798ff"/>
+  </g>
+  <ellipse cx="257" cy="162" rx="142" ry="105" fill="#166a94" opacity=".23" filter="url(#soft)"/>
+  <g transform="translate(255 160)" filter="url(#orb)">
+    <circle r="67" fill="url(#glass)" stroke="#d9fbff" stroke-opacity=".6" stroke-width="1.5">
+      <animate attributeName="r" values="67;56;48;56;67" keyTimes="0;.2;.5;.8;1" dur="6s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="1;.75;.14;.75;1" keyTimes="0;.2;.5;.8;1" dur="6s" repeatCount="indefinite"/>
+    </circle>
+    <text text-anchor="middle" y="14" font-family="Arial,Helvetica,sans-serif" font-size="42" font-weight="700" letter-spacing="-3" fill="#fff">IR<animate attributeName="opacity" values="1;1;0;1;1" keyTimes="0;.2;.36;.8;1" dur="6s" repeatCount="indefinite"/></text>
+  </g>
+  <g fill="url(#glass)" stroke="#d9fbff" stroke-opacity=".68" filter="url(#orb)">
+    <circle cx="255" cy="160" r="18"><animate attributeName="cx" values="255;255;155;255;255" keyTimes="0;.18;.48;.82;1" dur="6s" repeatCount="indefinite"/><animate attributeName="cy" values="160;160;96;160;160" keyTimes="0;.18;.48;.82;1" dur="6s" repeatCount="indefinite"/><animate attributeName="r" values="0;4;18;4;0" dur="6s" repeatCount="indefinite"/></circle>
+    <circle cx="255" cy="160" r="14"><animate attributeName="cx" values="255;255;214;255;255" keyTimes="0;.18;.52;.82;1" dur="6s" repeatCount="indefinite"/><animate attributeName="cy" values="160;160;64;160;160" keyTimes="0;.18;.52;.82;1" dur="6s" repeatCount="indefinite"/><animate attributeName="r" values="0;3;14;3;0" dur="6s" repeatCount="indefinite"/></circle>
+    <circle cx="255" cy="160" r="20"><animate attributeName="cx" values="255;255;339;255;255" keyTimes="0;.18;.46;.82;1" dur="6s" repeatCount="indefinite"/><animate attributeName="cy" values="160;160;92;160;160" keyTimes="0;.18;.46;.82;1" dur="6s" repeatCount="indefinite"/><animate attributeName="r" values="0;4;20;4;0" dur="6s" repeatCount="indefinite"/></circle>
+    <circle cx="255" cy="160" r="13"><animate attributeName="cx" values="255;255;374;255;255" keyTimes="0;.18;.54;.82;1" dur="6s" repeatCount="indefinite"/><animate attributeName="cy" values="160;160;168;160;160" keyTimes="0;.18;.54;.82;1" dur="6s" repeatCount="indefinite"/><animate attributeName="r" values="0;3;13;3;0" dur="6s" repeatCount="indefinite"/></circle>
+    <circle cx="255" cy="160" r="17"><animate attributeName="cx" values="255;255;328;255;255" keyTimes="0;.18;.5;.82;1" dur="6s" repeatCount="indefinite"/><animate attributeName="cy" values="160;160;244;160;160" keyTimes="0;.18;.5;.82;1" dur="6s" repeatCount="indefinite"/><animate attributeName="r" values="0;4;17;4;0" dur="6s" repeatCount="indefinite"/></circle>
+    <circle cx="255" cy="160" r="12"><animate attributeName="cx" values="255;255;242;255;255" keyTimes="0;.18;.44;.82;1" dur="6s" repeatCount="indefinite"/><animate attributeName="cy" values="160;160;260;160;160" keyTimes="0;.18;.44;.82;1" dur="6s" repeatCount="indefinite"/><animate attributeName="r" values="0;3;12;3;0" dur="6s" repeatCount="indefinite"/></circle>
+    <circle cx="255" cy="160" r="16"><animate attributeName="cx" values="255;255;142;255;255" keyTimes="0;.18;.5;.82;1" dur="6s" repeatCount="indefinite"/><animate attributeName="cy" values="160;160;220;160;160" keyTimes="0;.18;.5;.82;1" dur="6s" repeatCount="indefinite"/><animate attributeName="r" values="0;4;16;4;0" dur="6s" repeatCount="indefinite"/></circle>
+  </g>
+  <g transform="translate(462 101)">
+    <text fill="#83ddeb" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13" letter-spacing="2">DATA · SYSTEMS · PEOPLE</text>
+    <text y="60" fill="url(#word)" font-family="Arial,Helvetica,sans-serif" font-size="42" font-weight="700" letter-spacing="-.8">ISAIAH RAMIREZ</text>
+    <text y="94" fill="#b9cddd" font-family="Arial,Helvetica,sans-serif" font-size="17">Data engineering  /  human-centered AI</text>
+    <path d="M0 124h390" stroke="#a9e9ff" stroke-opacity=".28"/>
+    <text y="151" fill="#7f9eb3" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" letter-spacing="1.1">ANN ARBOR, MICHIGAN  •  BUILDING USEFUL SYSTEMS</text>
+  </g>
+</svg>
