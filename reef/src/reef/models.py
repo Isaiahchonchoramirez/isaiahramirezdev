@@ -162,6 +162,78 @@ class Document(Base):
     )
 
 
+class StatusKind:
+    """How a document's currency was declared, not how it was parsed.
+
+    `ProcessingState` answers "could we read it". This answers "does it still stand".
+    The two are independent: a withdrawn file usually parses perfectly, which is exactly
+    why it outranked its replacement in cold review 001 (CR-033).
+
+    Both values are patient-side — they describe the document the declaration is *about*,
+    never the declaring notice and never the successor.
+    """
+
+    WITHDRAWN = "withdrawn"
+    SUPERSEDED = "superseded"
+
+    ALL = (WITHDRAWN, SUPERSEDED)
+
+
+class DocumentStatus(Base):
+    """A declaration, found in one document, about the currency of another.
+
+    Every row cites the span that declared it. A status with no span is the same category
+    of error as a claim with no support: an assertion the engine cannot show its work for.
+    The span is required by a NOT NULL rather than by convention, because
+    `COLD_REVIEW_ADJUDICATION_001` §8 admits `SUPERSEDED_OR_WITHDRAWN` to the state
+    contract only on the condition that it is evidenced.
+
+    Status is never derived from a filename. `_v2`, `final`, `draft` and `old` in a name
+    are seller habits, not facts, and a room that names its current file `..._v1.xlsx` is
+    not unusual. Only a declaration in a document's text creates a row here.
+    """
+
+    __tablename__ = "document_status"
+    __table_args__ = (
+        # One declaration per (subject, declaring span). A notice repeated in two places —
+        # as the fixture's withdrawal notice and room README both are — records two rows,
+        # because two independent declarations is a stronger fact than one and the reader
+        # should be able to see both.
+        UniqueConstraint("document_id", "declared_by_span_id", name="uq_document_status_source"),
+        Index("ix_document_status_room_document", "room_id", "document_id"),
+        CheckConstraint(
+            "status IN (" + ", ".join(f"'{s}'" for s in StatusKind.ALL) + ")",
+            name="ck_document_status_status",
+        ),
+        # A document cannot declare itself withdrawn out of its own text. Self-reference
+        # is how a notice that names its own filename would silently retract itself.
+        CheckConstraint(
+            "document_id <> declared_by_document_id",
+            name="ck_document_status_not_self",
+        ),
+    )
+
+    id: Mapped[uuid.UUID] = _uuid_pk()
+    room_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("room.id", ondelete="CASCADE"))
+
+    #: The document the declaration is about — the one that is no longer current.
+    document_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("document.id", ondelete="CASCADE"))
+    status: Mapped[str] = mapped_column(String(32))
+
+    #: The document carrying the declaration, and the exact span of it. Both are required:
+    #: the reader of a superseded label must be able to go and read the notice.
+    declared_by_document_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("document.id", ondelete="CASCADE")
+    )
+    declared_by_span_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("span.id", ondelete="CASCADE")
+    )
+    #: The declaring sentence, verbatim. Stored so the label can be shown without a second
+    #: round trip, and truncated nowhere the reader would notice.
+    declaration_text: Mapped[str] = mapped_column(Text, default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
 class Page(Base):
     __tablename__ = "page"
     __table_args__ = (UniqueConstraint("document_id", "number", name="uq_page_document_number"),)
@@ -357,6 +429,7 @@ class IngestRun(Base):
 #: visible omission rather than an invisible one.
 TENANT_SCOPED_TABLES = (
     "document",
+    "document_status",
     "page",
     "span",
     "chunk",
