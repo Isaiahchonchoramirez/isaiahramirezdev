@@ -11,6 +11,42 @@ import { getAssetPath } from "../utils/assetPath";
 // gallery -> optional grouped stills, rendered under the row with a lightbox
 const projects = [
   {
+    id: "reef",
+    featured: true,
+    categories: ["AI", "Data", "Web", "UX", "3D"],
+    role: "Product design · Ingestion engine · Evaluation harness · Frontend development",
+    problem:
+      "A document-search tool is easy to fake — an answer written in confident prose looks the same whether it came from the file or from the model. The failure that matters in diligence is not a wrong answer, it is a confident answer with no source behind it.",
+    outcome:
+      "An ingestion and evidence engine where every returned fact resolves to the exact region of the document it came from — page, bounding box, character range — and an evaluation harness that publishes the gate it currently fails.",
+    title: "Reef",
+    year: "2026",
+    tagline: "Every claim traced back to the page it came from",
+    image: getAssetPath("/images/projects/reef.jpg"),
+    href: getAssetPath("/reef/index.html#/demo"),
+    external: true,
+    cta: "Open the deal room",
+    stack: ["Python", "FastAPI", "PostgreSQL", "pgvector", "TypeScript", "React", "Vite"],
+    description:
+      "Reef reads a folder of documents and builds a searchable room where nothing can be asserted without a citation. The pipeline runs intake, extraction, structuring, chunking, embedding and indexing, and the search API abstains instead of guessing when nothing clears the confidence floor. I wrote the engine, the evaluation harness that scores it, and the interface — including Reef View, which draws the room as a bathymetric map with one coral structure per document, lit only where the engine actually returned evidence. The demo linked here runs on Ridgeline Industrial Services, a fictional company built as a test fixture; it is a synthetic evaluation environment, not a customer deployment.",
+    highlights: [
+      "Span-level provenance — every extracted fact carries document, page, bounding box and character range, so a claim can be opened at the exact region that produced it",
+      "Abstention over invention — search returns nothing rather than a plausible sentence when the retrieval floor is not cleared",
+      "121-document fixture indexes in about 14 seconds into 869 chunks; the one file left unindexed is a password-protected archive, registered with an actionable reason instead of silently dropped",
+      "Scored against twelve gates: parsing success 100% against a 95% bar, citation location accuracy 100% against 95%, and zero fabricated citations",
+      "The abstention gate currently fails — 3 of 6 held-out absent subjects leak an answer instead of returning none. It is published in the scorecard rather than omitted, and it blocks the next milestone",
+      "Scorer and customer bundles are derived from different source documents, so the answer key cannot reach the interface even if the UI is wrong — a structural separation rather than a client-side filter",
+      "Reef View renders the same data as a reef without WebGL, lazy-loaded and respecting reduced-motion, and creates no findings or relationships of its own",
+      "337 tests over the engine and 67 over the interface, including invariants that fail the build if an evidence anchor loses its source region",
+    ],
+    related: {
+      id: "datagate",
+      title: "DataGate",
+      blurb: "the earlier profiler this evidence-first approach grew out of",
+      href: getAssetPath("/datagate/index.html"),
+    },
+  },
+  {
     id: "tesseraxis",
     featured: true,
     categories: ["Simulation", "AI", "Data", "Web", "UX", "3D"],

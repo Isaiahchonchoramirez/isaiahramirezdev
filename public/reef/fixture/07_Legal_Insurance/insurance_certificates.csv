@@ -1,0 +1,5 @@
+policy_type,carrier,policy_number,effective,expiry,limit
+General liability,Tri-State Casualty,GL-88421,2025-01-15,2026-01-15,2000000
+Commercial auto,Tri-State Casualty,CA-11907,2025-01-15,2026-01-15,1000000
+Umbrella,Keystone Surplus,UM-40311,2025-01-15,2026-01-15,5000000
+Workers compensation,Ohio BWC,WC-772140,2025-07-01,2026-07-01,1000000
