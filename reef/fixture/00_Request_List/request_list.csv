@@ -1,0 +1,31 @@
+item,description,expected_folder,seller_status
+1.1,Corporate formation documents,01_Corporate,Supplied
+1.2,Ownership schedule / cap table,01_Corporate,Supplied
+1.3,Member consents authorizing the transaction,01_Corporate,Supplied
+2.1,FY2023 financial statements,02_Financial,Supplied
+2.2,FY2024 financial statements,02_Financial,Not supplied
+2.3,FY2025 financial statements,02_Financial,Supplied
+2.4,"Monthly P&L, trailing 36 months",02_Financial,Supplied
+2.5,Trial balance,02_Financial,Supplied
+2.6,AR and AP aging,02_Financial,Supplied
+2.7,Debt schedule and credit agreement,02_Financial,Supplied
+3.1,Customer master and revenue by customer,03_Customers,Supplied
+3.2,Top customer contracts,03_Customers,Supplied
+3.3,Customer churn log,03_Customers,Supplied
+4.1,Vendor master and top vendor schedule,04_Suppliers,Supplied
+4.2,Principal supplier agreements,04_Suppliers,Supplied
+5.1,Employee roster,05_Employees,Supplied
+5.2,Payroll summary,05_Employees,Supplied
+5.3,Contractor schedule,05_Employees,Supplied
+6.1,Fleet and equipment register,06_Operations,Supplied
+6.2,Branch KPI reporting,06_Operations,Supplied
+7.1,Litigation summary,07_Legal_Insurance,Supplied
+7.2,Insurance certificates,07_Legal_Insurance,Supplied
+7.3,Permits and licences,07_Legal_Insurance,Supplied
+8.1,Tax filing acknowledgments,08_Tax,Supplied
+8.2,Tax support workpapers,08_Tax,Supplied
+9.1,Capex register,09_Capex,Supplied
+9.2,Fixed asset register,09_Capex,Supplied
+10.1,Seller Q&A log,10_QA,Supplied
+10.2,Management presentation transcript,10_QA,Supplied
+10.3,Environmental site assessment,07_Legal_Insurance,"Not applicable — all facilities leased, landlord retains responsibility (buyer confirmed 2026-02-02)"

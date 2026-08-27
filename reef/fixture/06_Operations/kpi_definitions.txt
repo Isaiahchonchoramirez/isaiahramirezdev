@@ -1,0 +1,10 @@
+SYNTHETIC — FICTIONAL COMPANY — NOT REAL
+
+KPI DEFINITIONS
+
+Active customer   A customer invoiced at least once in the trailing twelve months.
+All customers     Every customer record, including inactive and churned accounts.
+                  The customer master contains 143 records; 142 are active.
+Recurring revenue Management reports recurring revenue as contracted maintenance
+                  plus time-and-materials work from customers holding a contract.
+Gross margin      Revenue less cost of revenue, by branch, per branch reporting.

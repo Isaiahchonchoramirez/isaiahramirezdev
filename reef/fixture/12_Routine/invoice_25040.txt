@@ -1,0 +1,7 @@
+SYNTHETIC — FICTIONAL COMPANY — NOT REAL
+
+INVOICE 25040
+Customer: Customer 049 Industrial
+Date: 2025-05-14
+Service: scheduled preventive maintenance visit
+Amount: 5,603

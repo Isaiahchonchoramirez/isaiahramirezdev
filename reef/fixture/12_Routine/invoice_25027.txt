@@ -1,0 +1,7 @@
+SYNTHETIC — FICTIONAL COMPANY — NOT REAL
+
+INVOICE 25027
+Customer: Customer 036 Industrial
+Date: 2025-04-01
+Service: scheduled preventive maintenance visit
+Amount: 7,031

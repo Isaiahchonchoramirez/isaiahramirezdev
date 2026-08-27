@@ -1,0 +1,4 @@
+lender,instrument,balance,rate,maturity,covenants
+Fifth Meridian Bank,Term loan A,3360000,7.25%,2029-06-30,"Fixed charge coverage ratio not less than 1.25x, tested annually"
+Fifth Meridian Bank,Revolving line,1250000,8.10%,2027-06-30,Same covenant package as Term loan A
+Great Lakes Fleet Leasing,Equipment notes,1250000,6.90%,2028-03-31,Cross-default with senior facility

@@ -1,0 +1,12 @@
+invoice_id,customer_id,customer,amount,days_outstanding
+INV-24118,000742,Consolidated Foundry Group,341200,118
+INV-24377,000418,Lakeside Steel Processing Co.,96400,104
+INV-24512,000119,Bayfield Paper Mills,88300,96
+INV-24555,000905,Northgate Plastics,86500,92
+INV-25001,000418,Lakeside Steel Processing Co.,612000,44
+INV-25044,000377,Maumee Chemical,318000,31
+INV-25102,000550,Sandusky Marine Works,214900,22
+INV-25166,001233,Erie Valley Grain,180400,17
+INV-25201,000861,Fort Wayne Castings,402300,12
+INV-25233,000119,Bayfield Paper Mills,511000,8
+INV-25240,000742,Consolidated Foundry Group,551000,6
