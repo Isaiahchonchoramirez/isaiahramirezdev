@@ -37,7 +37,7 @@ const FeaturedWork = () => {
                     Case study <span aria-hidden="true">→</span>
                   </Link>
                   <a href={project.href} target="_blank" rel="noreferrer" className="featured-link muted">
-                    Live demo <span aria-hidden="true">↗</span>
+                    {project.cta || "Live demo"} <span aria-hidden="true">↗</span>
                   </a>
                 </div>
               </div>

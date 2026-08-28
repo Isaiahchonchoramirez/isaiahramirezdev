@@ -11,6 +11,37 @@ import { getAssetPath } from "../utils/assetPath";
 // gallery -> optional grouped stills, rendered under the row with a lightbox
 const projects = [
   {
+    id: "tree-of-life",
+    featured: true,
+    categories: ["Web", "UX", "Design"],
+    role: "Product design · Accessibility · Frontend development",
+    problem:
+      "Public mental-health websites need to feel welcoming without making clinical promises, hiding urgent-help guidance, or asking motion and imagery to carry essential meaning.",
+    outcome:
+      "A calm, accessible journey from sky to water that keeps crisis guidance visible, works without animation, and marks organization-specific details for owner approval.",
+    title: "Tree of Life",
+    year: "2026",
+    tagline: "A grounded public mental-health journey",
+    image:
+      "https://raw.githubusercontent.com/Isaiahchonchoramirez/tree-of-life/feature/tree-journey-visual-consolidation/docs/consolidation/screenshots/stage1-1440.png",
+    href:
+      "https://github.com/Isaiahchonchoramirez/tree-of-life/tree/feature/tree-journey-visual-consolidation",
+    external: true,
+    cta: "View the implementation",
+    stack: ["Next.js", "React", "TypeScript", "CSS", "WCAG 2.2 AA"],
+    description:
+      "Tree of Life is a Stage 1 public-site concept organized as an emotional descent through sky, canopy, branches, trunk, soil, roots, and renewing water. I consolidated an existing application and a visual prototype into modular React sections, CSS-native illustration, restrained scroll progression, a complete reduced-motion mode, and safety-first content boundaries. It uses synthetic, nonrepresentative copy; organization-specific details remain provisional and require owner approval.",
+    highlights: [
+      "Seven connected scenes communicate that visible growth is supported by experience, relationships, identity, care, and renewal",
+      "Semantic landmarks, skip navigation, visible focus, keyboard-safe anchors, 44-pixel targets, and contrast-aware scene transitions",
+      "Motion is enhancement-only: normal scrolling remains intact and the complete journey stays present when animation is disabled or unavailable",
+      "Responsive verification at 320, 390, 768, 834, 1024, and 1440 pixels found no unintended overflow or clipped controls",
+      "CSS-native artwork avoids uncertain stock licensing and keeps every major visual straightforward to replace",
+      "66 passing tests cover the retained application plus journey navigation, reduced motion, crisis guidance, and primary-content resilience",
+      "No clinical records, portals, scheduling, document uploads, AI features, or real organization branding are included",
+    ],
+  },
+  {
     id: "reef",
     featured: true,
     categories: ["AI", "Data", "Web", "UX", "3D"],
